@@ -1,0 +1,33 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+numpy = "*"
+pandas = "*"
+torch = "*"
+torchvision = "*"
+matplotlib = "*"
+jupyter = "*"
+jupyterlab = "*"
+flask = "*"
+flask-restplus = "*"
+werkzeug = "==0.16.0"
+flask-restx = "*"
+jsonref = "*"
+json-ref-dict = "*"
+celery = "*"
+pytest = "*"
+pymongo = "*"
+black = "==20.8b1" # version is required to proper pipenv installation (locking) due to specific black's version naming convention (with letters)
+pre-commit = "*"
+pytest-flask = "*"
+pytest-factoryboy = "*"
+pylint = "*"
+python-dotenv = "*"
+
+[requires]
+python_version = "3.7"
