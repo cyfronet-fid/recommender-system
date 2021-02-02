@@ -60,6 +60,9 @@ In the console you should see output similar to this:
 ### API
 You can interact with recommender system microservice using API available (by deafult) here: http://localhost:5000/api/v1/doc/
 
+### Application configuration
+All configuration constants (e.g. app server name and port) are located in the `.env` file
+
 ### Pre-commit in PyCharm
 While commiting using PyCharm Git GUI, pre-commit doesn't use project environment and can't find modules used in hooks.
 To fix this, go to `.git/hooks/pre-commit` in project directory and replace:
