@@ -44,7 +44,7 @@ service = api.model(
             title="Countries",
             description="List of countries",
         ),
-        "category_ids": fields.List(
+        "categories": fields.List(
             fields.String(
                 title="Category ID",
                 description="ID of the category",
@@ -54,7 +54,7 @@ service = api.model(
             title="Categories IDs",
             description="List of categories IDs",
         ),
-        "provider_ids": fields.List(
+        "providers": fields.List(
             fields.String(
                 title="Provider ID",
                 description="ID of the provider",
@@ -64,7 +64,7 @@ service = api.model(
             title="Providers IDs",
             description="List of providers IDs",
         ),
-        "resource_organisation_id": fields.List(
+        "resource_organisation": fields.List(
             fields.String(
                 title="Resource organisation ID",
                 description="ID of the resource organisation",
@@ -74,7 +74,7 @@ service = api.model(
             title="Resource organisations IDs",
             description="List of resource organisations IDs",
         ),
-        "scientific_domain_ids": fields.List(
+        "scientific_domains": fields.List(
             fields.String(
                 title="Scientific domain ID",
                 description="ID of the scientific domain",
@@ -84,7 +84,7 @@ service = api.model(
             title="Scientific domains IDs",
             description="List of scientific domains IDs",
         ),
-        "platform_ids": fields.List(
+        "platforms": fields.List(
             fields.String(
                 title="Platform ID",
                 description="ID of the service's platform",
@@ -94,7 +94,7 @@ service = api.model(
             title="Platforms IDs",
             description="List of service's platforms IDs",
         ),
-        "target_user_ids": fields.List(
+        "target_users": fields.List(
             fields.String(
                 title="Target user ID",
                 description="ID of the service's target user",
@@ -104,7 +104,7 @@ service = api.model(
             title="Target users IDs",
             description="List of service's target users IDs",
         ),
-        "related_service_ids": fields.List(
+        "related_services": fields.List(
             fields.String(
                 title="Related service ID",
                 description="ID of the service's related service",
@@ -114,7 +114,7 @@ service = api.model(
             title="Related services IDs",
             description="List of service's related services IDs",
         ),
-        "access_mode_ids": fields.List(
+        "access_modes": fields.List(
             fields.String(
                 title="Access mode ID",
                 description="ID of the service's access mode",
@@ -124,7 +124,7 @@ service = api.model(
             title="Access modes IDs",
             description="List of service's access modes IDs",
         ),
-        "access_type_ids": fields.List(
+        "access_types": fields.List(
             fields.String(
                 title="Access type ID",
                 description="ID of the service's access type",
@@ -134,7 +134,7 @@ service = api.model(
             title="Access types IDs",
             description="List of service's access types IDs",
         ),
-        "trl_ids": fields.List(
+        "trls": fields.List(
             fields.String(
                 title="TRL ID",
                 description="ID of the service's Technology readiness level",
@@ -144,7 +144,7 @@ service = api.model(
             title="TRLs IDs",
             description="List of service's TRLs IDs",
         ),
-        "life_cycle_status_ids": fields.List(
+        "life_cycle_statuses": fields.List(
             fields.String(
                 title="Life cycle status ID",
                 description="ID of the service's life cycle status",
