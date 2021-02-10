@@ -12,7 +12,7 @@ user = api.model(
             description="The unique identifier of a the user",
             example=1234,
         ),
-        "scientific_domain_ids": fields.List(
+        "scientific_domains": fields.List(
             fields.String(
                 title="Scientific domain ID",
                 description="ID of the scientific domain",
@@ -22,7 +22,7 @@ user = api.model(
             title="Scientific domains IDs",
             description="List of scientific domains IDs",
         ),
-        "category_ids": fields.List(
+        "categories": fields.List(
             fields.String(
                 title="Category ID",
                 description="ID of the category",
@@ -32,7 +32,7 @@ user = api.model(
             title="Categories IDs",
             description="List of categories IDs",
         ),
-        "accessed_services_ids": fields.List(
+        "accessed_services": fields.List(
             fields.String(
                 title="Accessed service ID",
                 description="ID of the accessed services",
