@@ -1,80 +1,102 @@
-from pymodm import fields, MongoModel
+import os
+from mongoengine import (
+    Document,
+    IntField,
+    StringField,
+    ListField,
+    ReferenceField,
+    connect,
+    disconnect,
+)
+
+disconnect()
+connect(host=os.environ["MONGO_DB_ENDPOINT"], db=os.environ["MONGO_DB_NAME"])
 
 
-class Category(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
+class BaseDocument(Document):
+    id = IntField(primary_key=True)
+    meta = {
+        "allow_inheritance": True,
+        "abstract": True,
+    }
 
 
-class Provider(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
+class Category(BaseDocument):
+    name = StringField()
 
 
-class ScientificDomain(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
+class Provider(BaseDocument):
+    name = StringField()
 
 
-class Platform(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
+class ScientificDomain(BaseDocument):
+    name = StringField()
 
 
-class TargetUser(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
-    description = fields.CharField()
+class Platform(BaseDocument):
+    name = StringField()
 
 
-class AccessMode(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
-    description = fields.CharField()
+class TargetUser(BaseDocument):
+    name = StringField()
+    description = StringField()
 
 
-class AccessType(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
-    description = fields.CharField()
+class AccessMode(BaseDocument):
+    name = StringField()
+    description = StringField()
 
 
-class Trl(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
-    description = fields.CharField()
+class AccessType(BaseDocument):
+    name = StringField()
+    description = StringField()
 
 
-class LifeCycleStatus(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
-    description = fields.CharField()
+class Trl(BaseDocument):
+    name = StringField()
+    description = StringField()
 
 
-class Service(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    name = fields.CharField()
-    description = fields.CharField()
-    tagline = fields.CharField()
-    countries = fields.ListField(fields.CharField())
-    categories = fields.ListField(fields.ReferenceField("Category"))
-    providers = fields.ListField(fields.ReferenceField("Provider"))
-    resource_organisation = fields.ReferenceField("Provider")
-    scientific_domains = fields.ListField(fields.ReferenceField("ScientificDomain"))
-    platforms = fields.ListField(fields.ReferenceField("Platform"))
-    target_users = fields.ListField(fields.ReferenceField("TargetUser"))
-    access_modes = fields.ListField(fields.ReferenceField("AccessMode"))
-    access_types = fields.ListField(fields.ReferenceField("AccessType"))
-    trls = fields.ListField(fields.ReferenceField("Trl"))
-    life_cycle_statuses = fields.ListField(fields.ReferenceField(LifeCycleStatus))
-    # Integer field instead of ReferenceField to avoid circular references
-    related_services = fields.ListField(fields.IntegerField())
-    # Integer field instead of ReferenceField to avoid circular references
-    required_services = fields.ListField(fields.IntegerField())
+class LifeCycleStatus(BaseDocument):
+    name = StringField()
+    description = StringField()
 
 
-class User(MongoModel):
-    id = fields.IntegerField(primary_key=True)
-    scientific_domains = fields.ListField(fields.ReferenceField("ScientificDomain"))
-    categories = fields.ListField(fields.ReferenceField("Category"))
-    accessed_services = fields.ListField(fields.ReferenceField("Service"))
+class Service(BaseDocument):
+    name = StringField()
+    description = StringField()
+    tagline = StringField()
+    countries = ListField(StringField())
+    categories = ListField(ReferenceField("Category"))
+    providers = ListField(ReferenceField("Provider"))
+    resource_organisation = ReferenceField("Provider")
+    scientific_domains = ListField(ReferenceField("ScientificDomain"))
+    platforms = ListField(ReferenceField("Platform"))
+    target_users = ListField(ReferenceField("TargetUser"))
+    access_modes = ListField(ReferenceField("AccessMode"))
+    access_types = ListField(ReferenceField("AccessType"))
+    trls = ListField(ReferenceField("Trl"))
+    life_cycle_statuses = ListField(ReferenceField(LifeCycleStatus))
+    related_services = ListField(ReferenceField("Service"))
+    required_services = ListField(ReferenceField("Service"))
+
+
+class User(BaseDocument):
+    scientific_domains = ListField(ReferenceField("ScientificDomain"))
+    categories = ListField(ReferenceField("Category"))
+    accessed_services = ListField(ReferenceField("Service"))
+
+
+MP_DUMP_MODEL_CLASSES = [
+    Category,
+    Provider,
+    ScientificDomain,
+    Platform,
+    TargetUser,
+    AccessMode,
+    AccessType,
+    Trl,
+    LifeCycleStatus,
+    User,
+    Service,
+]
