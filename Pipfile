@@ -4,6 +4,14 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pytest-factoryboy = "*"
+factory-boy = "*"
+ipytest = "*"
+mongomock = "*"
+pytest = "*"
+black = "==20.8b1"
+pre-commit = "*"
+pylint = "*"
 
 [packages]
 numpy = "*"
@@ -14,22 +22,13 @@ matplotlib = "*"
 jupyter = "*"
 jupyterlab = "*"
 Flask = "*"
-Werkzeug = "==0.16.0"
 flask-restx = "*"
 jsonref = "*"
 json-ref-dict = "*"
-pytest = "*"
 pymongo = "*"
-black = "==20.8b1"
-pre-commit = "*"
-pytest-flask = "*"
-pytest-factoryboy = "*"
-pylint = "*"
 mongoengine = "*"
-mongomock = "*"
-factory-boy = "*"
-ipytest = "*"
 flask-mongoengine = "*"
+inflection = "*"
 
 [requires]
 python_version = "3.7"

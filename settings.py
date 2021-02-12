@@ -12,17 +12,15 @@ class Config:
     RESTPLUS_VALIDATE = True
     RESTPLUS_ERROR_404_HELP = False
     RESTPLUS_MASK_SWAGGER = False
-    CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
-    CELERY_RESULT_BACKEND = os.environ.get(
-        "CELERY_RESULT_BACKEND", "redis://localhost:6379"
-    )
+    REDIS_HOST = f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1:6379')}"
 
 
 class ProductionConfig(Config):
     """Production config"""
 
-    MONGODB_HOST = os.environ.get(
-        "MONGODB_HOST", "mongodb://localhost:27017/recommender_prod"
+    RESTPLUS_ERROR_404_HELP = True
+    MONGODB_HOST = (
+        f"mongodb://{os.environ.get('MONGODB_HOST', '127.0.0.1:27017')}/recommender"
     )
 
 
@@ -30,8 +28,8 @@ class DevelopmentConfig(Config):
     """Development config"""
 
     DEBUG = True
-    MONGODB_HOST = os.environ.get(
-        "MONGODB_HOST", "mongodb://localhost:27017/recommender_dev"
+    MONGODB_HOST = (
+        f"mongodb://{os.environ.get('MONGODB_HOST', '127.0.0.1:27017')}/recommender_dev"
     )
 
 

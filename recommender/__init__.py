@@ -15,7 +15,7 @@ def create_app():
     the proper ENV and initializes flask-restx"""
 
     app = Flask(__name__)
-    app.config.from_object(config_by_name[os.getenv("FLASK_ENV")])
+    app.config.from_object(config_by_name[os.environ["FLASK_ENV"]])
 
     _register_extensions(app)
     api.init_app(app)
@@ -32,8 +32,8 @@ def init_celery(app=None):
 
     app = app or create_app()
     celery.conf.update(
-        broker_url=app.config["CELERY_BROKER_URL"],
-        result_backend=app.config["CELERY_RESULT_BACKEND"],
+        broker_url=app.config["REDIS_HOST"],
+        result_backend=app.config["REDIS_HOST"],
     )
 
     class ContextTask(celery.Task):

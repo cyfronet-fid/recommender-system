@@ -8,7 +8,7 @@ from recommender.api.endpoints.database_dumps import api as database_dumps_ns
 from recommender.api.endpoints.user_actions import api as user_actions_ns
 
 api = Api(
-    doc="/doc/",
+    doc="/",
     version="1.0",
     title="Recommender system API",
     description="Recommender System API for getting recommendations, sending user "
