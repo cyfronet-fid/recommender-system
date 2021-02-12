@@ -1,4 +1,4 @@
-# pylint: disable=missing-class-docstring, missing-function-docstring, function-redefined, no-self-use
+# pylint: disable=missing-function-docstring, no-self-use
 
 """Recommendations endpoint definition"""
 

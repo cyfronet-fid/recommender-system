@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  flask:
+    build: .
+    environment:
+      - FLASK_ENV=testing
+    entrypoint: pytest ./tests
+    volumes:
+    - ./app

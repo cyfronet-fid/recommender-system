@@ -1,13 +1,12 @@
-# pylint: disable=missing-function-docstring, no-self-use, unused-variable
+# pylint: disable=missing-function-docstring, no-self-use
 
-"""Database dumps endpoint definition
-"""
+"""Database dumps endpoint definition"""
 
 from flask import request
 from flask_restx import Resource, Namespace
 
 from recommender.api.schemas.database_dump import database_dump
-from recommender.services.mp_dump import load_mp_dump, drop_mp_dump
+from recommender.tasks.db import handle_db_dump
 
 api = Namespace("database_dumps", "Endpoint used for sending a database dump")
 
@@ -20,6 +19,5 @@ class DatabaseDump(Resource):
     @api.response(204, "Database dump successfully sent")
     def post(self):
         data = request.get_json()
-        drop_mp_dump()  # For now we are dropping the old DB
-        load_mp_dump(data)
+        handle_db_dump.delay(data)
         return None, 204

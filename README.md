@@ -16,6 +16,7 @@ The inner structure can be described as two elements:
 - [git](https://git-scm.com/)
 - [Python 3.7.x](https://www.python.org/downloads/release/python-370/)
 - [Pipenv](https://pypi.org/project/pipenv/)
+- [MongoDB](https://www.mongodb.com/)
 - [redis](https://redis.io/)
 
 
@@ -30,7 +31,7 @@ git clone https://github.com/cyfronet-fid/recommender-system.git
 ```
 3. Install all required project packages by executing
 ```bash
-pipenv install
+pipenv --dev install
 ```
 
 4. To open project virtual environment shell, type:
@@ -42,7 +43,7 @@ pipenv shell
 
 Launch EOSC Marketplace Recommender server by executing in the project root directory:
 ```
-export FLASK_ENV=[development|production]
+export FLASK_ENV=development
 export FLASK_APP=app.py
 pipenv run flask run
 ```
@@ -60,18 +61,97 @@ In the console you should see output similar to this:
 
 ```
 
+NOTE: You can customize flask host and flask port by using `FLASK_RUN_HOST` and `FLASK_RUN_PORT` [env](#env-variables) variables accordingly.
+
+### Celery
+To run background tasks you also need a celery worker running alongside your server. To run the worker:
+```bash
+export FLASK_ENV=development
+pipenv run celery -A worker:app worker --loglevel=info
+```
+
+NOTE: Celery needs a running [redis](#redis) broker server in the background.
+
+### Redis
+NOTE: It is recommended for the developers to use docker-compose to run all the background servers
+(see [docker](#Docker) section below).
+
+Recommender system is running celery to execute background tasks in a queue.
+As a backend we are using redis. In the development environment we are assuming that
+the redis is running on `redis://localhost:6379`.
+
+NOTE: You can customize your redis host url using `REDIS_HOST` [env](#env-variables) variable.
+
+### Mongo
+NOTE: It is recommended for the developers to use docker-compose to run all the background servers
+(see [docker](#Docker) section below).
+
+Install and start the mongodb server following the mongo installation instructions. It should be running on the default
+url `mongodb://localhost:27017`.
+
+NOTE: You can customize your mongodb host path in `MONGODB_HOST` [env](#env-variables) variable.
+
 ### API
-You can interact with recommender system microservice using API available (by deafult) here: http://localhost:5000/doc/
+You can interact with recommender system microservice using API available (by default) here: http://localhost:5000/
 
-### .env
+
+### Docker
+To run all background servers needed for development (redis, mongodb) it is recommended that you use Docker:
+```bash
+docker-compose up
+```
+Mongo will be exposed and available on your host on `127.0.0.1:27017`, and redis on `127.0.0.1:6379`, although
+you can change them using `MONGODB_HOST` and `REDIS_HOST` [env](#env-variables) variables accordingly.
+
+NOTE: You still need to set up Flask server and celery worker as shown above. This is advantageous over the next option
+because you can run pytest from your IDE, easily debug the application, easily restart the broken flask server and 
+additionally you don't need to rebuild your docker image if your dependencies change.
+
+For full-stack local development deployment use:
+```bash
+docker-compose -f docker-compose.yml -f development.yml up
+```
+This will build application images and run base flask development server on `127.0.0.1:5000` 
+(you can customize flask port and host using [env](#env-variables) variables).
+This command will also run celery worker, mongo and redis.
+You can immediately change the server code without restarting the containers.
+
+To run jupyter notebook server along with the application stack run:
+```bash
+docker-compose -f docker-compose.yml -f jupyter.yml up
+```
+NOTE: The url of the jupyter server will be displayed in the docker-compose output 
+(default: `http://127.0.0.1:8888/?token=SOME_JUPYTER_TOKEN`) (you can customize jupyter port and host using [env](#env-variables) variables)
+
+### Tests
+To run all the tests in our app run:
+```bash
+export FLASK_ENV=testing
+pipenv run pytest ./tests
+```
+...or you can run them using docker:
+```bash
+docker-compose -f docker-compose.testing.yml up && docker-compose -f docker-compose.testing.yml down
+```
+
+### ENV variables
 We are using .env to store instance specific constants or secrets. This file is not tracked by git and it needs to be 
-present in the project root directory. Values:
+present in the project root directory. Details:
+- `MONGODB_HOST` - url and port of your running mongodb server (example: `127.0.0.1:27018`) or desired url and port of your mongodb
+  server when ran using docker-compose (recommended)
+- `REDIS_HOST` - url and port of your running redis server (example: `127.0.0.1:6380`) or desired url and port of your redis
+  server when ran using docker-compose (recommended)
+- `FLASK_RUN_HOST` - desired url of your application server (example: `127.0.0.1`)
+- `FLASK_RUN_PORT` - desired port of your application server (example: `5001`)
+- `JUPYTER_RUN_PORT` - desired port of your jupyter server when ran using docker (example: `8889`)
+- `JUPYTER_RUN_HOST` - desired host of your jupyter server when ran using docker (example: `127.0.0.1`)
+- `CELERY_LOG_LEVEL` - log level of your celery worker when ran using docker (one of: `CRITICAL`, `ERROR`, `WARN`, `INFO` or `DEBUG`)
 
-- SECRET KEY - description
+NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 
 ### Pre-commit
 To activate pre-commit run:
-```
+```bash
 pipenv run pre-commit install
 ```
 
@@ -81,6 +161,7 @@ Install [EnvFile plugin](https://plugins.jetbrains.com/plugin/7861-envfile). Go 
 
 #### PyTest
 In Pycharm, go to `Settings` -> `Tools` -> `Python Integrated Tools` -> `Testing` and choose `pytest`
+Remember to put FLASK_ENV=testing env variable in the configuration.
 
 #### Pre-commit
 While commiting using PyCharm Git GUI, pre-commit doesn't use project environment and can't find modules used in hooks.
@@ -95,15 +176,4 @@ with:
 # start templated
 INSTALL_PYTHON = 'PATH/TO/YOUR/ENV/EXECUTABLE'
 os.environ['PATH'] = f'{os.path.dirname(INSTALL_PYTHON)}{os.pathsep}{os.environ["PATH"]}'
-```
-
-
-### Celery and redis
-Recommender system is running celery to execute background tasks in a queue.
-As a backend we are using redis. In the development environment we are assuming that
-the redis is running on `redis://localhost:6379` although it can be configured in `settings.py`
-
-To run background tasks you also need a celery worker running alongside your server. To run the worker:
-```
-pipenv run celery -A celery_worker:app worker --loglevel=info
 ```
