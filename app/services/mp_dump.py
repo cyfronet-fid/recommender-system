@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring, no-member
 
-"""Functions to handle marketplace datbase dump"""
+"""Functions to handle marketplace database dump"""
+import os
 
 from inflection import underscore, pluralize
 from app.db.mongo_models import MP_DUMP_MODEL_CLASSES

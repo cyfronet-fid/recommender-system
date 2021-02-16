@@ -5,10 +5,7 @@
 import os
 from flask import Flask
 from celery import Celery
-from dotenv import load_dotenv
 from app.api.v1 import use_api
-
-load_dotenv()
 
 app = Flask(__name__)
 
@@ -17,8 +14,8 @@ def make_celery(flask_app):
     """celery initialization function"""
     celery_instance = Celery(
         flask_app.import_name,
-        backend=flask_app.config["CELERY_RESULT_BACKEND"],
-        broker=flask_app.config["CELERY_BROKER_URL"],
+        backend=flask_app.config.get("CELERY_RESULT_BACKEND"),
+        broker=flask_app.config.get("CELERY_BROKER_URL"),
     )
     celery_instance.conf.update(flask_app.config)
 
@@ -32,23 +29,30 @@ def make_celery(flask_app):
 
 
 app.config.update(
-    CELERY_BROKER_URL=os.getenv("CELERY_BROKER_URL"),
-    CELERY_RESULT_BACKEND=os.getenv("CELERY_RESULT_BACKEND"),
+    CELERY_BROKER_URL=os.environ.get("CELERY_BROKER_URL"),
+    CELERY_RESULT_BACKEND=os.environ.get("CELERY_RESULT_BACKEND"),
 )
 celery = make_celery(app)
 
 
 def configure(flask_app):
     """flask app configuration function"""
-    flask_app.config["SERVER_NAME"] = os.getenv("FLASK_SERVER_NAME")
-    flask_app.config["FLASK_DEBUG"] = os.getenv("FLASK_DEBUG")
-    flask_app.config["SWAGGER_UI_DOC_EXPANSION"] = os.getenv("SWAGGER_UI_DOC_EXPANSION")
-    flask_app.config["RESTPLUS_VALIDATE"] = os.getenv("RESTPLUS_VALIDATE")
-    flask_app.config["RESTPLUS_MASK_SWAGGER"] = os.getenv("RESTPLUS_MASK_SWAGGER")
-    flask_app.config["ERROR_404_HELP"] = os.getenv("ERROR_404_HELP")
+    flask_app.config["SERVER_NAME"] = os.environ.get("FLASK_SERVER_NAME")
+    flask_app.config["FLASK_DEBUG"] = os.environ.get("FLASK_DEBUG")
+    flask_app.config["SWAGGER_UI_DOC_EXPANSION"] = os.environ.get(
+        "RESTPLUS_SWAGGER_UI_DOC_EXPANSION"
+    )
+    flask_app.config["RESTPLUS_VALIDATE"] = os.environ.get("RESTPLUS_VALIDATE")
+    flask_app.config["RESTPLUS_MASK_SWAGGER"] = os.environ.get("RESTPLUS_MASK_SWAGGER")
+    flask_app.config["ERROR_404_HELP"] = os.environ.get("RESTPLUS_ERROR_404_HELP")
 
 
 if __name__ == "__main__":
+    from mongoengine import connect
+
+    connect(
+        host=os.environ.get("MONGO_DB_ENDPOINT"), db=os.environ.get("MONGO_DB_NAME")
+    )
     configure(app)
     use_api(app)
     app.run()

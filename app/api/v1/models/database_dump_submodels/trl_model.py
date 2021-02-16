@@ -19,7 +19,6 @@ trl = api.model(
             example="some TRL name",
         ),
         "description": fields.String(
-            required=True,
             title="Description",
             description="Description of the TRL",
             example="Some TRL description",

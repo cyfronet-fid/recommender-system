@@ -10,7 +10,7 @@ api = Api(
     doc="/doc/",
     version="1.0",
     title="Recommender system API",
-    description="Recommender System API for getting recommendations, sending user \
-    actions, sending Marketplace database dumps and triggering recommender system \
-    offline learning.",
+    description="Recommender System API for getting recommendations, sending user "
+    "actions, sending Marketplace database dumps and triggering "
+    "recommender system offline learning.",
 )

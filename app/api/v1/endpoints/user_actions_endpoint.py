@@ -6,7 +6,7 @@ from flask import request
 from flask_restx import Resource
 from app.api.v1.api import api
 from app.api.v1.models.user_action_model import user_action
-from app.user_activity_gatherer import UserActivityGatherer
+from app.deserializer import Deserializer
 
 user_actions_name_space = api.namespace(
     "user_actions", "Endpoint used for sending user actions"
@@ -20,7 +20,7 @@ class UserAction(Resource):
     @api.expect(user_action, validate=True)
     @api.response(204, "User action successfully sent")
     def post(self):
-        useraction = request.get_json()
-        UserActivityGatherer.save_user_action(useraction)
+        json_dict = request.get_json()
+        Deserializer.deserialize_user_action(json_dict).save()
 
         return None, 204

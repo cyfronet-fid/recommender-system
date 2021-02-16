@@ -26,9 +26,10 @@ pre-commit = "*"
 pytest-flask = "*"
 pytest-factoryboy = "*"
 pylint = "*"
-python-dotenv = "*"
 mongoengine = "*"
 mongomock = "*"
+factory-boy = "*"
+ipytest = "*"
 
 [requires]
 python_version = "3.7"

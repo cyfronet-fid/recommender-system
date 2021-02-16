@@ -19,7 +19,6 @@ target_user = api.model(
             example="Business",
         ),
         "description": fields.String(
-            required=True,
             title="Description",
             description="Description of the target user",
             example="The user of the service is a company",
