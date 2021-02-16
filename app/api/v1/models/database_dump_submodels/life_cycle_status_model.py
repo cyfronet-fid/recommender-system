@@ -19,7 +19,6 @@ life_cycle_status = api.model(
             example="some TRL name",
         ),
         "description": fields.String(
-            required=True,
             title="Description",
             description="Description of the life cycle status",
             example="Some life cycle status description",

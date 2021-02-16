@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument, too-few-public-methods, missing-class-docstring, missing-function-docstring
-# pylint: disable=no-self-use, superfluous-parens
+# pylint: disable=no-self-use, superfluous-parens, no-else-return
 
 """Implementation of the recommender engine stub - for development purpose"""
 
@@ -11,21 +11,16 @@ class RecommenderEngineStub:
     """stub class representing a recommender engine"""
 
     @classmethod
-    def get_recommendations(cls, context, location, version):
-        """This function allows to get recommended services for the recommendation \
+    def get_recommendations(cls, context):
+        """This function allows to get recommended services for the recommendation
         sendpoint"""
-        if version not in ("v1", "v2"):
-            raise InvalidRecommendationPanelVersionError
 
-        if location not in ("services_list"):
-            raise InvalidRecommendationPanelLocationError
-
-        if version == "v1":
-            action = cls._get_services_ids(3)
-        elif version == "v2":
-            action = cls._get_services_ids(2)
-
-        return action
+        if context["panel_id"] == "version_A":
+            return cls._get_services_ids(3)
+        elif context["panel_id"] == "version_B":
+            return cls._get_services_ids(2)
+        else:
+            raise InvalidRecommendationPanelIDError
 
     @classmethod
     def _get_services_ids(cls, services_number):
@@ -38,11 +33,6 @@ class RecommendationEngineError(Exception):
     pass
 
 
-class InvalidRecommendationPanelVersionError(RecommendationEngineError):
+class InvalidRecommendationPanelIDError(RecommendationEngineError):
     def message(self):
-        return "Invalid recommendation panel version error"
-
-
-class InvalidRecommendationPanelLocationError(RecommendationEngineError):
-    def message(self):
-        return "Invalid recommendation panel location error"
+        return "Invalid recommendation panel id error"

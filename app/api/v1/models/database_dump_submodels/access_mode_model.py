@@ -19,7 +19,6 @@ access_mode = api.model(
             example="open access",
         ),
         "description": fields.String(
-            required=True,
             title="Description",
             description="Description of the access mode",
             example="The access is open for everyone",

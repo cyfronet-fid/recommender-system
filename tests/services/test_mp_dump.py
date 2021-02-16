@@ -1,12 +1,12 @@
 # pylint: disable-all
 
 import pytest
-from mongoengine import connect, disconnect
 from inflection import underscore, pluralize
 
 from app.db.mongo_models import MP_DUMP_MODEL_CLASSES
 from app.services.mp_dump import load_mp_dump, drop_mp_dump
-from tests.test_helpers import mongo_model_to_json
+from tests.helpers import mongo_model_to_json
+from tests.fixtures.utils import mongo
 
 
 @pytest.fixture
@@ -85,14 +85,6 @@ def mp_dump_data():
             {"id": 2, "name": "lcs2", "description": "desc"},
         ],
     }
-
-
-@pytest.fixture(scope="function")
-def mongo():
-    conn = connect(db="test", host="mongomock://localhost")
-    yield conn
-    conn.drop_database("test")
-    conn.close()
 
 
 def test_load_and_drop_mp_dump(mongo, mp_dump_data):

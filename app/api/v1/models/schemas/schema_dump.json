@@ -29,7 +29,7 @@
             "post": {
                 "responses": {
                     "200": {
-                        "description": "Successfully fetched recommendations",
+                        "description": "Recommendations fetched successfully",
                         "schema": {
                             "type": "array",
                             "title": "Recommended services list",
@@ -42,7 +42,7 @@
                             "items": {
                                 "type": "integer",
                                 "title": "Service ID",
-                                "description": "The unique identifier of a service"
+                                "description": "The unique identifier of the service"
                             }
                         }
                     }
@@ -55,24 +55,8 @@
                         "required": true,
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/Recommendation%20context"
+                            "$ref": "#/definitions/RecommendationContext"
                         }
-                    },
-                    {
-                        "name": "location",
-                        "in": "query",
-                        "type": "string",
-                        "required": true,
-                        "description": "An unambiguous identifier of the recommendation panel location on the page",
-                        "default": "services_list"
-                    },
-                    {
-                        "name": "version",
-                        "in": "query",
-                        "type": "string",
-                        "required": true,
-                        "description": "An unambiguous identifier of the version of the recommendation panel",
-                        "default": "v1"
                     }
                 ],
                 "tags": [
@@ -107,7 +91,7 @@
     "info": {
         "title": "Recommender system API",
         "version": "1.0",
-        "description": "Recommender System API for getting recommendations, sending user     actions, sending Marketplace database dumps and triggering recommender system     offline learning."
+        "description": "Recommender System API for getting recommendations, sending user actions, sending Marketplace database dumps and triggering recommender system offline learning."
     },
     "produces": [
         "application/json"
@@ -130,34 +114,69 @@
         }
     ],
     "definitions": {
-        "Recommendation context": {
+        "RecommendationContext": {
             "required": [
-                "recommendation_page_visit_id",
-                "user_id"
+                "filters",
+                "logged_user",
+                "page_id",
+                "panel_id",
+                "search_phrase",
+                "timestamp",
+                "visit_id"
             ],
             "properties": {
+                "logged_user": {
+                    "type": "boolean",
+                    "title": "Logged user",
+                    "description": "Flag indicating whether user is logged or not",
+                    "example": true
+                },
                 "user_id": {
                     "type": "integer",
                     "title": "User ID",
-                    "description": "The unique identifier of a user",
+                    "description": "The unique identifier of the logged user. Specified only if logged_user=True",
                     "example": 1234
                 },
-                "recommendation_page_visit_id": {
+                "unique_id": {
+                    "type": "integer",
+                    "title": "Not logged user ID",
+                    "description": "The unique identifier of the not logged user. Specified only if logged_user=False",
+                    "example": 1234
+                },
+                "timestamp": {
+                    "type": "string",
+                    "format": "date-time",
+                    "title": "Timestamp",
+                    "description": "The exact time of the recommendation request sending in iso8601 format"
+                },
+                "visit_id": {
                     "type": "integer",
                     "title": "recommendation page visit ID",
-                    "description": "The unique identifier of the user presence on the specific             page in the specific time",
+                    "description": "The unique identifier of the user presence on the recommendation page in the specific time (could be a function of above fields)",
                     "example": 1234
+                },
+                "page_id": {
+                    "type": "string",
+                    "title": "Page ID",
+                    "description": "The unique identifier of the page with recommendation panel",
+                    "example": "some_page_identifier"
+                },
+                "panel_id": {
+                    "type": "string",
+                    "title": "Root type",
+                    "description": "The unique identifier of the recommender panel on the page",
+                    "example": "version_A"
                 },
                 "search_phrase": {
                     "type": "string",
                     "title": "Search phrase",
-                    "description": "Search phrase text typed by user in the search panel  in             the context of this recommendation request",
+                    "description": "Search phrase text typed by user in the search panel  in the context of this recommendation request",
                     "example": "Cloud GPU"
                 },
                 "filters": {
                     "type": "array",
                     "title": "Filters",
-                    "description": "A list of filters chosen by a user in the context of this             recommendation request",
+                    "description": "A list of filters chosen by a user in the context of this recommendation request",
                     "items": {
                         "type": "string",
                         "title": "Filter",
@@ -170,40 +189,86 @@
         },
         "User Action": {
             "required": [
-                "root",
-                "source_page_visit_id",
-                "target_page_visit_id",
-                "user_action",
-                "user_id"
+                "action",
+                "logged_user",
+                "source",
+                "target",
+                "timestamp"
             ],
             "properties": {
+                "logged_user": {
+                    "type": "boolean",
+                    "title": "Logged user",
+                    "description": "Flag indicating whether user is logged or not",
+                    "example": true
+                },
                 "user_id": {
                     "type": "integer",
                     "title": "User ID",
-                    "description": "The unique identifier of a user",
+                    "description": "The unique identifier of the logged user. Specified only if logged_user=True",
                     "example": 1234
                 },
-                "source_page_visit_id": {
+                "unique_id": {
                     "type": "integer",
-                    "title": "Source page visit ID",
-                    "description": "The unique identifier of a user presence on the user action             source page in the specific time",
+                    "title": "Not logged user ID",
+                    "description": "The unique identifier of the not logged user. Specified only if logged_user=False",
                     "example": 1234
                 },
-                "target_page_visit_id": {
-                    "type": "integer",
-                    "title": "Target page visit ID",
-                    "description": "The unique identifier of a user presence on the user action             target page in the specific time",
-                    "example": 1234
-                },
-                "user_action": {
+                "timestamp": {
                     "type": "string",
+                    "format": "date-time",
+                    "title": "Timestamp",
+                    "description": "The exact time of taking this action by the user in iso8601 format"
+                },
+                "source": {
+                    "title": "User action source",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Source"
+                        }
+                    ]
+                },
+                "target": {
+                    "title": "User action target",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Target"
+                        }
+                    ]
+                },
+                "action": {
                     "title": "User action",
-                    "description": "An unambiguous symbol of the user action",
-                    "example": "Regular link click"
+                    "description": "Action details",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/Action"
+                        }
+                    ]
+                }
+            },
+            "type": "object"
+        },
+        "Source": {
+            "required": [
+                "page_id",
+                "visit_id"
+            ],
+            "properties": {
+                "visit_id": {
+                    "type": "integer",
+                    "title": "Visit ID",
+                    "description": "The unique identifier of a user presence on the user action's source page in the specific time",
+                    "example": 1234
+                },
+                "page_id": {
+                    "type": "string",
+                    "title": "Page ID",
+                    "description": "The unique identifier of the user action's source page",
+                    "example": "services_catalogue_list"
                 },
                 "root": {
                     "title": "User journey root",
-                    "description": "If this is an action that starts in clicking service             recommended in the recommendation panel or in the regular services list             then it is a root action and this field should be populated",
+                    "description": "If this is an action that starts in clicking service recommended in the recommendation panel or in the regular services list then it is a root action and this field should be populated",
                     "allOf": [
                         {
                             "$ref": "#/definitions/Root info"
@@ -215,32 +280,75 @@
         },
         "Root info": {
             "required": [
-                "root_type"
+                "type"
             ],
             "properties": {
-                "root_type": {
+                "type": {
                     "type": "string",
-                    "title": "Root Type",
-                    "description": "Field informing whether user followed recommended service or             clicked just service in the regular list or in some other place",
+                    "title": "Root type",
+                    "description": "Informs whether user followed service from recommendar box or just clicked service in the regular list in the services catalogue",
                     "example": "recommendation_panel"
                 },
-                "location": {
+                "panel_id": {
                     "type": "string",
-                    "title": "Recommendation panel location",
-                    "description": "Field used only if the root type is recommendation_panel.             On one page there can be few recommendation panels so this field allows             to distinguish them",
-                    "example": "bottom_left_recommendation panel"
-                },
-                "version": {
-                    "type": "string",
-                    "title": "Recommendation panel version",
-                    "description": "Field used only if the root type is recommendation_panel.             There can be few versions of the same recommendation panel with e.g.             different number of recommended services",
-                    "example": "v1"
+                    "title": "Root type",
+                    "description": "Field used only if the root type is recommendation_panel. The unique identifier of a recommender panel on the page",
+                    "example": "version_A"
                 },
                 "service_id": {
                     "type": "integer",
                     "title": "Service ID",
-                    "description": "Field used only if the root type is recommendation_panel.             The unique identifier of a recommended service clicked by the user",
+                    "description": "Field used only if the root type is recommendation_panel. The unique identifier of a recommended service clicked by the user",
                     "example": 1234
+                }
+            },
+            "type": "object"
+        },
+        "Target": {
+            "required": [
+                "page_id",
+                "visit_id"
+            ],
+            "properties": {
+                "visit_id": {
+                    "type": "integer",
+                    "title": "Visit ID",
+                    "description": "The unique identifier of a user presence on the user action's target page in the specific time",
+                    "example": 1234
+                },
+                "page_id": {
+                    "type": "string",
+                    "title": "Page ID",
+                    "description": "The unique identifier of the user action's target page",
+                    "example": "service_about"
+                }
+            },
+            "type": "object"
+        },
+        "Action": {
+            "required": [
+                "order",
+                "text",
+                "type"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "title": "Type of the action",
+                    "description": "Type of the clicked element",
+                    "example": "button"
+                },
+                "text": {
+                    "type": "string",
+                    "title": "Text on the clicked element",
+                    "description": "The unique identifier of the user action's target page",
+                    "example": "Details"
+                },
+                "order": {
+                    "type": "boolean",
+                    "title": "Order",
+                    "description": "Flag indicating whether action caused service ordering or not",
+                    "example": true
                 }
             },
             "type": "object"
@@ -419,22 +527,22 @@
         },
         "Service": {
             "required": [
-                "access_mode_ids",
-                "access_type_ids",
-                "category_ids",
+                "access_modes",
+                "access_types",
+                "categories",
                 "countries",
                 "description",
                 "id",
-                "life_cycle_status_ids",
+                "life_cycle_statuses",
                 "name",
-                "platform_ids",
-                "provider_ids",
-                "related_service_ids",
-                "resource_organisation_id",
-                "scientific_domain_ids",
+                "platforms",
+                "providers",
+                "related_services",
+                "resource_organisation",
+                "scientific_domains",
                 "tagline",
-                "target_user_ids",
-                "trl_ids"
+                "target_users",
+                "trls"
             ],
             "properties": {
                 "id": {
@@ -456,15 +564,10 @@
                     "example": "Service providing GPU cluster on demand"
                 },
                 "tagline": {
-                    "type": "array",
-                    "title": "Tag line",
-                    "description": "A list of service's tags",
-                    "items": {
-                        "type": "string",
-                        "title": "Tag",
-                        "description": "Tag of the service",
-                        "example": "gpu"
-                    }
+                    "type": "string",
+                    "title": "Tagline",
+                    "description": "Tag of the service",
+                    "example": "State-of-the-art service"
                 },
                 "countries": {
                     "type": "array",
@@ -477,122 +580,117 @@
                         "example": "PL"
                     }
                 },
-                "category_ids": {
+                "categories": {
                     "type": "array",
                     "title": "Categories IDs",
                     "description": "List of categories IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Category ID",
                         "description": "ID of the category",
                         "example": 1234
                     }
                 },
-                "provider_ids": {
+                "providers": {
                     "type": "array",
                     "title": "Providers IDs",
                     "description": "List of providers IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Provider ID",
                         "description": "ID of the provider",
                         "example": 1234
                     }
                 },
-                "resource_organisation_id": {
-                    "type": "array",
-                    "title": "Resource organisations IDs",
-                    "description": "List of resource organisations IDs",
-                    "items": {
-                        "type": "string",
-                        "title": "Resource organisation ID",
-                        "description": "ID of the resource organisation",
-                        "example": 1234
-                    }
+                "resource_organisation": {
+                    "type": "integer",
+                    "title": "Resource organisation ID",
+                    "description": "Resource organisations ID",
+                    "example": 1234
                 },
-                "scientific_domain_ids": {
+                "scientific_domains": {
                     "type": "array",
                     "title": "Scientific domains IDs",
                     "description": "List of scientific domains IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Scientific domain ID",
                         "description": "ID of the scientific domain",
                         "example": 1234
                     }
                 },
-                "platform_ids": {
+                "platforms": {
                     "type": "array",
                     "title": "Platforms IDs",
                     "description": "List of service's platforms IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Platform ID",
                         "description": "ID of the service's platform",
                         "example": 1234
                     }
                 },
-                "target_user_ids": {
+                "target_users": {
                     "type": "array",
                     "title": "Target users IDs",
                     "description": "List of service's target users IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Target user ID",
                         "description": "ID of the service's target user",
                         "example": 1234
                     }
                 },
-                "related_service_ids": {
+                "related_services": {
                     "type": "array",
                     "title": "Related services IDs",
                     "description": "List of service's related services IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Related service ID",
                         "description": "ID of the service's related service",
                         "example": 1234
                     }
                 },
-                "access_mode_ids": {
+                "access_modes": {
                     "type": "array",
                     "title": "Access modes IDs",
                     "description": "List of service's access modes IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Access mode ID",
                         "description": "ID of the service's access mode",
                         "example": 1234
                     }
                 },
-                "access_type_ids": {
+                "access_types": {
                     "type": "array",
                     "title": "Access types IDs",
                     "description": "List of service's access types IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Access type ID",
                         "description": "ID of the service's access type",
                         "example": 1234
                     }
                 },
-                "trl_ids": {
+                "trls": {
                     "type": "array",
                     "title": "TRLs IDs",
                     "description": "List of service's TRLs IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "TRL ID",
                         "description": "ID of the service's Technology readiness level",
                         "example": 1234
                     }
                 },
-                "life_cycle_status_ids": {
+                "life_cycle_statuses": {
                     "type": "array",
                     "title": "Life cycle statuses IDs",
                     "description": "List of service's life cycle statuses IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Life cycle status ID",
                         "description": "ID of the service's life cycle status",
                         "example": 1234
@@ -603,10 +701,10 @@
         },
         "User": {
             "required": [
-                "accessed_services_ids",
-                "category_ids",
+                "accessed_services",
+                "categories",
                 "id",
-                "scientific_domain_ids"
+                "scientific_domains"
             ],
             "properties": {
                 "id": {
@@ -615,34 +713,34 @@
                     "description": "The unique identifier of a the user",
                     "example": 1234
                 },
-                "scientific_domain_ids": {
+                "scientific_domains": {
                     "type": "array",
                     "title": "Scientific domains IDs",
                     "description": "List of scientific domains IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Scientific domain ID",
                         "description": "ID of the scientific domain",
                         "example": 1234
                     }
                 },
-                "category_ids": {
+                "categories": {
                     "type": "array",
                     "title": "Categories IDs",
                     "description": "List of categories IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Category ID",
                         "description": "ID of the category",
                         "example": 1234
                     }
                 },
-                "accessed_services_ids": {
+                "accessed_services": {
                     "type": "array",
                     "title": "Accessed services IDs",
                     "description": "List of accessed services IDs",
                     "items": {
-                        "type": "string",
+                        "type": "integer",
                         "title": "Accessed service ID",
                         "description": "ID of the accessed services",
                         "example": 1234
@@ -737,7 +835,6 @@
         },
         "Target user": {
             "required": [
-                "description",
                 "id",
                 "name"
             ],
@@ -765,7 +862,6 @@
         },
         "Access mode": {
             "required": [
-                "description",
                 "id",
                 "name"
             ],
@@ -793,7 +889,6 @@
         },
         "Access type": {
             "required": [
-                "description",
                 "id",
                 "name"
             ],
@@ -821,7 +916,6 @@
         },
         "TRL": {
             "required": [
-                "description",
                 "id",
                 "name"
             ],
@@ -849,7 +943,6 @@
         },
         "Life cycle status": {
             "required": [
-                "description",
                 "id",
                 "name"
             ],
@@ -883,8 +976,7 @@
         "MaskError": {
             "description": "When any error occurs on mask"
         },
-        "InvalidRecommendationPanelVersionError": {},
-        "InvalidRecommendationPanelLocationError": {}
+        "InvalidRecommendationPanelIDError": {}
     },
     "host": "localhost:5000"
 }

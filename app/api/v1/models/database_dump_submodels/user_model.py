@@ -13,7 +13,7 @@ user = api.model(
             example=1234,
         ),
         "scientific_domains": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Scientific domain ID",
                 description="ID of the scientific domain",
                 example=1234,
@@ -23,7 +23,7 @@ user = api.model(
             description="List of scientific domains IDs",
         ),
         "categories": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Category ID",
                 description="ID of the category",
                 example=1234,
@@ -33,7 +33,7 @@ user = api.model(
             description="List of categories IDs",
         ),
         "accessed_services": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Accessed service ID",
                 description="ID of the accessed services",
                 example=1234,

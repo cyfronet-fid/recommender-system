@@ -2,49 +2,65 @@
 
 """Models for the recommendations endpoint"""
 
-from flask_restx import fields, reqparse
+from flask_restx import fields
 from app.api.v1.api import api
 
 
-recommendation_parser = reqparse.RequestParser()
-recommendation_parser.add_argument(
-    "location",
-    required=True,
-    type=str,
-    help="An unambiguous identifier of the recommendation panel location on the page",
-    default="services_list",
-)
-
-recommendation_parser.add_argument(
-    "version",
-    required=True,
-    type=str,
-    help="An unambiguous identifier of the version of the recommendation panel",
-    default="v1",
-)
-
-
 recommendation_context = api.model(
-    "Recommendation context",
+    "RecommendationContext",
     {
-        "user_id": fields.Integer(
+        "logged_user": fields.Boolean(
             required=True,
+            title="Logged user",
+            description="Flag indicating whether user is logged or not",
+            example=True,
+        ),
+        "user_id": fields.Integer(
+            required=False,
             title="User ID",
-            description="The unique identifier of a user",
+            description="The unique identifier of the logged user. "
+            "Specified only if logged_user=True",
             example=1234,
         ),
-        "recommendation_page_visit_id": fields.Integer(
+        "unique_id": fields.Integer(
+            required=False,
+            title="Not logged user ID",
+            description="The unique identifier of the not logged user. "
+            "Specified only if logged_user=False",
+            example=1234,
+        ),
+        "timestamp": fields.DateTime(
+            dt_format="iso8601",
+            required=True,
+            title="Timestamp",
+            description="The exact time of the recommendation request sending "
+            "in iso8601 format",
+        ),
+        "visit_id": fields.Integer(
             required=True,
             title="recommendation page visit ID",
-            description="The unique identifier of the user presence on the specific \
-            page in the specific time",
+            description="The unique identifier of the user presence on the "
+            "recommendation page in the specific time (could be "
+            "a function of above fields)",
             example=1234,
         ),
+        "page_id": fields.String(
+            required=True,
+            title="Page ID",
+            description="The unique identifier of the page with recommendation panel",
+            example="some_page_identifier",
+        ),
+        "panel_id": fields.String(
+            required=True,
+            title="Root type",
+            description="The unique identifier of the recommender panel on the page",
+            example="version_A",
+        ),
         "search_phrase": fields.String(
-            required=False,
+            required=True,
             title="Search phrase",
-            description="Search phrase text typed by user in the search panel  in \
-            the context of this recommendation request",
+            description="Search phrase text typed by user in the search panel  in "
+            "the context of this recommendation request",
             example="Cloud GPU",
         ),
         "filters": fields.List(
@@ -53,17 +69,17 @@ recommendation_context = api.model(
                 description="An unambiguous symbol of the filter",
                 example="some_filter",
             ),
-            required=False,
+            required=True,
             title="Filters",
-            description="A list of filters chosen by a user in the context of this \
-            recommendation request",
+            description="A list of filters chosen by a user in the context of this "
+            "recommendation request",
         ),
     },
 )
 
 recommendation = fields.List(
     fields.Integer(
-        title="Service ID", description="The unique identifier of a service"
+        title="Service ID", description="The unique identifier of the service"
     ),
     required=True,
     title="Recommended services list",

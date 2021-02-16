@@ -19,7 +19,6 @@ access_type = api.model(
             example="remote access",
         ),
         "description": fields.String(
-            required=True,
             title="Description",
             description="Description of the access type",
             example="Access can be remote",

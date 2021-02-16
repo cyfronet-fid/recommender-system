@@ -7,35 +7,100 @@ from app.api.v1.api import api
 root = api.model(
     "Root info",
     {
-        "root_type": fields.String(
+        "type": fields.String(
             required=True,
-            title="Root Type",
-            description="Field informing whether user followed recommended service or \
-            clicked just service in the regular list or in some other place",
+            title="Root type",
+            description="Informs whether user followed service from recommendar box "
+            "or just clicked service in the regular list in the services "
+            "catalogue",
             example="recommendation_panel",
         ),
-        "location": fields.String(
+        "panel_id": fields.String(
             required=False,
-            title="Recommendation panel location",
-            description="Field used only if the root type is recommendation_panel. \
-            On one page there can be few recommendation panels so this field allows \
-            to distinguish them",
-            example="bottom_left_recommendation panel",
-        ),
-        "version": fields.String(
-            required=False,
-            title="Recommendation panel version",
-            description="Field used only if the root type is recommendation_panel. \
-            There can be few versions of the same recommendation panel with e.g. \
-            different number of recommended services",
-            example="v1",
+            title="Root type",
+            description="Field used only if the root type is recommendation_panel. "
+            "The unique identifier of a recommender panel on the page",
+            example="version_A",
         ),
         "service_id": fields.Integer(
             required=False,
             title="Service ID",
-            description="Field used only if the root type is recommendation_panel. \
-            The unique identifier of a recommended service clicked by the user",
+            description="Field used only if the root type is recommendation_panel. "
+            "The unique identifier of a recommended service clicked by "
+            "the user",
             example=1234,
+        ),
+    },
+)
+
+source = api.model(
+    "Source",
+    {
+        "visit_id": fields.Integer(
+            required=True,
+            title="Visit ID",
+            description="The unique identifier of a user presence on the user "
+            "action's source page in the specific time",
+            example=1234,
+        ),
+        "page_id": fields.String(
+            required=True,
+            title="Page ID",
+            description="The unique identifier of the user action's source page",
+            example="services_catalogue_list",
+        ),
+        "root": fields.Nested(
+            root,
+            required=False,
+            title="User journey root",
+            description="If this is an action that starts in clicking service "
+            "recommended in the recommendation panel or in the regular "
+            "services list then it is a root action and this field should "
+            "be populated",
+        ),
+    },
+)
+
+target = api.model(
+    "Target",
+    {
+        "visit_id": fields.Integer(
+            required=True,
+            title="Visit ID",
+            description="The unique identifier of a user presence on the user "
+            "action's target page in the specific time",
+            example=1234,
+        ),
+        "page_id": fields.String(
+            required=True,
+            title="Page ID",
+            description="The unique identifier of the user action's target page",
+            example="service_about",
+        ),
+    },
+)
+
+action = api.model(
+    "Action",
+    {
+        "type": fields.String(
+            required=True,
+            title="Type of the action",
+            description="Type of the clicked element",
+            example="button",
+        ),
+        "text": fields.String(
+            required=True,
+            title="Text on the clicked element",
+            description="The unique identifier of the user action's target page",
+            example="Details",
+        ),
+        "order": fields.Boolean(
+            required=True,
+            title="Order",
+            description="Flag indicating whether action caused service ordering or "
+            "not",
+            example=True,
         ),
     },
 )
@@ -43,39 +108,37 @@ root = api.model(
 user_action = api.model(
     "User Action",
     {
+        "logged_user": fields.Boolean(
+            required=True,
+            title="Logged user",
+            description="Flag indicating whether user is logged or not",
+            example=True,
+        ),
         "user_id": fields.Integer(
-            required=True,
+            required=False,
             title="User ID",
-            description="The unique identifier of a user",
+            description="The unique identifier of the logged user. Specified only if "
+            "logged_user=True",
             example=1234,
         ),
-        "source_page_visit_id": fields.Integer(
-            required=True,
-            title="Source page visit ID",
-            description="The unique identifier of a user presence on the user action \
-            source page in the specific time",
+        "unique_id": fields.Integer(
+            required=False,
+            title="Not logged user ID",
+            description="The unique identifier of the not logged user. Specified only "
+            "if logged_user=False",
             example=1234,
         ),
-        "target_page_visit_id": fields.Integer(
+        "timestamp": fields.DateTime(
+            dt_format="iso8601",
             required=True,
-            title="Target page visit ID",
-            description="The unique identifier of a user presence on the user action \
-            target page in the specific time",
-            example=1234,
+            title="Timestamp",
+            description="The exact time of taking this action by the user in iso8601 "
+            "format",
         ),
-        "user_action": fields.String(
-            required=True,
-            title="User action",
-            description="An unambiguous symbol of the user action",
-            example="Regular link click",
-        ),
-        "root": fields.Nested(
-            root,
-            required=True,
-            title="User journey root",
-            description="If this is an action that starts in clicking service \
-            recommended in the recommendation panel or in the regular services list \
-            then it is a root action and this field should be populated",
+        "source": fields.Nested(source, required=True, title="User action source"),
+        "target": fields.Nested(target, required=True, title="User action target"),
+        "action": fields.Nested(
+            action, required=True, title="User action", description="Action details"
         ),
     },
 )

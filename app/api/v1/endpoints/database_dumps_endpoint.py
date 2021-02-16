@@ -23,7 +23,9 @@ class DatabaseDump(Resource):
     @api.response(204, "Database dump successfully sent")
     def post(self):
         data = request.get_json()
-        connect(host=os.environ["MONGO_DB_ENDPOINT"], db=os.environ["MONGO_DB_NAME"])
+        connect(
+            host=os.environ.get("MONGO_DB_ENDPOINT"), db=os.environ.get("MONGO_DB_NAME")
+        )
         drop_mp_dump()  # For now we are dropping the old DB
         load_mp_dump(data)
         return None, 204

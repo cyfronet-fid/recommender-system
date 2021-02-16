@@ -24,15 +24,11 @@ service = api.model(
             description="description of the service",
             example="Service providing GPU cluster on demand",
         ),
-        "tagline": fields.List(
-            fields.String(
-                title="Tag",
-                description="Tag of the service",
-                example="gpu",
-            ),
+        "tagline": fields.String(
             required=True,
-            title="Tag line",
-            description="A list of service's tags",
+            title="Tagline",
+            description="Tag of the service",
+            example="State-of-the-art service",
         ),
         "countries": fields.List(
             fields.String(
@@ -45,7 +41,7 @@ service = api.model(
             description="List of countries",
         ),
         "categories": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Category ID",
                 description="ID of the category",
                 example=1234,
@@ -55,7 +51,7 @@ service = api.model(
             description="List of categories IDs",
         ),
         "providers": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Provider ID",
                 description="ID of the provider",
                 example=1234,
@@ -64,18 +60,14 @@ service = api.model(
             title="Providers IDs",
             description="List of providers IDs",
         ),
-        "resource_organisation": fields.List(
-            fields.String(
-                title="Resource organisation ID",
-                description="ID of the resource organisation",
-                example=1234,
-            ),
+        "resource_organisation": fields.Integer(
+            title="Resource organisation ID",
             required=True,
-            title="Resource organisations IDs",
-            description="List of resource organisations IDs",
+            description="Resource organisations ID",
+            example=1234,
         ),
         "scientific_domains": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Scientific domain ID",
                 description="ID of the scientific domain",
                 example=1234,
@@ -85,7 +77,7 @@ service = api.model(
             description="List of scientific domains IDs",
         ),
         "platforms": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Platform ID",
                 description="ID of the service's platform",
                 example=1234,
@@ -95,7 +87,7 @@ service = api.model(
             description="List of service's platforms IDs",
         ),
         "target_users": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Target user ID",
                 description="ID of the service's target user",
                 example=1234,
@@ -105,7 +97,7 @@ service = api.model(
             description="List of service's target users IDs",
         ),
         "related_services": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Related service ID",
                 description="ID of the service's related service",
                 example=1234,
@@ -115,7 +107,7 @@ service = api.model(
             description="List of service's related services IDs",
         ),
         "access_modes": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Access mode ID",
                 description="ID of the service's access mode",
                 example=1234,
@@ -125,7 +117,7 @@ service = api.model(
             description="List of service's access modes IDs",
         ),
         "access_types": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Access type ID",
                 description="ID of the service's access type",
                 example=1234,
@@ -135,7 +127,7 @@ service = api.model(
             description="List of service's access types IDs",
         ),
         "trls": fields.List(
-            fields.String(
+            fields.Integer(
                 title="TRL ID",
                 description="ID of the service's Technology readiness level",
                 example=1234,
@@ -145,7 +137,7 @@ service = api.model(
             description="List of service's TRLs IDs",
         ),
         "life_cycle_statuses": fields.List(
-            fields.String(
+            fields.Integer(
                 title="Life cycle status ID",
                 description="ID of the service's life cycle status",
                 example=1234,
