@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring
 
-from mongoengine import StringField, ReferenceField, ListField
+from mongoengine import StringField, ReferenceField, ListField, BinaryField, FloatField
 
 from .access_mode import AccessMode
 from .access_type import AccessType
@@ -31,3 +31,5 @@ class Service(MarketplaceDocument):
     life_cycle_statuses = ListField(ReferenceField(LifeCycleStatus))
     related_services = ListField(ReferenceField("Service"))
     required_services = ListField(ReferenceField("Service"))
+    dataframe = BinaryField(blank=True)
+    tensor = ListField(FloatField(), blank=True)

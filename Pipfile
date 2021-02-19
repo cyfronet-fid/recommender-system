@@ -29,6 +29,9 @@ pymongo = "*"
 mongoengine = "*"
 flask-mongoengine = "*"
 inflection = "*"
+sklearn = "*"
+tqdm = "*"
+celery = {extras = ["redis"], version = "*"}
 
 [requires]
 python_version = "3.7"

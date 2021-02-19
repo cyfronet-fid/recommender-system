@@ -1,0 +1,7 @@
+{
+    "Free": "Users can freely access the Resource provided, registration may be needed.",
+    "Free Conditionally": "Users are granted access based on defined policies;\nsuch policies usually apply to Resources being offered with \u201csponsored use\u201d\nto meet some national or EU level objective; for instance,\na country may offer Resources with \u201csponsored use\u201d to support\nnational researchers involved in international collaborations.\n",
+    "Other": null,
+    "Paid": "Users need to pay a fee to access the Resource",
+    "Peer Reviewed": "Users are selected based on scientific excellence evaluation, originality,\nquality and technical and ethical feasibility of an application evaluated\nthrough peer review conducted by internal or external experts of the activity to be supported by the Resource.\n"
+}

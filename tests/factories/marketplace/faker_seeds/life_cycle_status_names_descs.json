@@ -1,0 +1,16 @@
+{
+    "Alpha": "Resource proto type available for closed set of users",
+    "Beta": "Resource being developed while available for testing publicly",
+    "Concept": "Concept development",
+    "Design": "Resource in design",
+    "Discovery": "Researching users needs, exploring technological or policy constraints",
+    "Implementation": "Resource in deployment",
+    "In containment": "Resource active, but generally not available to new users",
+    "Operation": "Resource offered",
+    "Other": null,
+    "Planned": "Resource plan defined",
+    "Preparation": "Resource in preparatory phase",
+    "Production": "Resource available in the live environment",
+    "Retirement": "Resource is not anymore offered",
+    "Termination": "Resource dissolution, dismantling"
+}

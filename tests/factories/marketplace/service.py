@@ -1,7 +1,6 @@
 # pylint: disable-all
 
-from factory import LazyFunction, SubFactory
-from factory.random import reseed_random, random
+from factory import LazyFunction, LazyAttribute, SubFactory
 from faker import Factory as FakerFactory
 
 from recommender.models import Service
@@ -16,26 +15,43 @@ from .scientific_domain import ScientificDomainFactory
 from .target_user import TargetUserFactory
 from .trl import TrlFactory
 
-faker = FakerFactory.create()
+from faker.providers import BaseProvider
+from factory.random import reseed_random, random
+from tests.factories.marketplace.faker_seeds.utils.loaders import (
+    load_names_descs,
+    load_taglines,
+)
+
 reseed_random("test-seed")
+fake = FakerFactory.create()
 
 
-def _tagline():
-    n = random.randint(1, 7)
-    tags = [" ".join(faker.words(nb=random.randint(1, 10))) for _ in range(n)]
-    tagline = ", ".join(tags)
-    return tagline
+class ServiceProvider(BaseProvider):
+    SERVICE_NAMES_DESCS = load_names_descs(Service)
+    TAGLINES = load_taglines()
+
+    def service_name(self):
+        return random.choice(list(self.SERVICE_NAMES_DESCS.keys()))
+
+    def service_description(self, name):
+        return self.SERVICE_NAMES_DESCS.get(name)
+
+    def service_tagline(self):
+        return random.choice(self.TAGLINES)
+
+
+fake.add_provider(ServiceProvider)
 
 
 class ServiceFactory(MarketplaceDocument):
     class Meta:
         model = Service
 
-    name = LazyFunction(lambda: " ".join(faker.words(nb=2)))
-    description = faker.sentence(nb_words=30)
-    tagline = LazyFunction(_tagline)
+    name = LazyFunction(lambda: fake.service_name())
+    description = LazyAttribute(lambda o: fake.service_description(o.name))
+    tagline = LazyFunction(lambda: fake.service_tagline())
     countries = LazyFunction(
-        lambda: [faker.country_code() for _ in range(random.randint(2, 5))]
+        lambda: [fake.country_code() for _ in range(random.randint(2, 5))]
     )
     providers = LazyFunction(lambda: ProviderFactory.create_batch(random.randint(2, 5)))
     resource_organisation = SubFactory(ProviderFactory)

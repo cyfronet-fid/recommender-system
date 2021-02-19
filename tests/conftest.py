@@ -1,3 +1,5 @@
+# pylint: disable=fixme
+
 """Fixtures used by pytest shared across all tests"""
 
 import pytest
