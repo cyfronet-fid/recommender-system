@@ -1,3 +1,3 @@
 # pylint: disable=missing-module-docstring
 
-from .user_action import UserActionFactory
+from .common import api

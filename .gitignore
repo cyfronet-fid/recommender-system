@@ -1,5 +1,4 @@
 .idea
 .ipynb_checkpoints
 .pytest_cache
-app/api/v1/models/schemas/
-app/db/data.json
+.env

@@ -16,6 +16,7 @@ The inner structure can be described as two elements:
 - [git](https://git-scm.com/)
 - [Python 3.7.x](https://www.python.org/downloads/release/python-370/)
 - [Pipenv](https://pypi.org/project/pipenv/)
+- [redis](https://redis.io/)
 
 
 All required project packages are listed in the pipfile. For their instalation look at the setup section.
@@ -37,11 +38,13 @@ pipenv install
 pipenv shell
 ```
 
-### Launching
+### Server
 
-Launch EOSC Marketplace Recommender System with executing:
+Launch EOSC Marketplace Recommender server by executing in the project root directory:
 ```
-python run.py
+export FLASK_ENV=[development|production]
+export FLASK_APP=app.py
+pipenv run flask run
 ```
 In the console you should see output similar to this:
 ```bash
@@ -58,10 +61,13 @@ In the console you should see output similar to this:
 ```
 
 ### API
-You can interact with recommender system microservice using API available (by deafult) here: http://localhost:5000/api/v1/doc/
+You can interact with recommender system microservice using API available (by deafult) here: http://localhost:5000/doc/
 
-### Application configuration
-All configuration constants (e.g. app server name and port) are located in the `.env` file
+### .env
+We are using .env to store instance specific constants or secrets. This file is not tracked by git and it needs to be 
+present in the project root directory. Values:
+
+- SECRET KEY - description
 
 ### Pre-commit
 To activate pre-commit run:
@@ -91,5 +97,13 @@ INSTALL_PYTHON = 'PATH/TO/YOUR/ENV/EXECUTABLE'
 os.environ['PATH'] = f'{os.path.dirname(INSTALL_PYTHON)}{os.pathsep}{os.environ["PATH"]}'
 ```
 
-### Server config
-TODO: Add server config info
+
+### Celery and redis
+Recommender system is running celery to execute background tasks in a queue.
+As a backend we are using redis. In the development environment we are assuming that
+the redis is running on `redis://localhost:6379` although it can be configured in `settings.py`
+
+To run background tasks you also need a celery worker running alongside your server. To run the worker:
+```
+pipenv run celery -A celery_worker:app worker --loglevel=info
+```
