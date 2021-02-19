@@ -1,19 +1,17 @@
 # pylint: disable-all
 
-from app.services.sarses_generator import generate_sarses
-from tests.factories.marketplace_factories import UserFactory
-from tests.factories.recommendation_factory import RecommendationFactory
-from tests.factories.user_action_factory import UserActionFactory
-from app.db.mongo_models import Sars
-from tests.fixtures.utils import mongo
-from app.reward_mapping import ua_to_reward_id
-from app.services.sarses_generator import (
+from tests.factories.marketplace import UserFactory
+from tests.factories.recommendation import RecommendationFactory
+from tests.factories.user_action import UserActionFactory
+from recommender.services.sarses_generator import generate_sarses
+from recommender.models import Sars, UserAction
+from recommender.engine.reward_mapping import ua_to_reward_id
+from recommender.services.sarses_generator import (
     RECOMMENDATION_PAGES_IDS,
     _tree_collapse,
     _get_clicked_services_and_reward,
     _find_root_uas_before,
 )
-from app.db.mongo_models import UserAction
 
 
 def ruas2services(ruas):

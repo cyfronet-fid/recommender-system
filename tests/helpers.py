@@ -1,11 +1,10 @@
-"""Helper util methods for tests"""
+"""Test helpers"""
 
 import json
 
 
 def mongo_model_to_json(model):
-    """Convert mongoeninge model to json representation
-    that matches our MP serialization"""
+    """Converts mongo json into json as sent by MP in database dump"""
     json_repr = json.loads(model.to_json())
     json_repr["id"] = model.id
     del json_repr["_id"]
