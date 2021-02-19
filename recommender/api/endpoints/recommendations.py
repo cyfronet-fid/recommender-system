@@ -2,7 +2,7 @@
 
 """Recommendations endpoint definition"""
 
-from flask import request
+from flask import request, current_app
 from flask_restx import Resource, Namespace
 
 from recommender.api.schemas.recommendation import (
@@ -11,7 +11,6 @@ from recommender.api.schemas.recommendation import (
 )
 from recommender.services.deserializer import Deserializer
 from recommender.engine.recommender_engine_stub import (
-    RecommenderEngineStub,
     InvalidRecommendationPanelIDError,
 )
 
@@ -33,7 +32,9 @@ class Recommendation(Resource):
         """Returns list of ids of recommended scientific services"""
 
         json_dict = request.get_json()
-        services_ids = RecommenderEngineStub.get_recommendations(json_dict)
+        with current_app.app_context():
+            services_ids = current_app.recommender_engine.call(json_dict)
+
         json_dict["services"] = services_ids
 
         Deserializer.deserialize_recommendation(json_dict).save()

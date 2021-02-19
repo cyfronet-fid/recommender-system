@@ -10,8 +10,8 @@ from datetime import datetime
 from recommender.models import Recommendation
 from .marketplace import UserFactory, ServiceFactory
 
-faker = FakerFactory.create()
 reseed_random("test-seed")
+faker = FakerFactory.create()
 
 
 class RecommendationFactory(MongoEngineFactory):

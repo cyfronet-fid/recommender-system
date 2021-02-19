@@ -5,6 +5,9 @@
 import os
 from flask import Flask
 
+from recommender.engine.pre_agent.models.common import load_last_module
+from recommender.engine.pre_agent.models.neural_colaborative_filtering import NEURAL_CF
+from recommender.engine.pre_agent.pre_agent import PreAgentRecommender
 from recommender.extensions import db, celery
 from recommender.api import api
 from settings import config_by_name
@@ -20,6 +23,9 @@ def create_app():
     _register_extensions(app)
     api.init_app(app)
     init_celery(app)
+
+    init_recommender_engine(app)
+
     return app
 
 
@@ -45,3 +51,10 @@ def init_celery(app=None):
 
     celery.Task = ContextTask
     return celery
+
+
+def init_recommender_engine(app):
+    """Instantiate a recommender engine in the Flask app"""
+    app.recommender_engine = PreAgentRecommender(
+        neural_cf_model=load_last_module(NEURAL_CF)
+    )

@@ -1,0 +1,11 @@
+{
+    "trl-1": "Basic principles observed",
+    "trl-2": "Technology concept formulated",
+    "trl-3": "Experimental proof of concept",
+    "trl-4": "Technology validated in lab",
+    "trl-5": "Technology validated in relevant environment (industrially relevant environment in the case of key enabling technologies)",
+    "trl-6": "Technology demonstrated in relevant environment (industrially relevant environment in the case of key enabling technologies)",
+    "trl-7": "System prototype demonstration in operational environment",
+    "trl-8": "System complete and qualified",
+    "trl-9": "Actual system proven in operational environment (competitive manufacturing in the case of key enabling technologies; or in space)"
+}

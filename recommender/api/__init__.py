@@ -6,6 +6,8 @@ from recommender.api.schemas import api as models_ns
 from recommender.api.endpoints.recommendations import api as recommendations_ns
 from recommender.api.endpoints.database_dumps import api as database_dumps_ns
 from recommender.api.endpoints.user_actions import api as user_actions_ns
+from recommender.api.endpoints.training import api as training_ns
+
 
 api = Api(
     doc="/",
@@ -21,3 +23,4 @@ api.add_namespace(models_ns)
 api.add_namespace(recommendations_ns)
 api.add_namespace(database_dumps_ns)
 api.add_namespace(user_actions_ns)
+api.add_namespace(training_ns)
