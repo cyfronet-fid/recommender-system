@@ -37,10 +37,14 @@ def init_celery(app=None):
     """Initializes celery"""
 
     app = app or create_app()
-    celery.conf.update(
-        broker_url=app.config["REDIS_HOST"],
-        result_backend=app.config["REDIS_HOST"],
-    )
+
+    if os.environ["FLASK_ENV"] == "testing":
+        celery.conf.update(task_always_eager=True)
+    else:
+        celery.conf.update(
+            broker_url=app.config["REDIS_HOST"],
+            result_backend=app.config["REDIS_HOST"],
+        )
 
     class ContextTask(celery.Task):
         """Make celery tasks work with Flask recommender context"""
