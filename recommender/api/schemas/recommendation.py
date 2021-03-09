@@ -12,9 +12,9 @@ search_data = api.model(
     {
         "q": fields.String(title="Search phrase", example="Cloud GPU"),
         "category_id": fields.Integer(title="Category", example=1),
-        "geographical_availabilities": fields.List(fields.String(
-            title="Countries", example="PL"
-        )),
+        "geographical_availabilities": fields.List(
+            fields.String(title="Countries", example="PL")
+        ),
         "order_type": fields.String(title="Order type", example="open_access"),
         "providers": fields.List(fields.Integer(title="Provider", example=1)),
         "rating": fields.String(title="Rating", example="5"),
@@ -25,8 +25,7 @@ search_data = api.model(
             fields.Integer(title="Scientific domain", example=1)
         ),
         "sort": fields.String(title="Sort filter", example="_score"),
-        "target_users": fields.List(
-            fields.Integer(title="Target users", example=1)),
+        "target_users": fields.List(fields.Integer(title="Target users", example=1)),
     },
 )
 

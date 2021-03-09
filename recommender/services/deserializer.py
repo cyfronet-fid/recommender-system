@@ -8,7 +8,8 @@ from recommender.models import (
     Root,
     Source,
     Target,
-    Action, SearchData,
+    Action,
+    SearchData,
 )
 
 
@@ -24,7 +25,9 @@ class Deserializer:
         search_data = SearchData(
             q=search_data_json_dict.get("q"),
             category=search_data_json_dict.get("category"),
-            geographical_availabilities=search_data_json_dict.get("geographical_availabilities"),
+            geographical_availabilities=search_data_json_dict.get(
+                "geographical_availabilities"
+            ),
             order_type=search_data_json_dict.get("order_type"),
             providers=search_data_json_dict.get("providers"),
             related_platforms=search_data_json_dict.get("related_platforms"),
@@ -32,7 +35,6 @@ class Deserializer:
             sort=search_data_json_dict.get("sort"),
             target_users=search_data_json_dict.get("target_users"),
         )
-
 
         recommendation = Recommendation(
             logged_user=json_dict.get("logged_user"),

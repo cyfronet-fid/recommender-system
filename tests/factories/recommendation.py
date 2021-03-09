@@ -27,7 +27,7 @@ class RecommendationFactory(MongoEngineFactory):
     panel_id = LazyFunction(lambda: random.choice(["v1", "v2"]))
 
     services = LazyFunction(lambda: ServiceFactory.create_batch(random.randint(2, 10)))
-    search_data = None
+    search_data = None  # TODO: Add search_data to faker
 
     class Params:
         v1 = Trait(
