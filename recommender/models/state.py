@@ -4,7 +4,7 @@ from mongoengine import (
     EmbeddedDocument,
     ListField,
     ReferenceField,
-    EmbeddedDocumentField
+    EmbeddedDocumentField,
 )
 
 from .search_data import SearchData
