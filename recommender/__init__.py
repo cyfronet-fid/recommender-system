@@ -55,6 +55,4 @@ def init_celery(app=None):
 
 def init_recommender_engine(app):
     """Instantiate a recommender engine in the Flask app"""
-    app.recommender_engine = PreAgentRecommender(
-        neural_cf_model=load_last_module(NEURAL_CF)
-    )
+    app.recommender_engine = PreAgentRecommender()
