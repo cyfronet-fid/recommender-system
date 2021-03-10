@@ -35,6 +35,3 @@ celery = {extras = ["redis"], version = "*"}
 
 [requires]
 python_version = "3.7"
-
-[packages.celery]
-extras = [ "redis",]
