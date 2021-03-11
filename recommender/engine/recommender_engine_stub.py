@@ -14,9 +14,9 @@ class RecommenderEngineStub:
         """This function allows to get recommended services for the recommendation
         sendpoint"""
 
-        if context["panel_id"] == "version_A":
+        if context["panel_id"] == "v1":
             return cls._get_services_ids(3)
-        elif context["panel_id"] == "version_B":
+        elif context["panel_id"] == "v2":
             return cls._get_services_ids(2)
         else:
             raise InvalidRecommendationPanelIDError

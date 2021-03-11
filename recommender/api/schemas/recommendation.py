@@ -6,6 +6,30 @@ from flask_restx import fields
 
 from .common import api
 
+
+search_data = api.model(
+    "Search Data",
+    {
+        "q": fields.String(title="Search phrase", example="Cloud GPU"),
+        "category_id": fields.Integer(title="Category", example=1),
+        "geographical_availabilities": fields.List(fields.String(
+            title="Countries", example="PL"
+        )),
+        "order_type": fields.String(title="Order type", example="open_access"),
+        "providers": fields.List(fields.Integer(title="Provider", example=1)),
+        "rating": fields.String(title="Rating", example="5"),
+        "related_platforms": fields.List(
+            fields.Integer(title="Related platforms", example=1)
+        ),
+        "scientific_domains": fields.List(
+            fields.Integer(title="Scientific domain", example=1)
+        ),
+        "sort": fields.String(title="Sort filter", example="_score"),
+        "target_users": fields.List(
+            fields.Integer(title="Target users", example=1)),
+    },
+)
+
 recommendation_context = api.model(
     "Recommendation context",
     {
@@ -20,7 +44,7 @@ recommendation_context = api.model(
             title="User ID",
             description="The unique identifier of the logged user. "
             "Specified only if logged_user=True",
-            example=1234,
+            example=1,
         ),
         "unique_id": fields.Integer(
             required=False,
@@ -54,26 +78,9 @@ recommendation_context = api.model(
             required=True,
             title="Root type",
             description="The unique identifier of the recommender panel on the page",
-            example="version_A",
+            example="v1",
         ),
-        "search_phrase": fields.String(
-            required=True,
-            title="Search phrase",
-            description="Search phrase text typed by user in the search panel  in "
-            "the context of this recommendation request",
-            example="Cloud GPU",
-        ),
-        "filters": fields.List(
-            fields.String(
-                title="Filter",
-                description="An unambiguous symbol of the filter",
-                example="some_filter",
-            ),
-            required=True,
-            title="Filters",
-            description="A list of filters chosen by a user in the context of this "
-            "recommendation request",
-        ),
+        "search_data": fields.Nested(search_data, required=True),
     },
 )
 

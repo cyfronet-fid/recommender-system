@@ -119,8 +119,7 @@ def generate_sarses():
         state = State(
             user=recommendation.user,
             services_history=services_history_before,
-            last_searchphrase=recommendation.search_phrase,
-            last_filters=recommendation.filters,
+            last_search_data=recommendation.search_data,
         )
 
         # create action
@@ -132,8 +131,7 @@ def generate_sarses():
         next_state = State(
             user=recommendation.user,
             services_history=services_history_after,
-            last_searchphrase=recommendation.search_phrase,
-            last_filters=recommendation.filters,
+            last_search_data=recommendation.search_data,
         )
 
         # Create SARS

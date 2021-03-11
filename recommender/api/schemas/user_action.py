@@ -20,7 +20,7 @@ root = api.model(
             title="Root type",
             description="Field used only if the root type is recommendation_panel. "
             "The unique identifier of a recommender panel on the page",
-            example="version_A",
+            example="v1",
         ),
         "service_id": fields.Integer(
             required=False,

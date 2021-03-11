@@ -24,7 +24,7 @@ class RecommendationFactory(MongoEngineFactory):
     timestamp = LazyFunction(lambda: datetime.fromtimestamp(time.time()))
     visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None).int >> 65)
     page_id = LazyFunction(lambda: "_".join(faker.words(nb=random.randint(2, 6))))
-    panel_id = LazyFunction(lambda: random.choice(["version_A", "version_B"]))
+    panel_id = LazyFunction(lambda: random.choice(["v1", "v2"]))
 
     services = LazyFunction(lambda: ServiceFactory.create_batch(random.randint(2, 10)))
     search_phrase = LazyFunction(
@@ -33,17 +33,15 @@ class RecommendationFactory(MongoEngineFactory):
     filters = LazyFunction(lambda: faker.words(nb=random.randint(2, 10)))
 
     class Params:
-        version_A = Trait(
+        v1 = Trait(
             services=LazyFunction(lambda: ServiceFactory.create_batch(3)),
-            panel_id="version_A",
+            panel_id="v1",
         )
-        version_1 = version_A
 
-        version_B = Trait(
+        v2 = Trait(
             services=LazyFunction(lambda: ServiceFactory.create_batch(2)),
-            panel_id="version_B",
+            panel_id="v2",
         )
-        version_2 = version_B
 
         not_logged = Trait(
             logged_user=False,

@@ -19,6 +19,8 @@ class Service(MarketplaceDocument):
     description = StringField()
     tagline = StringField()
     countries = ListField(StringField())
+    order_type = StringField()
+    rating = StringField()
     categories = ListField(ReferenceField(Category))
     providers = ListField(ReferenceField(Provider))
     resource_organisation = ReferenceField(Provider)
