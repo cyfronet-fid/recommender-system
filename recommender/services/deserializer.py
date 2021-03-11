@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, line-too-long
 
 """Implementation of the user activity stub - for development purpose"""
 
@@ -8,7 +8,7 @@ from recommender.models import (
     Root,
     Source,
     Target,
-    Action,
+    Action, SearchData,
 )
 
 
@@ -20,6 +20,20 @@ class Deserializer:
     def deserialize_recommendation(cls, json_dict):
         """This method is used for deserialization of recommendation"""
 
+        search_data_json_dict = json_dict.get("search_data", {})
+        search_data = SearchData(
+            q=search_data_json_dict.get("q"),
+            category=search_data_json_dict.get("category"),
+            geographical_availabilities=search_data_json_dict.get("geographical_availabilities"),
+            order_type=search_data_json_dict.get("order_type"),
+            providers=search_data_json_dict.get("providers"),
+            related_platforms=search_data_json_dict.get("related_platforms"),
+            scientific_domains=search_data_json_dict.get("scientific_domains"),
+            sort=search_data_json_dict.get("sort"),
+            target_users=search_data_json_dict.get("target_users"),
+        )
+
+
         recommendation = Recommendation(
             logged_user=json_dict.get("logged_user"),
             user=json_dict.get("user_id"),
@@ -27,8 +41,7 @@ class Deserializer:
             timestamp=json_dict.get("timestamp"),
             visit_id=json_dict.get("visit_id"),
             services=json_dict.get("services"),
-            search_phrase=json_dict.get("search_phrase"),
-            filters=json_dict.get("filters"),
+            search_data=search_data,
         )
 
         return recommendation

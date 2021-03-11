@@ -43,7 +43,7 @@ class PreAgentRecommender:
         if k is None:
             raise InvalidRecommendationPanelIDError
         search_phrase = context.get("search_phrase")
-        filters = context.get("filters")
+        filters = context.get("search_data")
 
         user = None
         if context.get("logged_user"):

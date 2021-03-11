@@ -73,7 +73,7 @@ class TestSarsesGenerator:
     def test_get_clicked_services_and_reward(self, mongo):
         [UserActionFactory(recommendation_root=True) for _ in range(3)]
 
-        recommendation1 = RecommendationFactory(version_A=True)
+        recommendation1 = RecommendationFactory(v1=True)
         [UserActionFactory(recommendation_root=True) for _ in range(3)]
         root_uas = UserAction.objects(source__root__type__="recommendation_panel")
 
@@ -88,7 +88,7 @@ class TestSarsesGenerator:
             assert type(service_reward) == list
             assert len(service_reward) == 0
 
-        recommendation2 = RecommendationFactory(version_A=True)
+        recommendation2 = RecommendationFactory(v1=True)
         UserActionFactory(
             recommendation_root=True,
             source__visit_id=recommendation2.visit_id,
@@ -169,7 +169,7 @@ class TestSarsesGenerator:
         ]
 
         # Simple user journey
-        recommendation = RecommendationFactory(version_A=True, user=user)
+        recommendation = RecommendationFactory(v1=True, user=user)
 
         root_user_action_1 = UserActionFactory(
             recommendation_root=True,

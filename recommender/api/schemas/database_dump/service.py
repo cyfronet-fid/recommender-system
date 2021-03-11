@@ -41,6 +41,18 @@ service = api.model(
             title="Countries",
             description="List of countries",
         ),
+        "order_type": fields.String(
+            required=True,
+            title="Order type",
+            description="Order type",
+            example="Order required",
+        ),
+        "rating": fields.String(
+            required=True,
+            title="Rating",
+            description="Rating",
+            example="5.0",
+        ),
         "categories": fields.List(
             fields.Integer(
                 title="Category ID",

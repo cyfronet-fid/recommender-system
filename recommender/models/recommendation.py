@@ -7,11 +7,12 @@ from mongoengine import (
     DateTimeField,
     IntField,
     StringField,
-    ListField,
+    ListField, EmbeddedDocumentField,
 )
 
 from .user import User
 from .service import Service
+from .search_data import SearchData
 
 
 class Recommendation(Document):
@@ -23,5 +24,4 @@ class Recommendation(Document):
     page_id = StringField()
     panel_id = StringField()
     services = ListField(ReferenceField(Service))
-    search_phrase = StringField()
-    filters = ListField(StringField())
+    search_data = EmbeddedDocumentField(SearchData)
