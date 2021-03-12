@@ -7,7 +7,7 @@ import random
 import torch
 
 from recommender.engine.pre_agent.models.neural_colaborative_filtering import NEURAL_CF
-from recommender.engine.pre_agent.preprocessing.dataframe_to_tensor import (
+from recommender.engine.pre_agent.preprocessing.preprocessing import (
     user_and_services_to_tensors,
 )
 from recommender.models import User, Service
@@ -60,7 +60,6 @@ class PreAgentRecommender:
         not_accessed_services = _get_not_accessed_services(user)
         services_ids = _services_to_ids(not_accessed_services)
 
-        # TODO: transformers optimization needed
         users_tensor, services_tensor = user_and_services_to_tensors(
             user, not_accessed_services
         )

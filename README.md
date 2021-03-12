@@ -94,7 +94,6 @@ NOTE: You can customize your mongodb host path in `MONGODB_HOST` [env](#env-vari
 ### API
 You can interact with recommender system microservice using API available (by default) here: http://localhost:5000/
 
-
 ### Docker
 To run all background servers needed for development (redis, mongodb) it is recommended that you use Docker:
 ```bash
@@ -122,6 +121,35 @@ docker-compose -f docker-compose.yml -f jupyter.yml up
 ```
 NOTE: The url of the jupyter server will be displayed in the docker-compose output 
 (default: `http://127.0.0.1:8888/?token=SOME_JUPYTER_TOKEN`) (you can customize jupyter port and host using [env](#env-variables) variables)
+
+### Training
+For now the only trainable recommendation agent is the Pre-Agent.
+
+It can be trained via training endpoint (used in production) or via training tasks.
+
+Before training, the development database should be populated. It can be accomplished in two ways:
+ - posting marketplace database dump to the `database_dumps` endpoint
+ - loading it manually using `load_mp_dump` function
+
+If you load dump manually, don't forget to run `tasks/neural_cf/real_data_preprocessing.py` to preprocess data (In case of loading dump via endpoint preprocessing is done automatically).
+
+After populating database you can run training in following ways:
+ - using `training` endpoint
+ - using `tasks/neural_cf/real_data_training.py`
+
+Training automatically:
+ - creates dataset and split it into train/validation/test datasets 
+ - saves datasets
+ - creates new model
+ - trains model and saves it
+ - displays training statistics and plots.
+
+Server Pre Agent will use last saved model for recommendations.
+
+If you don't have data, but you want to see how training looks like, use `tasks/neural_cf/fake_data_training.py` task.
+It prepares fake data and run training on it. All of it uses testing database but the final trained model and transformers (used for data preprocessing) are saved into development database, so it can be used for recommendations in development environment.
+
+If you're interested in ML experiments related to model or training you can use `training_and_inferention_example.ipynb`.
 
 ### Tests
 To run all the tests in our app run:
