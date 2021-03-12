@@ -3,7 +3,7 @@
 from mongoengine import Document, StringField, BinaryField
 
 
-class PytorchModule(Document):
+class PytorchDataset(Document):
     name = StringField()
     description = StringField()
-    module_bytes = BinaryField()
+    dataset_bytes = BinaryField()

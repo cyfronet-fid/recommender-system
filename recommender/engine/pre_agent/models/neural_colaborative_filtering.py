@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from recommender.engine.pre_agent.models.user_embedder import UserEmbedder
 from recommender.engine.pre_agent.models.service_embedder import ServiceEmbedder
 
-NEURAL_CF = "neural_cf"
+NEURAL_CF = "Neural Colaborative Filtering Model"
 
 
 class NeuralColaborativeFilteringModel(Module):
