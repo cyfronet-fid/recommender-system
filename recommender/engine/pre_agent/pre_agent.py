@@ -42,17 +42,15 @@ class PreAgentRecommender:
         k = PANEL_ID_TO_K.get(context["panel_id"])
         if k is None:
             raise InvalidRecommendationPanelIDError
-        search_phrase = context.get("search_phrase")
-        filters = context.get("search_data")
 
         user = None
         if context.get("logged_user"):
             user = User.objects(id=context.get("user_id")).first()
 
         if user:
-            return self._for_logged_user(user, search_phrase, filters, k)
+            return self._for_logged_user(user, None, None, k)
         else:
-            return self._for_anonymous_user(search_phrase, filters, k)
+            return self._for_anonymous_user(None, None, k)
 
     def _for_logged_user(self, user, _search_phrase, _filters, k):
         # TODO: use _search_phrase and _filters after elasticsearch integration
