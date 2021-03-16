@@ -27,10 +27,7 @@ class RecommendationFactory(MongoEngineFactory):
     panel_id = LazyFunction(lambda: random.choice(["v1", "v2"]))
 
     services = LazyFunction(lambda: ServiceFactory.create_batch(random.randint(2, 10)))
-    search_phrase = LazyFunction(
-        lambda: " ".join(faker.words(nb=random.randint(2, 10)))
-    )
-    filters = LazyFunction(lambda: faker.words(nb=random.randint(2, 10)))
+    search_data = None
 
     class Params:
         v1 = Trait(
