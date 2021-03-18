@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, missing-class-docstring
 
 """This module contains common models functions"""
 
@@ -17,12 +17,16 @@ def save_module(module, name=None, description=None):
     PytorchModule(name=name, description=description, module_bytes=module_bytes).save()
 
 
+class NoSavedModuleError(Exception):
+    pass
+
+
 def load_last_module(name):
     """It loads module from the database"""
     last_module_model = PytorchModule.objects(name=name).order_by("-id").first()
 
     if last_module_model is None:
-        raise Exception(f"No saved module (model) with name {name}!")
+        raise NoSavedModuleError(f"No saved module (model) with name {name}!")
 
     module_bytes = last_module_model.module_bytes
     buffer = io.BytesIO(module_bytes)

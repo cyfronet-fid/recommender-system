@@ -162,11 +162,13 @@ def precalculate_tensors(objects, transformer, fit=True):
 def precalc_users_and_service_tensors():
     for model_class in (User, Service):
         name = pluralize(model_class.__name__).lower()
-        if name not in (USERS, SERVICES):
-            raise InvalidObject
         t = create_transformer(name)
         t = precalculate_tensors(model_class.objects, t)
         save_transformer(t, name)
+
+
+class NoPrecalculatedTensorsError(Exception):
+    pass
 
 
 def user_and_service_to_tensors(user, service):
@@ -175,7 +177,9 @@ def user_and_service_to_tensors(user, service):
     """
 
     if not (user.tensor and service.tensor):
-        raise InvalidObject
+        raise NoPrecalculatedTensorsError(
+            "Given user or service has no precalculated tensor"
+        )
 
     user_tensor = torch.Tensor(user.tensor)
     users_tensor = torch.unsqueeze(user_tensor, 0)
@@ -191,6 +195,15 @@ def user_and_services_to_tensors(user, services):
     It takes raw MongoEngine models of one user and related services
     and compose them into tensors ready for inference.
     """
+
+    if not user.tensor:
+        raise NoPrecalculatedTensorsError("Given user has no precalculated tensor")
+
+    for service in services:
+        if not service.tensor:
+            raise NoPrecalculatedTensorsError(
+                "One or more of given services has/have no precalculated tensor(s)"
+            )
 
     services_tensors = []
     services = list(services)
@@ -208,5 +221,5 @@ def user_and_services_to_tensors(user, services):
 
 
 class InvalidObject(Exception):
-    def message(self):
+    def message(self):  # pragma: no cover
         return "Invalid object (should be 'User' or 'Service' instance)"

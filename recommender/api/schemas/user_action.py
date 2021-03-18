@@ -28,7 +28,7 @@ root = api.model(
             description="Field used only if the root type is recommendation_panel. "
             "The unique identifier of a recommended service clicked by "
             "the user",
-            example=1234,
+            example=1,
         ),
     },
 )
@@ -41,7 +41,7 @@ source = api.model(
             title="Visit ID",
             description="The unique identifier of a user presence on the user "
             "action's source page in the specific time",
-            example=1234,
+            example=1,
         ),
         "page_id": fields.String(
             required=True,
@@ -69,7 +69,7 @@ target = api.model(
             title="Visit ID",
             description="The unique identifier of a user presence on the user "
             "action's target page in the specific time",
-            example=1234,
+            example=1,
         ),
         "page_id": fields.String(
             required=True,

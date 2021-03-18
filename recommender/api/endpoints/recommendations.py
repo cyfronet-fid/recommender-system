@@ -1,6 +1,7 @@
 # pylint: disable=missing-function-docstring, no-self-use
 
 """Recommendations endpoint definition"""
+import copy
 
 from flask import request, current_app
 from flask_restx import Resource, Namespace
@@ -10,16 +11,8 @@ from recommender.api.schemas.recommendation import (
     recommendation_context,
 )
 from recommender.services.deserializer import Deserializer
-from recommender.engine.recommender_engine_stub import (
-    InvalidRecommendationPanelIDError,
-)
 
 api = Namespace("recommendations", "Endpoint used for getting recommendations")
-
-
-@api.errorhandler(InvalidRecommendationPanelIDError)
-def handle_root_exception(error):
-    return {"message": error.message()}, 400
 
 
 @api.route("")
@@ -35,8 +28,9 @@ class Recommendation(Resource):
         with current_app.app_context():
             services_ids = current_app.recommender_engine.call(json_dict)
 
-        json_dict["services"] = services_ids
-        Deserializer.deserialize_recommendation(json_dict).save()
+        json_dict_with_services = copy.deepcopy(json_dict)
+        json_dict_with_services["services"] = services_ids
+        Deserializer.deserialize_recommendation(json_dict_with_services).save()
 
         response = {
             "recommendations": services_ids

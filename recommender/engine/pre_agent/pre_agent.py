@@ -13,7 +13,9 @@ from recommender.engine.pre_agent.preprocessing.preprocessing import (
 from recommender.models import User, Service
 
 from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from recommender.engine.pre_agent.models.common import load_last_module
+from recommender.engine.pre_agent.models.common import (
+    load_last_module, NoSavedModuleError
+)
 from recommender.services.fts import retrieve_services
 
 
@@ -48,7 +50,10 @@ class PreAgentRecommender:
         """
 
         if self.neural_cf_model is None:
-            self.neural_cf_model = load_last_module(NEURAL_CF)
+            try:
+                self.neural_cf_model = load_last_module(NEURAL_CF)
+            except NoSavedModuleError as no_saved_module:
+                raise UntrainedPreAgentError from no_saved_module
 
         k = PANEL_ID_TO_K.get(context["panel_id"])
         if k is None:
@@ -95,5 +100,12 @@ class RecommendationEngineError(Exception):
 
 
 class InvalidRecommendationPanelIDError(RecommendationEngineError):
-    def message(self):
+    def message(self):  # pragma: no cover
         return "Invalid recommendation panel id error"
+
+
+class UntrainedPreAgentError(Exception):
+    def message(self):  # pragma: no cover
+        return "Pre-Agent can't operate without trained Neural Collaborative" \
+               " Filtering model - train it before Pre-agent usage via " \
+               "'/training' endpoint"
