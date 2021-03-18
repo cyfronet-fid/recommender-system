@@ -5,6 +5,9 @@ services:
     build: .
     environment:
       - FLASK_ENV=development
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT:-development}
+      - SENTRY_RELEASE=${SENTRY_RELEASE}
     depends_on:
       - mongo
     ports:
@@ -16,6 +19,9 @@ services:
     build: .
     environment:
       - FLASK_ENV=development
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SENTRY_ENVIRONMENT=${SENTRY_ENVIRONMENT:-development}
+      - SENTRY_RELEASE=${SENTRY_RELEASE}
     depends_on:
       - mongo
       - redis

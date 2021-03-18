@@ -3,7 +3,13 @@
 """Flask recommender factory"""
 
 import os
+
 from flask import Flask
+
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 from recommender.engine.pre_agent.models.common import load_last_module
 from recommender.engine.pre_agent.models.neural_colaborative_filtering import NEURAL_CF
@@ -16,6 +22,8 @@ from settings import config_by_name
 def create_app():
     """Creates the flask recommender, initializes config in
     the proper ENV and initializes flask-restx"""
+
+    init_sentry_flask()
 
     app = Flask(__name__)
     app.config.from_object(config_by_name[os.environ["FLASK_ENV"]])
@@ -60,3 +68,21 @@ def init_celery(app=None):
 def init_recommender_engine(app):
     """Instantiate a recommender engine in the Flask app"""
     app.recommender_engine = PreAgentRecommender()
+
+
+def init_sentry_flask():
+    """Initializes sentry-flask integration"""
+
+    sentry_sdk.init(
+        integrations=[FlaskIntegration()],
+        traces_sample_rate=1.0,
+    )
+
+
+def init_sentry_celery():
+    """Initializes sentry-celery integration"""
+
+    sentry_sdk.init(
+        integrations=[CeleryIntegration(), RedisIntegration()],
+        traces_sample_rate=1.0,
+    )

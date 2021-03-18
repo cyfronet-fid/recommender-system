@@ -174,6 +174,9 @@ present in the project root directory. Details:
 - `JUPYTER_RUN_PORT` - desired port of your jupyter server when ran using docker (example: `8889`)
 - `JUPYTER_RUN_HOST` - desired host of your jupyter server when ran using docker (example: `127.0.0.1`)
 - `CELERY_LOG_LEVEL` - log level of your celery worker when ran using docker (one of: `CRITICAL`, `ERROR`, `WARN`, `INFO` or `DEBUG`)
+- `SENTRY_DSN` -  The DSN tells the sentry where to send the events (example: `https://16f35998712a415f9354a9d6c7d096e6@o556478.ingest.sentry.io/7284791`). If that variable does not exist, sentry will just not send any events.
+- `SENTRY_ENVIRONMENT` - environment name - it's optional and it can be a free-form string. If not specified and using docker, it is set to `development`/`testing`/`production` respectively to the docker environment.
+- `SENTRY_RELEASE` - human readable release name - it's optional and it can be a free-form string. If not specified, sentry automatically set it based on commit revision number.
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 
@@ -205,3 +208,9 @@ with:
 INSTALL_PYTHON = 'PATH/TO/YOUR/ENV/EXECUTABLE'
 os.environ['PATH'] = f'{os.path.dirname(INSTALL_PYTHON)}{os.pathsep}{os.environ["PATH"]}'
 ```
+
+### External tools integration
+
+#### Sentry
+`Sentry` is integrated with the `flask` server and the `celery` task queue manager so all unhandled exceptions from these entities will be tracked and sent to the sentry.
+Customization of the sentry ntegration can be done vie environmental variables (look into [ENV variables](#env-variables) section) - more about them [here](https://docs.sentry.io/platforms/python/configuration/options/)
