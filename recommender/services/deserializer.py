@@ -24,7 +24,7 @@ class Deserializer:
         search_data_json_dict = json_dict.get("search_data", {})
         search_data = SearchData(
             q=search_data_json_dict.get("q"),
-            category=search_data_json_dict.get("category"),
+            category=search_data_json_dict.get("category_id"),
             geographical_availabilities=search_data_json_dict.get(
                 "geographical_availabilities"
             ),
@@ -58,11 +58,14 @@ class Deserializer:
         )
 
         root_data = json_dict.get("source", {}).get("root")
-        root = Root(
-            type=root_data.get("type"),
-            panel_id=root_data.get("panel_id"),
-            service=root_data.get("service_id"),
-        )
+        if root_data is None:
+            root = None
+        else:
+            root = Root(
+                type=root_data.get("type"),
+                panel_id=root_data.get("panel_id"),
+                service=root_data.get("service_id"),
+            )
         source1.root = root
 
         target_data = json_dict.get("target", {})
