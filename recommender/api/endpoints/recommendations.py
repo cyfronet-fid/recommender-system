@@ -36,7 +36,10 @@ class Recommendation(Resource):
             services_ids = current_app.recommender_engine.call(json_dict)
 
         json_dict["services"] = services_ids
-
         Deserializer.deserialize_recommendation(json_dict).save()
 
-        return services_ids
+        response = {
+            "recommendations": services_ids
+        }
+
+        return response
