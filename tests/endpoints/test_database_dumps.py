@@ -11,10 +11,11 @@ def test_database_dumps_endpoint(client, mp_dump_data, mocker):
     # https://docs.python.org/3/library/unittest.mock.html#where-to-patch
     delay_dump = mocker.patch("recommender.tasks.db.handle_db_dump.delay")
 
-    client.post(
+    response = client.post(
         "/database_dumps",
         data=json.dumps(mp_dump_data),
         content_type="application/json",
     )
 
     delay_dump.assert_called_once_with(mp_dump_data)
+    assert response.status_code == 204

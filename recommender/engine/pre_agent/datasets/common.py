@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, missing-class-docstring
 
 """This module contains common datasets functions"""
 import io
@@ -29,13 +29,17 @@ def save_dataset(dataset, name=None, description=None):
     ).save()
 
 
+class NoSavedDatasetError(Exception):
+    pass
+
+
 def load_last_dataset(name):
     """It loads model from the database"""
 
     last_dataset_model = PytorchDataset.objects(name=name).order_by("-id").first()
 
     if last_dataset_model is None:
-        raise Exception(f"No saved dataset with name {name}!")
+        raise NoSavedDatasetError(f"No saved dataset with name {name}!")
 
     dataset_bytes = last_dataset_model.dataset_bytes
     buffer = io.BytesIO(dataset_bytes)

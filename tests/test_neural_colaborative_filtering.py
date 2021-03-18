@@ -1,4 +1,6 @@
 # pylint: disable-all
+from unittest.mock import patch
+
 from recommender.engine.pre_agent.datasets import create_datasets
 from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
 from recommender.engine.pre_agent.training import pre_agent_training
@@ -17,4 +19,6 @@ class TestNeuralCollaborativeFiltering:
 
         precalc_users_and_service_tensors()
         create_datasets()
-        pre_agent_training()
+
+        with patch("matplotlib.pyplot.show"):
+            pre_agent_training()

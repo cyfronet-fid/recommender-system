@@ -1,8 +1,10 @@
 # pylint: disable-all
 
+import pytest
 import torch
 from torch.utils.data import DataLoader
 
+from engine.pre_agent.datasets.common import NoSavedDatasetError, load_last_dataset
 from recommender.engine.pre_agent.datasets import PreAgentDataset
 from recommender.engine.pre_agent.preprocessing import (
     USERS,
@@ -37,3 +39,8 @@ def test_pre_agent_dataset(mongo):
     labels_tensor = batch[SERVICES]
     assert isinstance(labels_tensor, torch.Tensor)
     assert len(labels_tensor) >= 8
+
+
+def test_load_last_dataset(mongo):
+    with pytest.raises(NoSavedDatasetError):
+        load_last_dataset("placeholder_name")

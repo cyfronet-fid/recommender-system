@@ -1,4 +1,4 @@
-# pylint: disable=no-else-return, no-member
+# pylint: disable=no-else-return, no-member, missing-class-docstring
 
 """Functions related to Scikit-learn transformers used in other functions
  of data preprocessing pipeline
@@ -69,6 +69,10 @@ def save_transformer(transformer, name=None, description=None):
     ).save()
 
 
+class NoSavedTransformerError(Exception):
+    pass
+
+
 def load_last_transformer(name):
     """It loads transformer from database and unpickles it"""
 
@@ -77,7 +81,7 @@ def load_last_transformer(name):
     )
 
     if last_transformer_model is None:
-        raise Exception(f"No saved transformer with name {name}!")
+        raise NoSavedTransformerError(f"No saved transformer with name {name}!")
 
     transformer = pickle.loads(last_transformer_model.binary_transformer)
 

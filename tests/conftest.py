@@ -110,3 +110,70 @@ def mp_dump_data():
             {"id": 2, "name": "lcs2", "description": "desc"},
         ],
     }
+
+
+@pytest.fixture
+def recommendation_json_dict():
+    """Fixture of json dict of the recommendations endpoint request"""
+
+    return {
+        "logged_user": True,
+        "user_id": 1,
+        "unique_id": 1234,
+        "timestamp": "2021-03-25T12:43:53.118Z",
+        "visit_id": 1234,
+        "page_id": "some_page_identifier",
+        "panel_id": "v1",
+        "services": [1, 2, 3],
+        "search_data": {
+            "q": "Cloud GPU",
+            "category_id": 1,
+            "geographical_availabilities": [
+                "PL"
+            ],
+            "order_type": "open_access",
+            "providers": [
+                1
+            ],
+            "rating": "5",
+            "related_platforms": [
+                1
+            ],
+            "scientific_domains": [
+                1
+            ],
+            "sort": "_score",
+            "target_users": [
+                1
+            ]
+        }
+    }
+
+
+@pytest.fixture
+def user_action_json_dict():
+    """Fixture of json dict of the user_actions endpoint request"""
+    return {
+        "logged_user": True,
+        "user_id": 1,
+        "unique_id": 1,
+        "timestamp": "2021-03-25T14:10:42.368Z",
+        "source": {
+            "visit_id": 1,
+            "page_id": "services_catalogue_list",
+            "root": {
+                "type": "recommendation_panel",
+                "panel_id": "v1",
+                "service_id": 1
+            }
+        },
+        "target": {
+            "visit_id": 1,
+            "page_id": "service_about"
+        },
+        "action": {
+            "type": "button",
+            "text": "Details",
+            "order": True
+        }
+    }
