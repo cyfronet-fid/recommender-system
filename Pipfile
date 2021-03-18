@@ -33,6 +33,7 @@ sklearn = "*"
 tqdm = "*"
 celery = {extras = ["redis"], version = "*"}
 pytest-mock = "*"
+sentry-sdk = {extras = ["flask"], version = "*"}
 
 [requires]
 python_version = "3.7"
