@@ -11,7 +11,7 @@ search_data = api.model(
     "Search Data",
     {
         "q": fields.String(title="Search phrase", example="Cloud GPU"),
-        "category_id": fields.Integer(title="Category", example=1),
+        "categories": fields.List(fields.Integer(title="Category", example=1)),
         "geographical_availabilities": fields.List(
             fields.String(title="Countries", example="PL")
         ),
