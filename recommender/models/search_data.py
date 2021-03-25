@@ -15,7 +15,7 @@ from .target_user import TargetUser
 
 class SearchData(EmbeddedDocument):
     q = StringField(blank=True)
-    category = ReferenceField(Category, blank=True)
+    categories = ListField(ReferenceField(Category), blank=True)
     geographical_availabilities = ListField(StringField(), blank=True)
     order_type = StringField(blank=True)
     providers = ListField(ReferenceField(Provider), blank=True)

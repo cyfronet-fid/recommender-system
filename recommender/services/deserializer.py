@@ -24,7 +24,7 @@ class Deserializer:
         search_data_json_dict = json_dict.get("search_data", {})
         search_data = SearchData(
             q=search_data_json_dict.get("q"),
-            category=search_data_json_dict.get("category_id"),
+            categories=search_data_json_dict.get("categories"),
             geographical_availabilities=search_data_json_dict.get(
                 "geographical_availabilities"
             ),
