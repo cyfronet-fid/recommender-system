@@ -18,7 +18,6 @@ class RecommendationFactory(MongoEngineFactory):
     class Meta:
         model = Recommendation
 
-    logged_user = True
     user = SubFactory(UserFactory)
     unique_id = None
     timestamp = LazyFunction(lambda: datetime.fromtimestamp(time.time()))
@@ -41,7 +40,6 @@ class RecommendationFactory(MongoEngineFactory):
         )
 
         not_logged = Trait(
-            logged_user=False,
             user=None,
             unique_id=LazyFunction(lambda: faker.uuid4(cast_to=None).int >> 65),
         )

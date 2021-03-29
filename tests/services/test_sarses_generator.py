@@ -164,7 +164,7 @@ class TestSarsesGenerator:
 
         # User's root actions taken before considered recommendation
         root_actions_before_recommendation = [
-            UserActionFactory(recommendation_root=True, logged_user=True, user=user)
+            UserActionFactory(recommendation_root=True, user=user)
             for _ in range(3)
         ]
 
@@ -173,7 +173,6 @@ class TestSarsesGenerator:
 
         root_user_action_1 = UserActionFactory(
             recommendation_root=True,
-            logged_user=True,
             user=user,
             source__visit_id=recommendation.visit_id,
             source__root__service=recommendation.services[0],
@@ -181,14 +180,12 @@ class TestSarsesGenerator:
 
         root_user_action_2 = UserActionFactory(
             recommendation_root=True,
-            logged_user=True,
             user=user,
             source__visit_id=recommendation.visit_id,
             source__root__service=recommendation.services[2],
         )
 
         non_root_user_action = UserActionFactory(
-            logged_user=True,
             user=user,
             source__visit_id=root_user_action_2.target.visit_id,
         )

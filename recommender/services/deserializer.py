@@ -37,7 +37,6 @@ class Deserializer:
         )
 
         recommendation = Recommendation(
-            logged_user=json_dict.get("logged_user"),
             user=json_dict.get("user_id"),
             unique_id=json_dict.get("unique_id"),
             timestamp=json_dict.get("timestamp"),
@@ -75,7 +74,6 @@ class Deserializer:
         action = Action(**action_data)
 
         user_action = UserAction(
-            logged_user=json_dict.get("logged_user"),
             user=json_dict.get("user_id"),
             unique_id=json_dict.get("unique_id"),
             timestamp=json_dict.get("timestamp"),

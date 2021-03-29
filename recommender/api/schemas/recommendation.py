@@ -32,24 +32,16 @@ search_data = api.model(
 recommendation_context = api.model(
     "Recommendation context",
     {
-        "logged_user": fields.Boolean(
-            required=True,
-            title="Logged user",
-            description="Flag indicating whether user is logged or not",
-            example=True,
-        ),
         "user_id": fields.Integer(
             required=False,
             title="User ID",
-            description="The unique identifier of the logged user. "
-            "Specified only if logged_user=True",
+            description="The unique identifier of the logged user. ",
             example=1,
         ),
         "unique_id": fields.Integer(
-            required=False,
+            required=True,
             title="Not logged user ID",
-            description="The unique identifier of the not logged user. "
-            "Specified only if logged_user=False",
+            description="The unique identifier of the not logged user.",
             example=1234,
         ),
         "timestamp": fields.DateTime(
