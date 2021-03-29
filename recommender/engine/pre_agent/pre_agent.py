@@ -57,7 +57,7 @@ class PreAgentRecommender:
         search_data = context.get("search_data")
 
         user = None
-        if context.get("logged_user"):
+        if context.get("user_id"):
             user = User.objects(id=context.get("user_id")).first()
 
         if user:

@@ -2,7 +2,6 @@
 
 from mongoengine import (
     Document,
-    BooleanField,
     ReferenceField,
     DateTimeField,
     IntField,
@@ -17,9 +16,8 @@ from .search_data import SearchData
 
 
 class Recommendation(Document):
-    logged_user = BooleanField()
     user = ReferenceField(User, blank=True)
-    unique_id = IntField(blank=True)
+    unique_id = IntField()
     timestamp = DateTimeField()
     visit_id = IntField()
     page_id = StringField()

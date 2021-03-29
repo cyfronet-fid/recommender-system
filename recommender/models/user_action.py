@@ -2,7 +2,6 @@
 
 from mongoengine import (
     Document,
-    BooleanField,
     ReferenceField,
     DateTimeField,
     EmbeddedDocumentField,
@@ -16,9 +15,8 @@ from .user import User
 
 
 class UserAction(Document):
-    logged_user = BooleanField()
     user = ReferenceField(User, blank=True)
-    unique_id = IntField(blank=True)
+    unique_id = IntField()
     timestamp = DateTimeField()
     source = EmbeddedDocumentField(Source)
     target = EmbeddedDocumentField(Target)

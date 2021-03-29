@@ -77,7 +77,7 @@ def _find_root_uas_before(root_uas, recommendation):
     """Find all user's root actions that user took before
     current recommendation"""
 
-    if recommendation.logged_user:
+    if recommendation.user:
         root_uas_before = root_uas(
             user=recommendation.user, timestamp__lt=recommendation.timestamp
         )
