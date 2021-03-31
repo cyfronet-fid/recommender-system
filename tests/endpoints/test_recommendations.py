@@ -9,7 +9,6 @@ from pytest import fixture
 @fixture
 def recommendation_data():
     return {
-        "logged_user": True,
         "user_id": 1,
         "unique_id": 1234,
         "timestamp": "2021-03-18T18:49:55.006Z",

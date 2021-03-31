@@ -117,7 +117,6 @@ def recommendation_json_dict():
     """Fixture of json dict of the recommendations endpoint request"""
 
     return {
-        "logged_user": True,
         "user_id": 1,
         "unique_id": 1234,
         "timestamp": "2021-03-25T12:43:53.118Z",
@@ -154,7 +153,6 @@ def recommendation_json_dict():
 def user_action_json_dict():
     """Fixture of json dict of the user_actions endpoint request"""
     return {
-        "logged_user": True,
         "user_id": 1,
         "unique_id": 1,
         "timestamp": "2021-03-25T14:10:42.368Z",

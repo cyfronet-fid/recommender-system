@@ -8,7 +8,6 @@ from pytest import fixture
 @fixture
 def user_action_data():
     return {
-        "logged_user": True,
         "user_id": 1234,
         "unique_id": 1234,
         "timestamp": "2021-03-18T19:33:21.620Z",

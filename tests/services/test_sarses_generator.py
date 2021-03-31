@@ -152,7 +152,7 @@ class TestSarsesGenerator:
     def test_find_root_uas_before(self, mongo):
         user = UserFactory()
         root_uas = [
-            UserActionFactory(recommendation_root=True, logged_user=True, user=user) for _ in range(3)
+            UserActionFactory(recommendation_root=True, user=user) for _ in range(3)
         ]
         found_root_uas = UserAction.objects(source__root__type__="recommendation_panel")
         recommendation = RecommendationFactory(user=user)
