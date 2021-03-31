@@ -23,7 +23,6 @@ def test_recommendation_deserialization(mongo, recommendation_json_dict):
     Deserializer.deserialize_recommendation(recommendation_json_dict).save()
     r = Recommendation.objects.first()
 
-    assert r.logged_user == recommendation_json_dict.get("logged_user")
     assert r.user.id == recommendation_json_dict.get("user_id")
     assert r.unique_id == recommendation_json_dict.get("unique_id")
     assert str(r.timestamp.isoformat(timespec='milliseconds'))+'Z' == recommendation_json_dict.get("timestamp")
@@ -50,7 +49,6 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
     Deserializer.deserialize_user_action(user_action_json_dict).save()
     ua = UserAction.objects.first()
 
-    assert ua.logged_user == user_action_json_dict.get("logged_user")
     assert ua.user.id == user_action_json_dict.get("user_id")
     assert ua.unique_id == user_action_json_dict.get("unique_id")
     assert str(ua.timestamp.isoformat(timespec='milliseconds')) + 'Z' == user_action_json_dict.get("timestamp")
@@ -70,7 +68,6 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
     Deserializer.deserialize_user_action(json_dict_without_root).save()
     ua = UserAction.objects[1]
 
-    assert ua.logged_user == user_action_json_dict.get("logged_user")
     assert ua.user.id == user_action_json_dict.get("user_id")
     assert ua.unique_id == user_action_json_dict.get("unique_id")
     assert str(ua.timestamp.isoformat(timespec='milliseconds')) + 'Z' == user_action_json_dict.get("timestamp")

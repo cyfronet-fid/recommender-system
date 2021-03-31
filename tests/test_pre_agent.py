@@ -83,7 +83,6 @@ def test_pre_agent_call(mongo):
         context = {
             "panel_id": panel_id_version,
             "search_data": {},
-            "logged_user": True,
             "user_id": user.id
         }
 
@@ -101,7 +100,6 @@ def test_pre_agent_call(mongo):
         context = {
             "panel_id": panel_id_version,
             "search_data": {},
-            "logged_user": True,
             "user_id": -1
         }
 
@@ -118,8 +116,7 @@ def test_pre_agent_call(mongo):
     for panel_id_version in list(PANEL_ID_TO_K.keys()):
         context = {
             "panel_id": panel_id_version,
-            "search_data": {},
-            "logged_user": False
+            "search_data": {}
         }
 
         services_ids_1 = pre_agent.call(context)
@@ -134,8 +131,7 @@ def test_pre_agent_call(mongo):
 
     context = {
         "panel_id": "invalid_panel_id",
-        "search_data": {},
-        "logged_user": False
+        "search_data": {}
     }
 
     with pytest.raises(InvalidRecommendationPanelIDError):
