@@ -164,16 +164,14 @@ class TestSarsesGenerator:
 
         root_uas = [
             UserActionFactory(
-                recommendation_root=True,
-                not_logged=True,
-                unique_id=unique_id
-            ) for _ in range(3)
+                recommendation_root=True, not_logged=True, unique_id=unique_id
+            )
+            for _ in range(3)
         ]
-        found_root_uas = UserAction.objects(source__root__type__="recommendation_panel", unique_id=unique_id)
-        recommendation = RecommendationFactory(
-            not_logged=True,
-            unique_id=unique_id
+        found_root_uas = UserAction.objects(
+            source__root__type__="recommendation_panel", unique_id=unique_id
         )
+        recommendation = RecommendationFactory(not_logged=True, unique_id=unique_id)
 
         assert root_uas == list(_find_root_uas_before(found_root_uas, recommendation))
 
@@ -182,8 +180,7 @@ class TestSarsesGenerator:
 
         # User's root actions taken before considered recommendation
         root_actions_before_recommendation = [
-            UserActionFactory(recommendation_root=True, user=user)
-            for _ in range(3)
+            UserActionFactory(recommendation_root=True, user=user) for _ in range(3)
         ]
 
         # Simple user journey

@@ -4,10 +4,9 @@
 """This is example of training and inferencing
  using Neural Colaborative Filtering model.
  """
-
-from recommender.engine.pre_agent.datasets import create_datasets
+from recommender.engine.pre_agent.training.common import pre_agent_training
+from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
 from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
-from recommender.engine.pre_agent.training import pre_agent_training
 from recommender.extensions import celery
 
 

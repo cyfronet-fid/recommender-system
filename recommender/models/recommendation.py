@@ -6,7 +6,8 @@ from mongoengine import (
     DateTimeField,
     StringField,
     ListField,
-    EmbeddedDocumentField, UUIDField,
+    EmbeddedDocumentField,
+    UUIDField,
 )
 
 from .user import User

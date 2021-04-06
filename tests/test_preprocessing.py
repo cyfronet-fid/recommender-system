@@ -4,7 +4,7 @@ import torch
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
 
-from engine.pre_agent.preprocessing import USERS, SERVICES
+from recommender.engine.pre_agent.preprocessing import USERS, SERVICES
 from recommender.engine.pre_agent.preprocessing.preprocessing import (
     service_to_df,
     user_to_df,
@@ -12,10 +12,15 @@ from recommender.engine.pre_agent.preprocessing.preprocessing import (
     df_to_tensor,
     precalc_users_and_service_tensors,
     user_and_services_to_tensors,
-    user_and_service_to_tensors, InvalidObject, precalculate_tensors, NoPrecalculatedTensorsError,
+    user_and_service_to_tensors,
+    InvalidObject,
+    precalculate_tensors,
+    NoPrecalculatedTensorsError,
 )
 from recommender.engine.pre_agent.preprocessing.transformers import (
-    create_services_transformer, create_transformer, create_users_transformer,
+    create_services_transformer,
+    create_transformer,
+    create_users_transformer,
 )
 from recommender.models import User, Service
 from tests.factories.populate_database import populate_users_and_services
@@ -132,43 +137,63 @@ def test_user_and_services_to_tensors(mongo):
 
     with pytest.raises(NoPrecalculatedTensorsError):
         u1 = User.objects[0]
-        user_and_service_to_tensors(
-            user=u1, service=u1.accessed_services[0]
-        )
+        user_and_service_to_tensors(user=u1, service=u1.accessed_services[0])
 
     with pytest.raises(NoPrecalculatedTensorsError):
         u1 = User.objects[0]
-        user_and_services_to_tensors(
-            user=u1, services=u1.accessed_services
-        )
+        user_and_services_to_tensors(user=u1, services=u1.accessed_services)
 
     with pytest.raises(NoPrecalculatedTensorsError):
         u1 = User.objects[0]
         precalculate_tensors([u1], create_users_transformer())
-        user_and_services_to_tensors(
-            user=u1, services=u1.accessed_services
-        )
+        user_and_services_to_tensors(user=u1, services=u1.accessed_services)
 
     precalc_users_and_service_tensors()
 
     u1 = User.objects[0]
 
-    users_tensor, services_tensor = user_and_service_to_tensors(
-        user=u1, service=u1.accessed_services[0]
-    )
+    (
+        users_ids,
+        users_tensor,
+        services_ids,
+        services_tensor,
+    ) = user_and_service_to_tensors(user=u1, service=u1.accessed_services[0])
+
+    assert isinstance(users_ids, torch.Tensor)
+    assert len(users_ids.shape) == 1
+    assert users_ids.shape[0] == 1
 
     assert isinstance(users_tensor, torch.Tensor)
+    assert len(users_tensor.shape) == 2
     assert users_tensor.shape[0] == 1
 
+    assert isinstance(services_ids, torch.Tensor)
+    assert len(services_ids.shape) == 1
+    assert services_ids.shape[0] == 1
+
     assert isinstance(services_tensor, torch.Tensor)
+    assert len(services_tensor.shape) == 2
     assert services_tensor.shape[0] == 1
 
-    users_tensor, services_tensor = user_and_services_to_tensors(
-        user=u1, services=u1.accessed_services
-    )
+    (
+        users_ids,
+        users_tensor,
+        services_ids,
+        services_tensor,
+    ) = user_and_services_to_tensors(user=u1, services=u1.accessed_services)
+
+    assert isinstance(users_ids, torch.Tensor)
+    assert len(users_ids.shape) == 1
+    assert users_ids.shape[0] == len(u1.accessed_services)
 
     assert isinstance(users_tensor, torch.Tensor)
+    assert len(users_tensor.shape) == 2
     assert users_tensor.shape[0] == len(u1.accessed_services)
 
+    assert isinstance(services_ids, torch.Tensor)
+    assert len(services_ids.shape) == 1
+    assert services_ids.shape[0] == len(u1.accessed_services)
+
     assert isinstance(services_tensor, torch.Tensor)
+    assert len(services_tensor.shape) == 2
     assert services_tensor.shape[0] == len(u1.accessed_services)

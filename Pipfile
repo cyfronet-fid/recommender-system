@@ -35,6 +35,8 @@ celery = {extras = ["redis"], version = "*"}
 pytest-mock = "*"
 coverage = "*"
 sentry-sdk = {extras = ["flask"], version = "*"}
+python-dotenv = "*"
+tensorboard = "*"
 
 [requires]
 python_version = "3.7"

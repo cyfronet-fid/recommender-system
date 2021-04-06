@@ -34,7 +34,5 @@ class UserActionFactory(MongoEngineFactory):
             source=SubFactory(SourceFactory, regular_list_root=True)
         )
 
-        not_logged = Trait(
-            user=None
-        )
+        not_logged = Trait(user=None)
         order = Trait(action=SubFactory(ActionFactory, order=True))

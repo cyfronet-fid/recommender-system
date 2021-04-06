@@ -127,25 +127,15 @@ def recommendation_json_dict():
         "search_data": {
             "q": "Cloud GPU",
             "categories": [1],
-            "geographical_availabilities": [
-                "PL"
-            ],
+            "geographical_availabilities": ["PL"],
             "order_type": "open_access",
-            "providers": [
-                1
-            ],
+            "providers": [1],
             "rating": "5",
-            "related_platforms": [
-                1
-            ],
-            "scientific_domains": [
-                1
-            ],
+            "related_platforms": [1],
+            "scientific_domains": [1],
             "sort": "_score",
-            "target_users": [
-                1
-            ]
-        }
+            "target_users": [1],
+        },
     }
 
 
@@ -159,19 +149,11 @@ def user_action_json_dict():
         "source": {
             "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
             "page_id": "services_catalogue_list",
-            "root": {
-                "type": "recommendation_panel",
-                "panel_id": "v1",
-                "service_id": 1
-            }
+            "root": {"type": "recommendation_panel", "panel_id": "v1", "service_id": 1},
         },
         "target": {
             "visit_id": "9f543b80-dd5b-409b-a619-6312a0b04f4f",
-            "page_id": "service_about"
+            "page_id": "service_about",
         },
-        "action": {
-            "type": "button",
-            "text": "Details",
-            "order": True
-        }
+        "action": {"type": "button", "text": "Details", "order": True},
     }

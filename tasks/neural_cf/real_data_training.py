@@ -4,7 +4,8 @@
  development database"""
 
 from mongoengine import connect
-from recommender.engine.pre_agent.training import pre_agent_training
+
+from recommender.engine.pre_agent.training.common import pre_agent_training
 from settings import DevelopmentConfig
 
 
