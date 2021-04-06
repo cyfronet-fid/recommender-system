@@ -11,7 +11,8 @@ from recommender.engine.pre_agent.preprocessing.transformers import (
     create_services_transformer,
     create_transformer,
     save_transformer,
-    load_last_transformer, NoSavedTransformerError,
+    load_last_transformer,
+    NoSavedTransformerError,
 )
 from recommender.models import ScikitLearnTransformer
 

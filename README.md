@@ -123,6 +123,15 @@ NOTE: The url of the jupyter server will be displayed in the docker-compose outp
 (default: `http://127.0.0.1:8888/?token=SOME_JUPYTER_TOKEN`) (you can customize jupyter port and host using [env](#env-variables) variables)
 
 ### Training
+Currently GPU support is available only in the experimental jupyter notebook `neural_cf` that contains whole ML cycle:
+- Datasets creation, preprocessing and inspections
+- Models creation (Autoencoders, NCF)
+- Trainings
+- Evaluation
+- Inferention
+
+GPU support can be enabled using environmental variable TRAINING_DEVICE (look into [ENV variables](#env-variables) section) , but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`.
+
 For now the only trainable recommendation agent is the Pre-Agent.
 
 It can be trained via training endpoint (used in production) or via training tasks.
@@ -177,6 +186,7 @@ present in the project root directory. Details:
 - `SENTRY_DSN` -  The DSN tells the sentry where to send the events (example: `https://16f35998712a415f9354a9d6c7d096e6@o556478.ingest.sentry.io/7284791`). If that variable does not exist, sentry will just not send any events.
 - `SENTRY_ENVIRONMENT` - environment name - it's optional and it can be a free-form string. If not specified and using docker, it is set to `development`/`testing`/`production` respectively to the docker environment.
 - `SENTRY_RELEASE` - human readable release name - it's optional and it can be a free-form string. If not specified, sentry automatically set it based on commit revision number.
+- `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 

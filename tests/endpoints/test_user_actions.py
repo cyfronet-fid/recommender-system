@@ -22,7 +22,7 @@ def user_action_data():
         },
         "target": {
             "visit_id": "9f543b80-dd5b-409b-a619-6312a0b04f4f",
-            "page_id": "service_about"
+            "page_id": "service_about",
         },
         "action": {"type": "button", "text": "Details", "order": True},
     }

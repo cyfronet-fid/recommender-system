@@ -3,14 +3,19 @@ import sys
 
 import pytest
 
+from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
+from recommender.engine.pre_agent.training.common import pre_agent_training
 from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from recommender.engine.pre_agent.datasets import create_datasets
 from recommender.engine.pre_agent.models import NeuralColaborativeFilteringModel
-from recommender.engine.pre_agent.pre_agent import _get_not_accessed_services, _services_to_ids, \
-    _fill_candidate_services, \
-    PreAgentRecommender, UntrainedPreAgentError, InvalidRecommendationPanelIDError
+from recommender.engine.pre_agent.pre_agent import (
+    _get_not_accessed_services,
+    _services_to_ids,
+    _fill_candidate_services,
+    PreAgentRecommender,
+    UntrainedPreAgentError,
+    InvalidRecommendationPanelIDError,
+)
 from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
-from recommender.engine.pre_agent.training import pre_agent_training
 from recommender.models import User
 from recommender.models import Service
 from tests.factories.marketplace import UserFactory, ServiceFactory
@@ -19,11 +24,17 @@ from tests.factories.populate_database import populate_users_and_services
 
 def test_get_not_accessed_services(mongo):
     user = UserFactory()
-    print(f"user.accessed_services: {[s.id for s in user.accessed_services]}", file=sys.stderr)
+    print(
+        f"user.accessed_services: {[s.id for s in user.accessed_services]}",
+        file=sys.stderr,
+    )
     not_accessed_services = ServiceFactory.create_batch(10)
     not_accessed_services_set = set(list(not_accessed_services))
 
-    print(f"not_accessed_services_set: {[s.id for s in not_accessed_services_set]}", file=sys.stderr)
+    print(
+        f"not_accessed_services_set: {[s.id for s in not_accessed_services_set]}",
+        file=sys.stderr,
+    )
 
     output_set = set(list(_get_not_accessed_services(user)))
     print(f"output_set: {[s.id for s in output_set]}", file=sys.stderr)
@@ -44,7 +55,7 @@ def test_fill_candidate_services(mongo):
     all_services = list(ServiceFactory.create_batch(5))
 
     for required_services_no in range(1, 4):
-        for candidate_services_no in range(1, required_services_no+1):
+        for candidate_services_no in range(1, required_services_no + 1):
             candidate_services = all_services[:candidate_services_no]
             filled_services = _fill_candidate_services(
                 candidate_services, required_services_no
@@ -64,11 +75,11 @@ def test_pre_agent_call(mongo):
 
     # Create data and model
     populate_users_and_services(
-        common_services_number=4,
-        no_one_services_number=5,
-        users_number=4,
-        k_common_services_min=1,
-        k_common_services_max=3,
+        common_services_number=9,
+        no_one_services_number=9,
+        users_number=5,
+        k_common_services_min=5,
+        k_common_services_max=7,
     )
 
     precalc_users_and_service_tensors()
@@ -80,11 +91,7 @@ def test_pre_agent_call(mongo):
 
     for panel_id_version in list(PANEL_ID_TO_K.keys()):
         user = User.objects.first()
-        context = {
-            "panel_id": panel_id_version,
-            "search_data": {},
-            "user_id": user.id
-        }
+        context = {"panel_id": panel_id_version, "search_data": {}, "user_id": user.id}
 
         services_ids_1 = pre_agent.call(context)
         assert isinstance(pre_agent.neural_cf_model, NeuralColaborativeFilteringModel)
@@ -97,11 +104,7 @@ def test_pre_agent_call(mongo):
         assert services_ids_1 == services_ids_2
 
     for panel_id_version in list(PANEL_ID_TO_K.keys()):
-        context = {
-            "panel_id": panel_id_version,
-            "search_data": {},
-            "user_id": -1
-        }
+        context = {"panel_id": panel_id_version, "search_data": {}, "user_id": -1}
 
         services_ids_1 = pre_agent.call(context)
         assert isinstance(pre_agent.neural_cf_model, NeuralColaborativeFilteringModel)
@@ -114,10 +117,7 @@ def test_pre_agent_call(mongo):
         assert services_ids_1 != services_ids_2
 
     for panel_id_version in list(PANEL_ID_TO_K.keys()):
-        context = {
-            "panel_id": panel_id_version,
-            "search_data": {}
-        }
+        context = {"panel_id": panel_id_version, "search_data": {}}
 
         services_ids_1 = pre_agent.call(context)
         assert isinstance(pre_agent.neural_cf_model, NeuralColaborativeFilteringModel)
@@ -129,10 +129,7 @@ def test_pre_agent_call(mongo):
         services_ids_2 = pre_agent.call(context)
         assert services_ids_1 != services_ids_2
 
-    context = {
-        "panel_id": "invalid_panel_id",
-        "search_data": {}
-    }
+    context = {"panel_id": "invalid_panel_id", "search_data": {}}
 
     with pytest.raises(InvalidRecommendationPanelIDError):
         pre_agent.call(context)

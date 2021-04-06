@@ -14,7 +14,8 @@ from recommender.models import User, Service
 
 from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.engine.pre_agent.models.common import (
-    load_last_module, NoSavedModuleError
+    load_last_module,
+    NoSavedModuleError,
 )
 from recommender.services.fts import retrieve_services
 
@@ -76,15 +77,22 @@ class PreAgentRecommender:
         )
 
         candidate_services = _fill_candidate_services(candidate_services, k)
-        services_ids = _services_to_ids(candidate_services)
+        recommended_services_ids = _services_to_ids(candidate_services)
 
-        users_tensor, services_tensor = user_and_services_to_tensors(
-            user, candidate_services
+        (
+            users_ids,
+            users_tensor,
+            services_ids,
+            services_tensor,
+        ) = user_and_services_to_tensors(user, candidate_services)
+
+        matching_probs = self.neural_cf_model(
+            users_ids, users_tensor, services_ids, services_tensor
         )
-
-        matching_probs = self.neural_cf_model(users_tensor, services_tensor)
         matching_probs = torch.reshape(matching_probs, (-1,)).tolist()
-        top_k = sorted(list(zip(matching_probs, services_ids)), reverse=True)[:k]
+        top_k = sorted(
+            list(zip(matching_probs, recommended_services_ids)), reverse=True
+        )[:k]
 
         return [pair[1] for pair in top_k]
 
@@ -106,6 +114,8 @@ class InvalidRecommendationPanelIDError(RecommendationEngineError):
 
 class UntrainedPreAgentError(Exception):
     def message(self):  # pragma: no cover
-        return "Pre-Agent can't operate without trained Neural Collaborative" \
-               " Filtering model - train it before Pre-agent usage via " \
-               "'/training' endpoint"
+        return (
+            "Pre-Agent can't operate without trained Neural Collaborative"
+            " Filtering model - train it before Pre-agent usage via "
+            "'/training' endpoint"
+        )

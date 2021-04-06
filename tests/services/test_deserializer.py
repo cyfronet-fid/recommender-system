@@ -25,22 +25,34 @@ def test_recommendation_deserialization(mongo, recommendation_json_dict):
 
     assert r.user.id == recommendation_json_dict.get("user_id")
     assert str(r.unique_id) == recommendation_json_dict.get("unique_id")
-    assert str(r.timestamp.isoformat(timespec='milliseconds'))+'Z' == recommendation_json_dict.get("timestamp")
+    assert str(
+        r.timestamp.isoformat(timespec="milliseconds")
+    ) + "Z" == recommendation_json_dict.get("timestamp")
     assert str(r.visit_id) == recommendation_json_dict.get("visit_id")
     assert [s.id for s in r.services] == recommendation_json_dict.get("services")
 
     search_data_json_dict = recommendation_json_dict.get("search_data")
     assert r.search_data.q == search_data_json_dict.get("q")
-    assert [cat.id for cat in r.search_data.categories] == search_data_json_dict.get("categories")
+    assert [cat.id for cat in r.search_data.categories] == search_data_json_dict.get(
+        "categories"
+    )
     assert r.search_data.geographical_availabilities == search_data_json_dict.get(
         "geographical_availabilities"
     )
     assert r.search_data.order_type == search_data_json_dict.get("order_type")
-    assert [p.id for p in r.search_data.providers] == search_data_json_dict.get("providers")
-    assert [rp.id for rp in r.search_data.related_platforms] == search_data_json_dict.get("related_platforms")
-    assert [sd.id for sd in r.search_data.scientific_domains] == search_data_json_dict.get("scientific_domains")
+    assert [p.id for p in r.search_data.providers] == search_data_json_dict.get(
+        "providers"
+    )
+    assert [
+        rp.id for rp in r.search_data.related_platforms
+    ] == search_data_json_dict.get("related_platforms")
+    assert [
+        sd.id for sd in r.search_data.scientific_domains
+    ] == search_data_json_dict.get("scientific_domains")
     assert r.search_data.sort == search_data_json_dict.get("sort")
-    assert [tu.id for tu in r.search_data.target_users] == search_data_json_dict.get("target_users")
+    assert [tu.id for tu in r.search_data.target_users] == search_data_json_dict.get(
+        "target_users"
+    )
 
 
 def test_user_action_deserialization(mongo, user_action_json_dict):
@@ -51,13 +63,25 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
 
     assert ua.user.id == user_action_json_dict.get("user_id")
     assert str(ua.unique_id) == user_action_json_dict.get("unique_id")
-    assert str(ua.timestamp.isoformat(timespec='milliseconds')) + 'Z' == user_action_json_dict.get("timestamp")
-    assert str(ua.source.visit_id) == user_action_json_dict.get("source").get("visit_id")
+    assert str(
+        ua.timestamp.isoformat(timespec="milliseconds")
+    ) + "Z" == user_action_json_dict.get("timestamp")
+    assert str(ua.source.visit_id) == user_action_json_dict.get("source").get(
+        "visit_id"
+    )
     assert ua.source.page_id == user_action_json_dict.get("source").get("page_id")
-    assert ua.source.root.type == user_action_json_dict.get("source").get("root").get("type")
-    assert ua.source.root.panel_id == user_action_json_dict.get("source").get("root").get("panel_id")
-    assert ua.source.root.service.id == user_action_json_dict.get("source").get("root").get("service_id")
-    assert str(ua.target.visit_id) == user_action_json_dict.get("target").get("visit_id")
+    assert ua.source.root.type == user_action_json_dict.get("source").get("root").get(
+        "type"
+    )
+    assert ua.source.root.panel_id == user_action_json_dict.get("source").get(
+        "root"
+    ).get("panel_id")
+    assert ua.source.root.service.id == user_action_json_dict.get("source").get(
+        "root"
+    ).get("service_id")
+    assert str(ua.target.visit_id) == user_action_json_dict.get("target").get(
+        "visit_id"
+    )
     assert ua.target.page_id == user_action_json_dict.get("target").get("page_id")
     assert ua.action.type == user_action_json_dict.get("action").get("type")
     assert ua.action.text == user_action_json_dict.get("action").get("text")
@@ -70,10 +94,16 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
 
     assert ua.user.id == user_action_json_dict.get("user_id")
     assert str(ua.unique_id) == user_action_json_dict.get("unique_id")
-    assert str(ua.timestamp.isoformat(timespec='milliseconds')) + 'Z' == user_action_json_dict.get("timestamp")
-    assert str(ua.source.visit_id) == user_action_json_dict.get("source").get("visit_id")
+    assert str(
+        ua.timestamp.isoformat(timespec="milliseconds")
+    ) + "Z" == user_action_json_dict.get("timestamp")
+    assert str(ua.source.visit_id) == user_action_json_dict.get("source").get(
+        "visit_id"
+    )
     assert ua.source.page_id == user_action_json_dict.get("source").get("page_id")
-    assert str(ua.target.visit_id) == user_action_json_dict.get("target").get("visit_id")
+    assert str(ua.target.visit_id) == user_action_json_dict.get("target").get(
+        "visit_id"
+    )
     assert ua.target.page_id == user_action_json_dict.get("target").get("page_id")
     assert ua.action.type == user_action_json_dict.get("action").get("type")
     assert ua.action.text == user_action_json_dict.get("action").get("text")

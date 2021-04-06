@@ -2,8 +2,17 @@
 import pytest
 from torch.utils.data import Subset
 
-from recommender.engine.pre_agent.datasets import PreAgentDataset, load_last_dataset, TRAIN_DS_NAME, VALID_DS_NAME, TEST_DS_NAME
-from recommender.engine.pre_agent.datasets.common import NoSavedDatasetError
+from recommender.engine.pre_agent.datasets.autoencoders import (
+    get_autoencoder_dataset_name,
+)
+from recommender.engine.pre_agent.preprocessing import SERVICES
+from recommender.engine.pre_agent.datasets.common import (
+    NoSavedDatasetError,
+    load_last_dataset,
+    TRAIN,
+    VALID,
+    TEST,
+)
 from recommender.tasks.neural_networks import execute_pre_agent_preprocessing
 from recommender.models import User, Service
 from tests.factories.populate_database import populate_users_and_services
@@ -27,13 +36,13 @@ def test_execute_pre_agent_preprocessing(mongo):
         assert service.tensor == []
 
     with pytest.raises(NoSavedDatasetError):
-        load_last_dataset(TRAIN_DS_NAME)
+        load_last_dataset(get_autoencoder_dataset_name(SERVICES, TRAIN))
 
     with pytest.raises(NoSavedDatasetError):
-        load_last_dataset(VALID_DS_NAME)
+        load_last_dataset(get_autoencoder_dataset_name(SERVICES, VALID))
 
     with pytest.raises(NoSavedDatasetError):
-        load_last_dataset(TEST_DS_NAME)
+        load_last_dataset(get_autoencoder_dataset_name(SERVICES, TEST))
 
     execute_pre_agent_preprocessing.delay()
 
@@ -43,12 +52,12 @@ def test_execute_pre_agent_preprocessing(mongo):
     for service in Service.objects:
         assert len(service.tensor) > 0
 
-    assert isinstance(load_last_dataset(TRAIN_DS_NAME), Subset)
-    assert isinstance(load_last_dataset(VALID_DS_NAME), Subset)
-    assert isinstance(load_last_dataset(TEST_DS_NAME), Subset)
-
-
-
-
-
-
+    assert isinstance(
+        load_last_dataset(get_autoencoder_dataset_name(SERVICES, TRAIN)), Subset
+    )
+    assert isinstance(
+        load_last_dataset(get_autoencoder_dataset_name(SERVICES, VALID)), Subset
+    )
+    assert isinstance(
+        load_last_dataset(get_autoencoder_dataset_name(SERVICES, TEST)), Subset
+    )

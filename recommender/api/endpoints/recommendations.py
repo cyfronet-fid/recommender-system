@@ -32,8 +32,6 @@ class Recommendation(Resource):
         json_dict_with_services["services"] = services_ids
         Deserializer.deserialize_recommendation(json_dict_with_services).save()
 
-        response = {
-            "recommendations": services_ids
-        }
+        response = {"recommendations": services_ids}
 
         return response

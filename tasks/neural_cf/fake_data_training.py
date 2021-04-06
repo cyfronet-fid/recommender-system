@@ -8,8 +8,10 @@
 
 from mongoengine import connect, disconnect
 
-from recommender import load_last_module, NEURAL_CF
-from recommender.engine.pre_agent.datasets import create_datasets
+from recommender.engine.pre_agent.models import NEURAL_CF
+from recommender.engine.pre_agent.models import load_last_module
+from recommender.engine.pre_agent.training.common import pre_agent_training
+from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
 from recommender.engine.pre_agent.models import save_module
 from recommender.engine.pre_agent.preprocessing import (
     precalc_users_and_service_tensors,
@@ -18,7 +20,6 @@ from recommender.engine.pre_agent.preprocessing import (
     SERVICES,
     save_transformer,
 )
-from recommender.engine.pre_agent.training import pre_agent_training
 from settings import TestingConfig, DevelopmentConfig
 from tests.factories.populate_database import populate_users_and_services
 

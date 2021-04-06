@@ -39,6 +39,4 @@ class RecommendationFactory(MongoEngineFactory):
             panel_id="v2",
         )
 
-        not_logged = Trait(
-            user=None
-        )
+        not_logged = Trait(user=None)

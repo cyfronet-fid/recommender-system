@@ -1,5 +1,5 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
-# pylint: disable=redefined-builtin, no-member
+# pylint: disable=redefined-builtin, no-member, not-callable
 
 """Functions responsible for transforming Pandas dataframes
  to PyTorch tensors
@@ -181,13 +181,17 @@ def user_and_service_to_tensors(user, service):
             "Given user or service has no precalculated tensor"
         )
 
+    users_ids = torch.tensor([user.id])
+
     user_tensor = torch.Tensor(user.tensor)
     users_tensor = torch.unsqueeze(user_tensor, 0)
 
-    service_tensor = torch.Tensor(service.tensor)
+    services_ids = torch.tensor([service.id])
+
+    service_tensor = torch.tensor(service.tensor)
     services_tensor = torch.unsqueeze(service_tensor, 0)
 
-    return users_tensor, services_tensor
+    return users_ids, users_tensor, services_ids, services_tensor
 
 
 def user_and_services_to_tensors(user, services):
@@ -205,19 +209,24 @@ def user_and_services_to_tensors(user, services):
                 "One or more of given services has/have no precalculated tensor(s)"
             )
 
+    services_ids = []
     services_tensors = []
     services = list(services)
     for service in services:
+        services_ids.append(service.id)
         service_tensor = torch.unsqueeze(torch.Tensor(service.tensor), dim=0)
         services_tensors.append(service_tensor)
 
+    services_ids = torch.tensor(services_ids)
     services_tensor = torch.cat(services_tensors, dim=0)
 
     user_tensor = torch.Tensor(user.tensor)
     n = services_tensor.shape[0]
+    users_ids = torch.full([n], user.id)
+    user_tensor = torch.Tensor(user.tensor)
     users_tensor = torch.unsqueeze(user_tensor, dim=0).repeat(n, 1)
 
-    return users_tensor, services_tensor
+    return users_ids, users_tensor, services_ids, services_tensor
 
 
 class InvalidObject(Exception):
