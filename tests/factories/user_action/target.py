@@ -15,5 +15,5 @@ class TargetFactory(MongoEngineFactory):
     class Meta:
         model = Target
 
-    visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None).int >> 65)
+    visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None))
     page_id = LazyFunction(lambda: "_".join(faker.words(nb=random.randint(2, 6))))

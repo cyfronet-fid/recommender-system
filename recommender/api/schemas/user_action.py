@@ -36,12 +36,12 @@ root = api.model(
 source = api.model(
     "Source",
     {
-        "visit_id": fields.Integer(
+        "visit_id": fields.String(
             required=True,
             title="Visit ID",
             description="The unique identifier of a user presence on the user "
             "action's source page in the specific time",
-            example=1,
+            example="202090a4-de4c-4230-acba-6e2931d9e37c",
         ),
         "page_id": fields.String(
             required=True,
@@ -64,12 +64,12 @@ source = api.model(
 target = api.model(
     "Target",
     {
-        "visit_id": fields.Integer(
+        "visit_id": fields.String(
             required=True,
             title="Visit ID",
             description="The unique identifier of a user presence on the user "
             "action's target page in the specific time",
-            example=1,
+            example="9f543b80-dd5b-409b-a619-6312a0b04f4f",
         ),
         "page_id": fields.String(
             required=True,
@@ -114,11 +114,11 @@ user_action = api.model(
             description="The unique identifier of the logged user.",
             example=1234,
         ),
-        "unique_id": fields.Integer(
+        "unique_id": fields.String(
             required=True,
             title="Not logged user ID",
             description="The unique identifier of the not logged user.",
-            example=1234,
+            example="5642c351-80fe-44cf-b606-304f2f338122",
         ),
         "timestamp": fields.DateTime(
             dt_format="iso8601",

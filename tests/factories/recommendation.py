@@ -19,9 +19,9 @@ class RecommendationFactory(MongoEngineFactory):
         model = Recommendation
 
     user = SubFactory(UserFactory)
-    unique_id = None
+    unique_id = LazyFunction(lambda: faker.uuid4())
     timestamp = LazyFunction(lambda: datetime.fromtimestamp(time.time()))
-    visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None).int >> 65)
+    visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None))
     page_id = LazyFunction(lambda: "_".join(faker.words(nb=random.randint(2, 6))))
     panel_id = LazyFunction(lambda: random.choice(["v1", "v2"]))
 
@@ -40,6 +40,5 @@ class RecommendationFactory(MongoEngineFactory):
         )
 
         not_logged = Trait(
-            user=None,
-            unique_id=LazyFunction(lambda: faker.uuid4(cast_to=None).int >> 65),
+            user=None
         )

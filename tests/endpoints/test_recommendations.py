@@ -10,9 +10,9 @@ from pytest import fixture
 def recommendation_data():
     return {
         "user_id": 1,
-        "unique_id": 1234,
+        "unique_id": "5642c351-80fe-44cf-b606-304f2f338122",
         "timestamp": "2021-03-18T18:49:55.006Z",
-        "visit_id": 1234,
+        "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
         "page_id": "some_page_identifier",
         "panel_id": "v1",
         "search_data": {
