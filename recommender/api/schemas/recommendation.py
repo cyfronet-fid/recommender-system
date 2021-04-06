@@ -38,11 +38,11 @@ recommendation_context = api.model(
             description="The unique identifier of the logged user. ",
             example=1,
         ),
-        "unique_id": fields.Integer(
+        "unique_id": fields.String(
             required=True,
             title="Not logged user ID",
             description="The unique identifier of the not logged user.",
-            example=1234,
+            example="5642c351-80fe-44cf-b606-304f2f338122",
         ),
         "timestamp": fields.DateTime(
             dt_format="iso8601",
@@ -51,13 +51,13 @@ recommendation_context = api.model(
             description="The exact time of the recommendation request sending "
             "in iso8601 format",
         ),
-        "visit_id": fields.Integer(
+        "visit_id": fields.String(
             required=True,
             title="recommendation page visit ID",
             description="The unique identifier of the user presence on the "
             "recommendation page in the specific time (could be "
             "a function of above fields)",
-            example=1234,
+            example="202090a4-de4c-4230-acba-6e2931d9e37c",
         ),
         "page_id": fields.String(
             required=True,

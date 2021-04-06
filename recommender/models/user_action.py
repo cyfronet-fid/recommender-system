@@ -5,7 +5,7 @@ from mongoengine import (
     ReferenceField,
     DateTimeField,
     EmbeddedDocumentField,
-    IntField,
+    UUIDField,
 )
 
 from .action import Action
@@ -16,7 +16,7 @@ from .user import User
 
 class UserAction(Document):
     user = ReferenceField(User, blank=True)
-    unique_id = IntField()
+    unique_id = UUIDField()
     timestamp = DateTimeField()
     source = EmbeddedDocumentField(Source)
     target = EmbeddedDocumentField(Target)

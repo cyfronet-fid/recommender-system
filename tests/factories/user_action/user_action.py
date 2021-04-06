@@ -20,7 +20,7 @@ class UserActionFactory(MongoEngineFactory):
         model = UserAction
 
     user = SubFactory(UserFactory)
-    unique_id = None
+    unique_id = LazyFunction(lambda: faker.uuid4())
     timestamp = LazyFunction(lambda: datetime.fromtimestamp(time.time()))
     source = SubFactory(SourceFactory)
     target = SubFactory(TargetFactory)
@@ -35,7 +35,6 @@ class UserActionFactory(MongoEngineFactory):
         )
 
         not_logged = Trait(
-            user=None,
-            unique_id=LazyFunction(lambda: faker.uuid4(cast_to=None).int >> 65),
+            user=None
         )
         order = Trait(action=SubFactory(ActionFactory, order=True))

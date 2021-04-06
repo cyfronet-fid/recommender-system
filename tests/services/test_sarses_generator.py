@@ -12,6 +12,7 @@ from recommender.services.sarses_generator import (
     _get_clicked_services_and_reward,
     _find_root_uas_before,
 )
+from faker import Factory as FakerFactory
 
 
 def ruas2services(ruas):
@@ -159,17 +160,19 @@ class TestSarsesGenerator:
 
         assert root_uas == list(_find_root_uas_before(found_root_uas, recommendation))
 
+        unique_id = FakerFactory.create().uuid4()
+
         root_uas = [
             UserActionFactory(
                 recommendation_root=True,
                 not_logged=True,
-                unique_id=1234
+                unique_id=unique_id
             ) for _ in range(3)
         ]
-        found_root_uas = UserAction.objects(source__root__type__="recommendation_panel", unique_id=1234)
+        found_root_uas = UserAction.objects(source__root__type__="recommendation_panel", unique_id=unique_id)
         recommendation = RecommendationFactory(
             not_logged=True,
-            unique_id=1234
+            unique_id=unique_id
         )
 
         assert root_uas == list(_find_root_uas_before(found_root_uas, recommendation))

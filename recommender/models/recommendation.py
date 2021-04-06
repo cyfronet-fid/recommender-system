@@ -4,10 +4,9 @@ from mongoengine import (
     Document,
     ReferenceField,
     DateTimeField,
-    IntField,
     StringField,
     ListField,
-    EmbeddedDocumentField,
+    EmbeddedDocumentField, UUIDField,
 )
 
 from .user import User
@@ -17,9 +16,9 @@ from .search_data import SearchData
 
 class Recommendation(Document):
     user = ReferenceField(User, blank=True)
-    unique_id = IntField()
+    unique_id = UUIDField()
     timestamp = DateTimeField()
-    visit_id = IntField()
+    visit_id = UUIDField()
     page_id = StringField()
     panel_id = StringField()
     services = ListField(ReferenceField(Service))
