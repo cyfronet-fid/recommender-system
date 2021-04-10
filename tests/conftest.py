@@ -126,7 +126,7 @@ def recommendation_json_dict():
         "services": [1, 2, 3],
         "search_data": {
             "q": "Cloud GPU",
-            "category_id": 1,
+            "categories": [1],
             "geographical_availabilities": [
                 "PL"
             ],

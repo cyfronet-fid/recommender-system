@@ -31,7 +31,7 @@ def test_recommendation_deserialization(mongo, recommendation_json_dict):
 
     search_data_json_dict = recommendation_json_dict.get("search_data")
     assert r.search_data.q == search_data_json_dict.get("q")
-    assert r.search_data.category.id == search_data_json_dict.get("category_id")
+    assert [cat.id for cat in r.search_data.categories] == search_data_json_dict.get("categories")
     assert r.search_data.geographical_availabilities == search_data_json_dict.get(
         "geographical_availabilities"
     )
