@@ -17,7 +17,7 @@ def recommendation_data():
         "panel_id": "v1",
         "search_data": {
             "q": "Cloud GPU",
-            "category_id": 1,
+            "categories": [1],
             "geographical_availabilities": ["PL"],
             "order_type": "open_access",
             "providers": [1],

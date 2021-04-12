@@ -7,7 +7,7 @@ from recommender.models import Service
 
 def retrieve_services(search_data):
     """Applies search info from MP and filters MongoDB by them"""
-    category_id = search_data.get("category_id")
+    categories = search_data.get("categories")
     countries = search_data.get("geographical_availabilities")
     provider_ids = search_data.get("providers")
     search_phrase = search_data.get("q")
@@ -15,7 +15,7 @@ def retrieve_services(search_data):
     scientific_domain_ids = search_data.get("scientific_domains")
     target_user_ids = search_data.get("target_users")
     q = Service.objects
-    q = q(categories__in=[category_id]) if category_id is not None else q
+    q = q(categories__in=categories) if categories is not None else q
     q = q(countries__in=countries) if countries else q
     q = q(providers__in=provider_ids) if provider_ids else q
     q = q(platforms__in=platform_ids) if platform_ids else q
