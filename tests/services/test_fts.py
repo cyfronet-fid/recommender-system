@@ -50,8 +50,8 @@ def test_retrieve_services(mongo, mocker):
     assert [x.id for x in retrieve_services({"q": "EGI"})] == [0, 1]
     search_text_mock.assert_called_once_with("EGI")
 
-    assert [x.id for x in retrieve_services({"category_id": 0})] == [0]
-    assert [x.id for x in retrieve_services({"category_id": 1})] == [0, 1]
+    assert [x.id for x in retrieve_services({"categories": [0]})] == [0]
+    assert [x.id for x in retrieve_services({"categories": [1]})] == [0, 1]
     assert [x.id for x in retrieve_services({"countries": ["PL", "WW", "EU"]})] == [
         0,
         1,
@@ -70,8 +70,8 @@ def test_retrieve_services(mongo, mocker):
     assert [x.id for x in retrieve_services({"target_users": [2]})] == [1]
     assert [x.id for x in retrieve_services({"target_users": [3]})] == []
     assert [
-        x.id for x in retrieve_services({"category_id": 0, "target_users": [2]})
+        x.id for x in retrieve_services({"categories": [0], "target_users": [2]})
     ] == []
     assert [
-        x.id for x in retrieve_services({"category_id": 1, "target_users": [2]})
+        x.id for x in retrieve_services({"categories": [1], "target_users": [2]})
     ] == [1]
