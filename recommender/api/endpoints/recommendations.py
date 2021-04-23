@@ -6,6 +6,7 @@ import copy
 from flask import request, current_app
 from flask_restx import Resource, Namespace
 
+from recommender.errors import TooSmallRecommendationSpace
 from recommender.api.schemas.recommendation import (
     recommendation,
     recommendation_context,
@@ -26,12 +27,15 @@ class Recommendation(Resource):
 
         json_dict = request.get_json()
         with current_app.app_context():
-            services_ids = current_app.recommender_engine.call(json_dict)
+            try:
+                services_ids = current_app.recommender_engine.call(json_dict)
 
-        json_dict_with_services = copy.deepcopy(json_dict)
-        json_dict_with_services["services"] = services_ids
-        Deserializer.deserialize_recommendation(json_dict_with_services).save()
+                json_dict_with_services = copy.deepcopy(json_dict)
+                json_dict_with_services["services"] = services_ids
+                Deserializer.deserialize_recommendation(json_dict_with_services).save()
 
-        response = {"recommendations": services_ids}
+                response = {"recommendations": services_ids}
+            except TooSmallRecommendationSpace:
+                response = {"recommendations": []}
 
         return response
