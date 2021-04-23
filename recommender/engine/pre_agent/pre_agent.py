@@ -6,6 +6,11 @@
 import random
 import torch
 
+from recommender.errors import (
+    InvalidRecommendationPanelIDError,
+    UntrainedPreAgentError,
+    TooSmallRecommendationSpace,
+)
 from recommender.engine.pre_agent.models.neural_colaborative_filtering import NEURAL_CF
 from recommender.engine.pre_agent.preprocessing.preprocessing import (
     user_and_services_to_tensors,
@@ -20,21 +25,37 @@ from recommender.engine.pre_agent.models.common import (
 from recommender.services.fts import retrieve_services
 
 
-def _get_not_accessed_services(user):
-    ordered_services_ids = [s.id for s in user.accessed_services]
-    return Service.objects(id__nin=ordered_services_ids)
+def get_accessed_services_ids(user):
+    return [s.id for s in user.accessed_services]
 
 
 def _services_to_ids(services):
     return [s.id for s in services]
 
 
-def _fill_candidate_services(candidate_services, required_services_no):
+def _fill_candidate_services(
+    candidate_services, required_services_no, accessed_services_ids=None
+):
     """Fallback in case of len of the candidate_services being too small"""
     if len(candidate_services) < required_services_no:
-        diff = required_services_no - len(candidate_services)
-        sampled = random.sample(list(Service.objects), diff)
-        candidate_services += sampled
+        missing_n = required_services_no - len(candidate_services)
+
+        # We don't want to recommend same service multiple times
+        # in one recommendation panel
+        forbidden_ids = set(_services_to_ids(candidate_services))
+
+        # We don't want to recommend a service if it already
+        # has been ordered by a user
+        if accessed_services_ids is not None:
+            forbidden_ids = forbidden_ids | set(accessed_services_ids)
+
+        allowed_services = list(Service.objects(id__nin=forbidden_ids))
+
+        if len(allowed_services) >= missing_n:
+            sampled = random.sample(allowed_services, missing_n)
+            candidate_services += sampled
+        else:
+            raise TooSmallRecommendationSpace
 
     return candidate_services
 
@@ -63,7 +84,7 @@ class PreAgentRecommender:
         search_data = context.get("search_data")
 
         user = None
-        if context.get("user_id"):
+        if context.get("user_id") is not None:
             user = User.objects(id=context.get("user_id")).first()
 
         if user:
@@ -72,19 +93,19 @@ class PreAgentRecommender:
             return self._for_anonymous_user(search_data, k)
 
     def _for_logged_user(self, user, search_data, k):
-        candidate_services = list(
-            set(retrieve_services(search_data)) & set(_get_not_accessed_services(user))
+        accessed_services_ids = get_accessed_services_ids(user)
+        candidate_services = list(retrieve_services(search_data, accessed_services_ids))
+        recommended_services = _fill_candidate_services(
+            candidate_services, k, accessed_services_ids
         )
-
-        candidate_services = _fill_candidate_services(candidate_services, k)
-        recommended_services_ids = _services_to_ids(candidate_services)
+        recommended_services_ids = _services_to_ids(recommended_services)
 
         (
             users_ids,
             users_tensor,
             services_ids,
             services_tensor,
-        ) = user_and_services_to_tensors(user, candidate_services)
+        ) = user_and_services_to_tensors(user, recommended_services)
 
         matching_probs = self.neural_cf_model(
             users_ids, users_tensor, services_ids, services_tensor
@@ -101,21 +122,3 @@ class PreAgentRecommender:
         candidate_services = _fill_candidate_services(candidate_services, k)
         recommended_services = random.sample(list(candidate_services), k)
         return _services_to_ids(recommended_services)
-
-
-class RecommendationEngineError(Exception):
-    pass
-
-
-class InvalidRecommendationPanelIDError(RecommendationEngineError):
-    def message(self):  # pragma: no cover
-        return "Invalid recommendation panel id error"
-
-
-class UntrainedPreAgentError(Exception):
-    def message(self):  # pragma: no cover
-        return (
-            "Pre-Agent can't operate without trained Neural Collaborative"
-            " Filtering model - train it before Pre-agent usage via "
-            "'/training' endpoint"
-        )

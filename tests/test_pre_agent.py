@@ -8,7 +8,6 @@ from recommender.engine.pre_agent.training.common import pre_agent_training
 from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.engine.pre_agent.models import NeuralColaborativeFilteringModel
 from recommender.engine.pre_agent.pre_agent import (
-    _get_not_accessed_services,
     _services_to_ids,
     _fill_candidate_services,
     PreAgentRecommender,
@@ -20,26 +19,6 @@ from recommender.models import User
 from recommender.models import Service
 from tests.factories.marketplace import UserFactory, ServiceFactory
 from tests.factories.populate_database import populate_users_and_services
-
-
-def test_get_not_accessed_services(mongo):
-    user = UserFactory()
-    print(
-        f"user.accessed_services: {[s.id for s in user.accessed_services]}",
-        file=sys.stderr,
-    )
-    not_accessed_services = ServiceFactory.create_batch(10)
-    not_accessed_services_set = set(list(not_accessed_services))
-
-    print(
-        f"not_accessed_services_set: {[s.id for s in not_accessed_services_set]}",
-        file=sys.stderr,
-    )
-
-    output_set = set(list(_get_not_accessed_services(user)))
-    print(f"output_set: {[s.id for s in output_set]}", file=sys.stderr)
-
-    assert not_accessed_services_set == output_set
 
 
 def test_services_to_ids(mongo):
