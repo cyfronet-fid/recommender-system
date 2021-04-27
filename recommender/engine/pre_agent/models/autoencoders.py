@@ -12,7 +12,7 @@ from recommender.engine.pre_agent.preprocessing import USERS, SERVICES
 SERVICES_AUTOENCODER = "Services Auto-Encoder mMdel"
 USERS_AUTOENCODER = "Users Auto-Encoder Model"
 
-
+#TODO activations XD
 class AutoEncoder(Module):
     """An Autoencoder model"""
 
