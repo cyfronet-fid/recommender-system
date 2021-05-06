@@ -1,13 +1,16 @@
-# pylint: disable=missing-module-docstring
+# pylint: disable=missing-module-docstring, useless-super-delegation
 
 import torch
-from torch import nn
+
+from recommender.engine.rl_agent.models.lstm_model import LSTMModel
+
+HISTORY_MODEL = "history_model"
 
 
-class HistoryEmbedder(torch.nn.Module):
+class HistoryModel(LSTMModel):
     """
-    Model used for transforming services history (list of service tensors
-     in temporal order) into a history tensor.
+    Model used for transforming services history tensor [N, SE]
+    into a history tensor [SE].
      It should be used and trained inside both actor and critic.
     """
 
@@ -20,27 +23,18 @@ class HistoryEmbedder(torch.nn.Module):
             num_layers: number of hidden layers
             dropout: a dropout probability
         """
-        super().__init__()
-        self.rnn = nn.LSTM(
-            input_size=SE,
-            hidden_size=SE,
-            num_layers=num_layers,
-            dropout=dropout,
-            batch_first=True,
-        )
+        super().__init__(SE, num_layers, dropout)
 
-    def forward(self, services_history: torch.Tensor) -> torch.Tensor:
+    def forward(self, temporal_data: torch.Tensor) -> torch.Tensor:
         """
         RNN is used for reducing history's N dimension.
 
         Args:
-            services_history: history of services engaged by the
+            temporal_data: history of services engaged by the
             user represented as a tensor of shape [N, SE]
             where N is the history length and SE is service content tensor embedding dim
 
         Returns:
             Embedded history of services engaged by the user as a tensor of shape [SE]
         """
-
-        output, _ = self.rnn(services_history)
-        return output[:, -1]
+        return super().forward(temporal_data)
