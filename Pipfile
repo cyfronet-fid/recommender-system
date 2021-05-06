@@ -37,6 +37,7 @@ coverage = "*"
 sentry-sdk = {extras = ["flask"], version = "*"}
 python-dotenv = "*"
 tensorboard = "*"
+pytorch-nlp = "*"
 
 [requires]
 python_version = "3.7"
