@@ -1,23 +1,56 @@
+# pylint: disable=missing-module-docstring, invalid-name, too-many-arguments, no-member
+
+from typing import Tuple
+
 import torch
+from torch import nn
+import torch.nn.functional as F
+
+from recommender.engine.rl_agent.models.history_embedder import HistoryEmbedder
 
 
-class ActorModel(torch.nn.Module):
-    def __init__(self, K: int, SE: int, history_embedder: torch.nn.Module):
+class ActorModel(nn.Module):
+    """Actor neural network representing a deterministic policy used by RLAgent"""
+
+    def __init__(
+        self,
+        K: int,
+        SE: int,
+        UE: int,
+        FE: int,
+        SPE: int,
+        history_embedder: HistoryEmbedder,
+        layer_sizes: Tuple[int] = (256, 512, 256),
+    ):
+        """
+        Args:
+            K: number of services to recommend
+            SE: service embedding dimension
+            UE: user embedding dimension
+            FE: filter embedding dimension
+            SPE search phrase embedding dimension
+            history_embedder: pytorch module implementing history embedding
+            layer_sizes: list containing number of neurons in each hidden layer
+        """
         super().__init__()
         self.K = K
         self.SE = SE
         self.history_embedder = history_embedder
-        # WARNING: history_embedder is a model shared between actor and critic,
-        # the .detach will be probably needed for proper training
 
-        # TODO: layers initialization
-        self.output_layer = torch.nn.Linear(None, K*SE)
+        self.layers = [nn.Linear(SE + UE + FE + SPE, layer_sizes[0])]
+        self.layers += [
+            nn.Linear(n_size, next_n_size)
+            for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
+        ]
+        self.layers += [(nn.Linear(layer_sizes[-1], K * SE))]
 
-    def forward(self,
-                user: torch.Tensor,
-                services_history: torch.Tensor,
-                filters: torch.Tensor,
-                search_phrase: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        user: torch.Tensor,
+        services_history: torch.Tensor,
+        filters: torch.Tensor,
+        search_phrase: torch.Tensor,
+    ) -> torch.Tensor:
         """
         Performs forward propagation.
 
@@ -29,9 +62,12 @@ class ActorModel(torch.nn.Module):
 
         """
 
-        services_history = self.history_embedder(services_history)
+        embedded_services_history = self.history_embedder(services_history)
+        x = torch.cat([embedded_services_history, user, filters, search_phrase], dim=1)
 
-        # TODO: implement missing forward computation
-        weights = self.output_layer(None)
-        weights = weights.reshape(self.K, self.SE)
+        for layer in self.layers:
+            x = layer(x)
+            x = F.relu(x)
+
+        weights = x.reshape(-1, self.K, self.SE)
         return weights
