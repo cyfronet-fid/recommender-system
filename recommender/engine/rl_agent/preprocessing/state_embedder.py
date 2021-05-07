@@ -2,18 +2,32 @@ from typing import Tuple
 
 import torch
 
+from engine.pre_agent.models import load_last_module, USERS_AUTOENCODER, SERVICES_AUTOENCODER
 from models import State
 
 
 class StateEmbedder:
     def __init__(self, user_embedder=None, service_embedder=None, search_phrase_embedder=None, filters_embedder=None):
-        self.user_embedder = user_embedder
-        self.service_embedder = service_embedder
-        self.search_phrase_embedder = search_phrase_embedder
-        self.filters_embedder = filters_embedder
+        if user_embedder is not None:
+            self.user_embedder = user_embedder
+        else:
+            self.user_embedder = load_last_module(USERS_AUTOENCODER).encoder
 
-        # TODO: implement the rest of initialization (lazy embedders loading)
-        pass
+        if service_embedder is not None:
+            self.service_embedder = service_embedder
+        else:
+            self.service_embedder = load_last_module(SERVICES_AUTOENCODER).encoder
+
+        if search_phrase_embedder is not None:
+            self.search_phrase_embedder = search_phrase_embedder
+        else:
+            self.search_phrase_embedder = SearchPhraseEmbedder()
+
+        if filters_embedder is not None:
+            self.filters_embedder = filters_embedder
+        else:
+            self.filters_embedder = FilterEmbedder()
+
 
     def __call__(self, state: State) -> Tuple[torch.Tensor]:
         """
@@ -41,5 +55,7 @@ class StateEmbedder:
                     - SPE is search phrase tensor embedding dim
         """
 
-        # TODO: implement
+        user_dense_tensor = self.user_embedder(state.user.tensor)
+
+
         pass
