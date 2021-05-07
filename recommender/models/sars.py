@@ -4,7 +4,6 @@ from mongoengine import (
     ListField,
     ReferenceField,
     Document,
-    EmbeddedDocumentField,
     StringField,
 )
 
@@ -13,7 +12,7 @@ from .state import State
 
 
 class Sars(Document):
-    state = EmbeddedDocumentField(State)
+    state = ReferenceField(State)
     action = ListField(ReferenceField(Service))
     reward = ListField(ListField(StringField()))
-    next_state = EmbeddedDocumentField(State)
+    next_state = ReferenceField(State)
