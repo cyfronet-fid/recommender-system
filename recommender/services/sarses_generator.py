@@ -114,6 +114,8 @@ def generate_sarses():
         services_history_before = (
             recommendation.user.accessed_services + clicked_services_before
         )
+        # TODO: rethink uniqness of the services in the history of orders and
+        #  in the history of clicks and in both of them together.
         # Make unique but preserve order
         services_history_before = list(dict.fromkeys(services_history_before))
         state = State(
