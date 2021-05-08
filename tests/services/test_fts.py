@@ -1,4 +1,5 @@
 # pylint: disable-all
+import pytest
 
 from recommender.models import Service
 from recommender.services.fts import retrieve_services
@@ -75,3 +76,8 @@ def test_retrieve_services(mongo, mocker):
     assert [
         x.id for x in retrieve_services({"categories": [1], "target_users": [2]})
     ] == [1]
+
+
+@pytest.mark.skip(reason="no way of currently testing this")
+def retrieve_forbidden_service_ids(mongo):
+    pass
