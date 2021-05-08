@@ -27,3 +27,29 @@ def retrieve_services(search_data, accessed_services_ids=None):
     q = q(id__nin=accessed_services_ids) if accessed_services_ids else q
     q = q(status__in=AVAILABLE_FOR_RECOMMENDATION)
     return q
+
+
+def retrieve_matching_service_ids(search_data):
+    """Applies search info from MP and filters MongoDB by them"""
+    categories = search_data.get("categories")
+    countries = search_data.get("geographical_availabilities")
+    provider_ids = search_data.get("providers")
+    search_phrase = search_data.get("q")
+    platform_ids = search_data.get("related_platforms")
+    scientific_domain_ids = search_data.get("scientific_domains")
+    target_user_ids = search_data.get("target_users")
+    q = Service.objects
+    q = q(categories__in=categories) if categories is not None else q
+    q = q(countries__in=countries) if countries else q
+    q = q(providers__in=provider_ids) if provider_ids else q
+    q = q(platforms__in=platform_ids) if platform_ids else q
+    q = q(scientific_domains__in=scientific_domain_ids) if scientific_domain_ids else q
+    q = q(target_users__in=target_user_ids) if target_user_ids else q
+    q = q.search_text(search_phrase) if search_phrase else q
+    return q.only("id").distinct("id")
+
+
+def retrieve_forbidden_service_ids():
+    """Return services that should not be recommended"""
+    q = Service.objects(status__nin=AVAILABLE_FOR_RECOMMENDATION)
+    return q.only("id").distinct("id")

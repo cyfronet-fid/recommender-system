@@ -1,7 +1,8 @@
 # pylint: disable-all
+import pytest
 
 from recommender.models import Service
-from recommender.services.fts import retrieve_services
+from recommender.services.fts import retrieve_services, retrieve_forbidden_service_ids
 from tests.factories.marketplace import ServiceFactory
 from tests.factories.marketplace.category import CategoryFactory
 from tests.factories.marketplace.platform import PlatformFactory
@@ -75,3 +76,15 @@ def test_retrieve_services(mongo, mocker):
     assert [
         x.id for x in retrieve_services({"categories": [1], "target_users": [2]})
     ] == [1]
+
+
+def test_retrieve_forbidden_service_ids(mongo):
+    services = [
+        ServiceFactory(id=1, status="published"),
+        ServiceFactory(id=2, status="unverified"),
+        ServiceFactory(id=3, status="errored"),
+        ServiceFactory(id=4, status="deleted"),
+        ServiceFactory(id=5, status="draft"),
+    ]
+
+    assert retrieve_forbidden_service_ids() == [3, 4, 5]
