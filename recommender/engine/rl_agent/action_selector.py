@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Dict, Any
 
 import torch
 
@@ -9,7 +9,7 @@ class ActionSelector:
     def __init__(self) -> None:
         self.itemspace = self._create_itemspace()
 
-    def __call__(self, weights: torch.Tensor, user: User, search_data: SearchData) -> Tuple[int]:
+    def __call__(self, weights: torch.Tensor, user: User, search_data: Dict[str, Any]) -> Tuple[int]:
         """
         Based on weights_tensor, user and search_data, it selects services for
          recommendation and create action out of them.

@@ -4,12 +4,13 @@
 from recommender.services.services_history_generator import (
     leads_to_order,
     generate_services_history,
+    get_ordered_services,
 )
 from tests.factories.marketplace import UserFactory, ServiceFactory
 from tests.factories.user_action import UserActionFactory
 
 
-def test_retrieve_services(mongo):
+def test_services_history_generator(mongo):
     user = UserFactory(accessed_services=ServiceFactory.create_batch(5))
 
     accessed_services = user.accessed_services
@@ -43,8 +44,7 @@ def test_retrieve_services(mongo):
     ua5 = UserActionFactory(user=user, source__visit_id=ua4.target.visit_id)
     ua6 = UserActionFactory(user=user, source__visit_id=ua4.target.visit_id)
 
-    ua7 = UserActionFactory(user=user, source__visit_id=ua5.target.visit_id,
-                            order=True)
+    ua7 = UserActionFactory(user=user, source__visit_id=ua5.target.visit_id, order=True)
 
     ua8 = UserActionFactory(user=user, source__visit_id=ua1.target.visit_id)
     ua9 = UserActionFactory(user=user, source__visit_id=ua1.target.visit_id)
@@ -70,3 +70,9 @@ def test_retrieve_services(mongo):
         ua.source.root.service for ua in uas
     ]
     assert services_history == valid_services_history
+
+    ordered_services_history = get_ordered_services(user)
+    valid_ordered_services_history = user.accessed_services[:-1] + [
+        root_ua.source.root.service
+    ]
+    assert ordered_services_history == valid_ordered_services_history

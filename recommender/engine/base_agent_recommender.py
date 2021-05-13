@@ -3,19 +3,20 @@
 """Implementation of the base agent recommmender. Every other agent should
  inherit from this one."""
 
+from abc import ABC, abstractmethod
 import random
 from typing import Dict, Any, List
 
 from recommender.errors import (
     InvalidRecommendationPanelIDError,
-    TooSmallRecommendationSpace,
+    InsufficientRecommendationSpace,
 )
 from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.models import User, SearchData, Service
 from recommender.services.fts import retrieve_services
 
 
-class BaseAgentRecommender:
+class BaseAgentRecommender(ABC):
     """
     Base Recommender class with basic functionality
     """
@@ -46,6 +47,7 @@ class BaseAgentRecommender:
             return self._for_logged_user(user, search_data, K)
         return self._for_anonymous_user(search_data, K)
 
+    @abstractmethod
     def _load_models(self) -> None:
         """
         It loads model or models needed for recommendations and raise
@@ -85,6 +87,7 @@ class BaseAgentRecommender:
 
         return user
 
+    @abstractmethod
     def _for_logged_user(
         self, user: User, search_data: SearchData, k: int
     ) -> List[int]:
@@ -140,6 +143,6 @@ class BaseAgentRecommender:
                 sampled = random.sample(allowed_services, missing_n)
                 candidate_services += sampled
             else:
-                raise TooSmallRecommendationSpace
+                raise InsufficientRecommendationSpace
 
         return candidate_services

@@ -2,6 +2,7 @@
 
 """This module contains error classes"""
 
+
 class RecommendationEngineError(Exception):
     pass
 
@@ -11,16 +12,31 @@ class InvalidRecommendationPanelIDError(RecommendationEngineError):
         return "Invalid recommendation panel id error"
 
 
-class UntrainedPreAgentError(Exception):
+class NoActorModelForK(RecommendationEngineError):
     def message(self):  # pragma: no cover
         return (
-            "Pre-Agent can't operate without trained Neural Collaborative"
+            "There is no Actor model for used K (number of services in"
+            " recommendation)."
+        )
+
+
+class UntrainedPreAgentError(RecommendationEngineError):
+    def message(self):  # pragma: no cover
+        return (
+            "Pre-Agent can't operate without a trained Neural Collaborative"
             " Filtering model - train it before Pre-agent usage via "
             "'/training' endpoint"
         )
 
 
-class TooSmallRecommendationSpace(RecommendationEngineError):
+class UntrainedRLAgentError(RecommendationEngineError):
+    def message(self):  # pragma: no cover
+        return "RL-Agent can't operate without trained actor models"
+
+
+class InsufficientRecommendationSpace(RecommendationEngineError):
     def message(self):
-        return "The required number of services to recommend exceed the" \
-               " matching services space size"
+        return (
+            "The required number of services to recommend exceed the"
+            " matching services space size"
+        )
