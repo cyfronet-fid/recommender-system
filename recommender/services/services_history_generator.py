@@ -165,3 +165,36 @@ def generate_services_history(user: User) -> List[Service]:
     services_history = concat_histories(accessed_services, root_uas)
 
     return services_history
+
+
+def get_ordered_services(user: User) -> List[Service]:
+    """
+    Get ordered services of provided user from two sources:
+        -> user.accessed_services
+        -> user actions
+
+    Args:
+        user: MongoEngine User object
+
+    Returns:
+        ordered_services_history: list of all services ordered by specified
+         user in the temporal order.
+    """
+
+    accessed_services = user.accessed_services
+
+    root_uas = list(
+        UserAction.objects(
+            source__root__type__="recommendation_panel", user=user
+        ).order_by("+timestamp")
+    )
+
+    # Get ordered services
+    root_uas_leading_to_order = list(filter(leads_to_order, root_uas))
+    ordered_services = _get_ruas_services(root_uas_leading_to_order)
+
+    # Smart concat
+    ld = _list_difference(accessed_services, ordered_services)
+    ordered_services_history = ld + ordered_services
+
+    return ordered_services_history

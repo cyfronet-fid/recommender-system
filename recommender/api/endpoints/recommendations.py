@@ -6,7 +6,7 @@ import copy
 from flask import request, current_app
 from flask_restx import Resource, Namespace
 
-from recommender.errors import TooSmallRecommendationSpace
+from recommender.errors import InsufficientRecommendationSpace
 from recommender.api.schemas.recommendation import (
     recommendation,
     recommendation_context,
@@ -35,7 +35,7 @@ class Recommendation(Resource):
                 Deserializer.deserialize_recommendation(json_dict_with_services).save()
 
                 response = {"recommendations": services_ids}
-            except TooSmallRecommendationSpace:
+            except InsufficientRecommendationSpace:
                 response = {"recommendations": []}
 
         return response
