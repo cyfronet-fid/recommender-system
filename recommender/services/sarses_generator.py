@@ -19,7 +19,7 @@ from typing import List
 
 from recommender.models import UserAction, Recommendation, State, Sars, Service
 from recommender.engine.reward_mapping import ua_to_reward_id
-
+from recommender.services.services_history_generator import concat_histories
 
 RECOMMENDATION_PAGES_IDS = ("catalogue_services_list",)
 
@@ -110,14 +110,8 @@ def generate_sarses():
 
         # Create state
         root_uas_before = _find_root_uas_before(root_uas, recommendation)
-        clicked_services_before = _ruas2services(root_uas_before)
-        services_history_before = (
-            recommendation.user.accessed_services + clicked_services_before
-        )
-        # TODO: rethink uniqness of the services in the history of orders and
-        #  in the history of clicks and in both of them together.
-        # Make unique but preserve order
-        services_history_before = list(dict.fromkeys(services_history_before))
+        accessed_services = recommendation.user.accessed_services
+        services_history_before = concat_histories(accessed_services, root_uas_before)
         state = State(
             user=recommendation.user,
             services_history=services_history_before,
@@ -126,10 +120,9 @@ def generate_sarses():
 
         # create action
         action = recommendation.services
+
         # Create next state
         services_history_after = services_history_before + clicked_services_after
-        # Make unique but preserve order
-        services_history_after = list(dict.fromkeys(services_history_after))
         next_state = State(
             user=recommendation.user,
             services_history=services_history_after,

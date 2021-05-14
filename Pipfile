@@ -38,6 +38,7 @@ sentry-sdk = {extras = ["flask"], version = "*"}
 python-dotenv = "*"
 tensorboard = "*"
 pytorch-nlp = "*"
+graphviz = "*"
 
 [requires]
 python_version = "3.7"
