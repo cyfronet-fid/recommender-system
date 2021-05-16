@@ -5,7 +5,7 @@ from tests.factories.recommendation import RecommendationFactory
 from tests.factories.user_action import UserActionFactory
 from recommender.services.sarses_generator import generate_sarses
 from recommender.models import Sars, UserAction
-from recommender.engine.reward_mapping import ua_to_reward_id
+from recommender.engine.agents.rl_agent.reward_mapping import ua_to_reward_id
 from recommender.services.sarses_generator import (
     RECOMMENDATION_PAGES_IDS,
     _tree_collapse,

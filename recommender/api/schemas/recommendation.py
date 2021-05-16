@@ -1,31 +1,54 @@
-# pylint: disable=duplicate-code
+# pylint: disable=duplicate-code, wrong-import-position
 
 """Models for the recommendations endpoint"""
 
-from flask_restx import fields
+from dotenv import load_dotenv
 
+load_dotenv()
+
+from flask_restx import fields
+from mongoengine import connect, disconnect
+from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
+from recommender.utils import _get_search_data_examples
+
+from settings import DevelopmentConfig
 from .common import api
 
+
+connect(host=DevelopmentConfig.MONGODB_HOST)
+examples = _get_search_data_examples(
+    k=max(list(PANEL_ID_TO_K.values())), deterministic=True
+)
+disconnect()
 
 search_data = api.model(
     "Search Data",
     {
-        "q": fields.String(title="Search phrase", example="Cloud GPU"),
-        "categories": fields.List(fields.Integer(title="Category", example=1)),
+        "q": fields.String(title="Search phrase", example=""),
+        "categories": fields.List(
+            fields.Integer(title="Category"), example=examples["categories"]
+        ),
         "geographical_availabilities": fields.List(
-            fields.String(title="Countries", example="PL")
+            fields.String(title="Countries", example="PL"),
+            example=examples["geographical_availabilities"],
         ),
         "order_type": fields.String(title="Order type", example="open_access"),
-        "providers": fields.List(fields.Integer(title="Provider", example=1)),
+        "providers": fields.List(
+            fields.Integer(title="Provider"), example=examples["providers"]
+        ),
         "rating": fields.String(title="Rating", example="5"),
         "related_platforms": fields.List(
-            fields.Integer(title="Related platforms", example=1)
+            fields.Integer(title="Related platforms"),
+            example=examples["related_platforms"],
         ),
         "scientific_domains": fields.List(
-            fields.Integer(title="Scientific domain", example=1)
+            fields.Integer(title="Scientific domain"),
+            example=examples["scientific_domains"],
         ),
         "sort": fields.String(title="Sort filter", example="_score"),
-        "target_users": fields.List(fields.Integer(title="Target users", example=1)),
+        "target_users": fields.List(
+            fields.Integer(title="Target users"), example=examples["target_users"]
+        ),
     },
 )
 

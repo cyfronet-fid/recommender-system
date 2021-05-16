@@ -3,7 +3,7 @@ from mongoengine import (
     StringField,
     ReferenceField,
     ListField,
-    EmbeddedDocument,
+    Document,
 )
 
 from .category import Category
@@ -13,7 +13,7 @@ from .scientific_domain import ScientificDomain
 from .target_user import TargetUser
 
 
-class SearchData(EmbeddedDocument):
+class SearchData(Document):
     q = StringField(blank=True)
     categories = ListField(ReferenceField(Category), blank=True)
     geographical_availabilities = ListField(StringField(), blank=True)

@@ -12,7 +12,7 @@ class InvalidRecommendationPanelIDError(RecommendationEngineError):
         return "Invalid recommendation panel id error"
 
 
-class NoActorModelForK(RecommendationEngineError):
+class NoActorForK(RecommendationEngineError):
     def message(self):  # pragma: no cover
         return (
             "There is no Actor model for used K (number of services in"
@@ -20,18 +20,24 @@ class NoActorModelForK(RecommendationEngineError):
         )
 
 
-class UntrainedPreAgentError(RecommendationEngineError):
+class NoHistoryEmbedderForK(RecommendationEngineError):
     def message(self):  # pragma: no cover
         return (
-            "Pre-Agent can't operate without a trained Neural Collaborative"
-            " Filtering model - train it before Pre-agent usage via "
-            "'/training' endpoint"
+            "There is no HistoryEmbedder for used K (number of services in"
+            " recommendation)."
         )
 
 
-class UntrainedRLAgentError(RecommendationEngineError):
+class NoSearchPhraseEmbedderForK(RecommendationEngineError):
     def message(self):  # pragma: no cover
-        return "RL-Agent can't operate without trained actor models"
+        return (
+            "There is no SearchPhraseEmbedder for used K (number of services in"
+            " recommendation)."
+        )
+
+
+class MissingComponentError(RecommendationEngineError):
+    pass
 
 
 class InsufficientRecommendationSpace(RecommendationEngineError):

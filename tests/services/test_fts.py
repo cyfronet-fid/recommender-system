@@ -1,8 +1,11 @@
 # pylint: disable-all
-import pytest
 
-from recommender.models import Service
-from recommender.services.fts import retrieve_services, retrieve_forbidden_service_ids
+from recommender.models import Service, SearchData
+from recommender.services.fts import (
+    retrieve_services_for_recommendation,
+    retrieve_forbidden_services,
+    filter_services,
+)
 from tests.factories.marketplace import ServiceFactory
 from tests.factories.marketplace.category import CategoryFactory
 from tests.factories.marketplace.platform import PlatformFactory
@@ -11,34 +14,31 @@ from tests.factories.marketplace.scientific_domain import ScientificDomainFactor
 from tests.factories.marketplace.target_user import TargetUserFactory
 
 
-def test_retrieve_services(mongo, mocker):
-    ServiceFactory(
-        id=0,
-        name="Test name",
-        description="Unique description",
-        tagline="Extraordinary tagline",
-        categories=[CategoryFactory(id=0), CategoryFactory(id=1)],
+def test_filter_services(mongo, mocker):
+    categories = CategoryFactory.create_batch(2)
+    providers = ProviderFactory.create_batch(2)
+    platforms = PlatformFactory.create_batch(2)
+    scientific_domains = ScientificDomainFactory.create_batch(2)
+    target_users = TargetUserFactory.create_batch(3)
+
+    s0 = ServiceFactory(
+        categories=categories,
         countries=["WW"],  # World
-        providers=[ProviderFactory(id=0), ProviderFactory(id=1)],
-        platforms=[PlatformFactory(id=0), PlatformFactory(id=1)],
-        scientific_domains=[
-            ScientificDomainFactory(id=0),
-            ScientificDomainFactory(id=1),
-        ],
-        target_users=[TargetUserFactory(id=0), TargetUserFactory(id=1)],
+        providers=providers,
+        resource_organisation=providers[0],
+        platforms=platforms,
+        scientific_domains=scientific_domains,
+        target_users=target_users[:2],
     )
 
-    ServiceFactory(
-        id=1,
-        name="Nice name",
-        description="Very unique description",
-        tagline="Tested tagline",
-        categories=[CategoryFactory(id=1)],
+    s1 = ServiceFactory(
+        categories=[categories[1]],
         countries=["PL"],  # Poland
-        providers=[ProviderFactory(id=1)],
-        platforms=[PlatformFactory(id=0), PlatformFactory(id=1)],
-        scientific_domains=[ScientificDomainFactory(id=0)],
-        target_users=[TargetUserFactory(id=2)],
+        providers=[providers[1]],
+        resource_organisation=providers[1],
+        platforms=platforms,
+        scientific_domains=[scientific_domains[0]],
+        target_users=[target_users[2]],
     )
 
     # We have to mock search_text because it is not implemented in mongomock
@@ -48,43 +48,86 @@ def test_retrieve_services(mongo, mocker):
     search_text_mock.return_value = Service.objects
 
     # Mocked search_text call
-    assert [x.id for x in retrieve_services({"q": "EGI"})] == [0, 1]
+    assert list(filter_services(SearchData(q="EGI"))) == [s0, s1]
     search_text_mock.assert_called_once_with("EGI")
 
-    assert [x.id for x in retrieve_services({"categories": [0]})] == [0]
-    assert [x.id for x in retrieve_services({"categories": [1]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"countries": ["PL", "WW", "EU"]})] == [
-        0,
-        1,
+    assert list(filter_services(SearchData())) == [s0, s1]
+    assert (
+        list(filter_services(SearchData(categories=CategoryFactory.create_batch(2))))
+        == []
+    )
+
+    assert list(filter_services(SearchData(categories=[categories[0]]))) == [s0]
+    assert list(filter_services(SearchData(categories=[categories[1]]))) == [s0, s1]
+    assert list(
+        filter_services(SearchData(geographical_availabilities=["WW", "PL", "EU"]))
+    ) == [s0, s1]
+    assert list(filter_services(SearchData(providers=[providers[0]]))) == [s0]
+    assert list(filter_services(SearchData(providers=[providers[1]]))) == [s0, s1]
+    assert list(filter_services(SearchData(providers=providers))) == [s0, s1]
+    assert list(filter_services(SearchData(related_platforms=platforms))) == [s0, s1]
+    assert list(filter_services(SearchData(related_platforms=[platforms[0]]))) == [
+        s0,
+        s1,
     ]
-    assert [x.id for x in retrieve_services({"providers": [0]})] == [0]
-    assert [x.id for x in retrieve_services({"providers": [1]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"providers": [0, 1]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"platforms": [0, 1]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"platforms": [0]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"platforms": [1]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"scientific_domains": [1]})] == [0]
-    assert [x.id for x in retrieve_services({"scientific_domains": [0]})] == [0, 1]
-    assert [x.id for x in retrieve_services({"target_users": [0]})] == [0]
-    assert [x.id for x in retrieve_services({"target_users": [0, 1]})] == [0]
-    assert [x.id for x in retrieve_services({"target_users": [1]})] == [0]
-    assert [x.id for x in retrieve_services({"target_users": [2]})] == [1]
-    assert [x.id for x in retrieve_services({"target_users": [3]})] == []
-    assert [
-        x.id for x in retrieve_services({"categories": [0], "target_users": [2]})
-    ] == []
-    assert [
-        x.id for x in retrieve_services({"categories": [1], "target_users": [2]})
-    ] == [1]
+    assert list(filter_services(SearchData(related_platforms=[platforms[1]]))) == [
+        s0,
+        s1,
+    ]
+    assert list(
+        filter_services(SearchData(scientific_domains=[scientific_domains[1]]))
+    ) == [s0]
+    assert list(
+        filter_services(SearchData(scientific_domains=[scientific_domains[0]]))
+    ) == [s0, s1]
+    assert list(filter_services(SearchData(target_users=[target_users[0]]))) == [s0]
+    assert list(
+        filter_services(SearchData(target_users=[target_users[0], target_users[1]]))
+    ) == [s0]
+    assert list(filter_services(SearchData(target_users=[target_users[1]]))) == [s0]
+    assert list(filter_services(SearchData(target_users=[target_users[2]]))) == [s1]
+    assert list(filter_services(SearchData(target_users=target_users))) == [s0, s1]
+    assert (
+        list(
+            filter_services(
+                SearchData(categories=[categories[0]], target_users=[target_users[2]])
+            )
+        )
+        == []
+    )
+    assert list(
+        filter_services(
+            SearchData(categories=[categories[1]], target_users=[target_users[2]])
+        )
+    ) == [s1]
 
 
-def test_retrieve_forbidden_service_ids(mongo):
+def test_retrieve_forbidden_services(mongo):
     services = [
-        ServiceFactory(id=1, status="published"),
-        ServiceFactory(id=2, status="unverified"),
-        ServiceFactory(id=3, status="errored"),
-        ServiceFactory(id=4, status="deleted"),
-        ServiceFactory(id=5, status="draft"),
+        ServiceFactory(status="published"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="errored"),
+        ServiceFactory(status="deleted"),
+        ServiceFactory(status="draft"),
+        ServiceFactory(status="unverified"),
     ]
 
-    assert retrieve_forbidden_service_ids() == [3, 4, 5]
+    assert list(retrieve_forbidden_services()) == services[2:5]
+
+
+def test_retrieve_services_for_recommendations(mongo):
+    services = [
+        ServiceFactory(status="published"),
+        ServiceFactory(status="published"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="deleted"),
+        ServiceFactory(status="draft"),
+    ]
+
+    assert list(retrieve_services_for_recommendation(SearchData())) == services[:4]
+    assert list(
+        retrieve_services_for_recommendation(
+            SearchData(), accessed_services=[services[0], services[2]]
+        )
+    ) == [services[1], services[3]]

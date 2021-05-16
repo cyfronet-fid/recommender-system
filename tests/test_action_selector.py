@@ -3,9 +3,10 @@
 import pytest
 import torch
 
-from recommender.engine.pre_agent.models import ServiceAutoEncoder
-from recommender.engine.rl_agent.action_selector import ActionSelector
+from recommender.engine.agents.rl_agent.action_selector import ActionSelector
+from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_embedder
 from recommender.errors import InsufficientRecommendationSpace
+from recommender.models import SearchData, Service
 from tests.factories.marketplace import ServiceFactory, UserFactory
 
 
@@ -51,86 +52,106 @@ def service_embeddings():
 def weights():
     return torch.Tensor(
         [
-            [0.2, -0.1, 2.0, 1.4],
-            [0.2, -0.1, 2.0, 1.4],
+            [0.2, -0.1, 2.0, 1.4],  # k=1
+            [0.2, -0.1, 2.0, 1.4],  # k=2
         ]
     )
 
 
-def test_proper_initialization(mocker, proper_parameters, services):
+def test_proper_initialization(mocker, proper_parameters, services, service_embeddings):
     mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_forbidden_ids = mocker.patch(
-        "recommender.engine.rl_agent.action_selector.retrieve_forbidden_service_ids"
+    mock_forbidden_services = mocker.patch(
+        "recommender.engine.agents.rl_agent.action_selector.retrieve_forbidden_services"
     )
-    mock_forbidden_ids.return_value = [2, 4]
+    mock_forbidden_services.return_value = Service.objects(id__in=[2, 4])
+    mock_torch_module_call.return_value = service_embeddings
 
     FEATURES_DIM, K, SE, I = proper_parameters
-    action_selector = ActionSelector(K, ServiceAutoEncoder(FEATURES_DIM, SE).encoder)
+    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    action_selector = ActionSelector(service_embedder)
 
-    assert action_selector.K == K
-    assert action_selector.I == I
+    assert action_selector.itemspace_size == I
+    assert action_selector.forbidden_services_size == 2
+    assert action_selector.forbidden_indices == [0, 1]
     assert action_selector.index_id_map.index.values.tolist() == list(range(I))
     assert action_selector.index_id_map.id.values.tolist() == list([2, 4, 6, 8])
     mock_torch_module_call.assert_called_once()
-
-    mock_forbidden_ids.return_value = [2, 4, 6]
-    with pytest.raises(InsufficientRecommendationSpace):
-        ActionSelector(K, ServiceAutoEncoder(FEATURES_DIM, SE).encoder)
 
 
 def test_call_with_matching_services(
     mocker, proper_parameters, services, user, service_embeddings, weights
 ):
     mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_retrieve_service_ids = mocker.patch(
-        "recommender.engine.rl_agent.action_selector.retrieve_matching_service_ids"
+    mock_filter_services = mocker.patch(
+        "recommender.engine.agents.rl_agent.action_selector.filter_services"
     )
-    mock_forbidden_ids = mocker.patch(
-        "recommender.engine.rl_agent.action_selector.retrieve_forbidden_service_ids"
+    mock_forbidden_services = mocker.patch(
+        "recommender.engine.agents.rl_agent.action_selector.retrieve_forbidden_services"
     )
     mock_torch_rand = mocker.patch("torch.rand")
 
     mock_torch_module_call.return_value = service_embeddings
-    mock_forbidden_ids.return_value = []
+    mock_forbidden_services.return_value = Service.objects(id__in=[-1])
     mock_torch_rand.return_value = torch.Tensor([0])
 
     FEATURES_DIM, K, SE, I = proper_parameters
-    action_selector = ActionSelector(K, ServiceAutoEncoder(FEATURES_DIM, SE).encoder)
+    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    action_selector = ActionSelector(service_embedder)
 
-    mock_retrieve_service_ids.return_value = [2, 4, 6, 8]
-    assert action_selector(weights, user, search_data={}) == [4, 6]
+    mock_filter_services.return_value = Service.objects.all()
+    assert action_selector(K, weights, user, search_data=SearchData()) == [4, 6]
 
-    mock_retrieve_service_ids.return_value = [2, 4, 8]
-    assert action_selector(weights, user, search_data={}) == [4, 2]
+    mock_filter_services.return_value = Service.objects(id__in=[2, 4, 8])
+    assert action_selector(K, weights, user, search_data=SearchData()) == [4, 2]
 
-    mock_retrieve_service_ids.return_value = []
-    assert action_selector(weights, user, search_data={}) == [6, 8]
+    mock_filter_services.return_value = Service.objects(id__in=[-1])
+    assert action_selector(K, weights, user, search_data=SearchData()) == [6, 8]
 
 
 def test_call_with_forbidden_services(
     mocker, proper_parameters, services, user, service_embeddings, weights
 ):
     mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_retrieve_service_ids = mocker.patch(
-        "recommender.engine.rl_agent.action_selector.retrieve_matching_service_ids"
+    mock_filter_services = mocker.patch(
+        "recommender.engine.agents.rl_agent.action_selector.filter_services"
     )
-    mock_forbidden_ids = mocker.patch(
-        "recommender.engine.rl_agent.action_selector.retrieve_forbidden_service_ids"
+    mock_forbidden_services = mocker.patch(
+        "recommender.engine.agents.rl_agent.action_selector.retrieve_forbidden_services"
     )
     mock_torch_rand = mocker.patch("torch.rand")
 
     mock_torch_module_call.return_value = service_embeddings
-    mock_forbidden_ids.return_value = [6]
+    mock_forbidden_services.return_value = Service.objects(id__in=[6])
     mock_torch_rand.return_value = torch.Tensor([0])
 
     FEATURES_DIM, K, SE, I = proper_parameters
-    action_selector = ActionSelector(K, ServiceAutoEncoder(FEATURES_DIM, SE).encoder)
+    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    action_selector = ActionSelector(service_embedder)
 
-    mock_retrieve_service_ids.return_value = [2, 4, 6, 8]
-    assert action_selector(weights, user, search_data={}) == [4, 2]
+    mock_filter_services.return_value = Service.objects.all()
+    assert action_selector(K, weights, user, search_data=SearchData()) == [4, 2]
 
-    mock_retrieve_service_ids.return_value = [2, 6, 8]
-    assert action_selector(weights, user, search_data={}) == [2, 8]
+    mock_filter_services.return_value = Service.objects(id__in=[2, 6, 8])
+    assert action_selector(K, weights, user, search_data=SearchData()) == [2, 8]
 
-    mock_retrieve_service_ids.return_value = []
-    assert action_selector(weights, user, search_data={}) == [4, 8]
+    mock_filter_services.return_value = Service.objects(id__in=[-1])
+    assert action_selector(K, weights, user, search_data=SearchData()) == [4, 8]
+
+
+def test_raise_insufficient_recommendation_space(
+    mocker, proper_parameters, services, weights, user, service_embeddings
+):
+    mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
+    mock_forbidden_services = mocker.patch(
+        "recommender.engine.agents.rl_agent.action_selector.retrieve_forbidden_services"
+    )
+    mock_forbidden_services.return_value = Service.objects.all()
+    mock_torch_module_call.return_value = service_embeddings
+
+    FEATURES_DIM, K, SE, I = proper_parameters
+    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    action_selector = ActionSelector(service_embedder)
+
+    mock_forbidden_services.return_value = Service.objects.all()
+    with pytest.raises(InsufficientRecommendationSpace):
+        action_selector(K, weights, user, search_data=SearchData())

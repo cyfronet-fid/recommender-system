@@ -1,4 +1,4 @@
-# pylint: disable=no-member, fixme
+# pylint: disable=no-member, line-too-long, fixme
 
 """
 This module contains logic for composing marketplace DB dump,
@@ -17,9 +17,11 @@ It assumes that above data are stored in database before call.
 import itertools
 from typing import List
 
-from recommender.models import UserAction, Recommendation, State, Sars, Service
-from recommender.engine.reward_mapping import ua_to_reward_id
+import torch
 
+from recommender.models import User, UserAction, Recommendation, State, Sars, Service
+from recommender.engine.agents.rl_agent.reward_mapping import ua_to_reward_id
+from recommender.services.services_history_generator import concat_histories
 
 RECOMMENDATION_PAGES_IDS = ("catalogue_services_list",)
 
@@ -90,10 +92,19 @@ def _find_root_uas_before(root_uas, recommendation):
     return root_uas_before.order_by("+timestamp")
 
 
-def _ruas2services(root_uas):
-    """This function maps root user actions to services"""
+def _get_empty_user() -> User:
+    """
+    This function get empty user with id=-1 from the database or create one.
+    It fill its tensor with zeros to simulate tensor precalculation.
+    It is used as a anonymous user and it has no categories or scientific
+     domains.
+    """
 
-    return [root_ua.source.root.service for root_ua in root_uas]
+    user = User.objects(id=-1).first()
+    if user is None:
+        user = User(id=-1, tensor=torch.zeros(User.objects.first().tensor.shape))
+
+    return user
 
 
 def generate_sarses():
@@ -103,43 +114,35 @@ def generate_sarses():
     root_uas = UserAction.objects(source__root__type__="recommendation_panel")
 
     for recommendation in Recommendation.objects:
-        if recommendation.user is not None:  # TODO: Fix this for non-logged user
-            # Create reward
-            clicked_services_after, reward = _get_clicked_services_and_reward(
-                recommendation, root_uas
-            )
+        user = recommendation.user or _get_empty_user()
 
-            # Create state
-            root_uas_before = _find_root_uas_before(root_uas, recommendation)
-            clicked_services_before = _ruas2services(root_uas_before)
-            services_history_before = (
-                recommendation.user.accessed_services + clicked_services_before
-            )
-            # TODO: rethink uniqness of the services in the history of orders and
-            #  in the history of clicks and in both of them together.
-            # Make unique but preserve order
-            services_history_before = list(dict.fromkeys(services_history_before))
-            state = State(
-                user=recommendation.user,
-                services_history=services_history_before,
-                last_search_data=recommendation.search_data,
-            ).save()
+        # Create reward
+        clicked_services_after, reward = _get_clicked_services_and_reward(
+            recommendation, root_uas
+        )
 
-            # create action
-            action = recommendation.services
-            # Create next state
-            services_history_after = services_history_before + clicked_services_after
-            # Make unique but preserve order
-            services_history_after = list(dict.fromkeys(services_history_after))
-            next_state = State(
-                user=recommendation.user,
-                services_history=services_history_after,
-                last_search_data=recommendation.search_data,
-            ).save()
+        # Create state
+        root_uas_before = _find_root_uas_before(root_uas, recommendation)
+        accessed_services = user.accessed_services
+        services_history_before = concat_histories(accessed_services, root_uas_before)
+        state = State(
+            user=user,
+            services_history=services_history_before,
+            last_search_data=recommendation.search_data,
+        ).save()
 
-            # Create SARS
-            Sars(
-                state=state, action=action, reward=reward, next_state=next_state
-            ).save()
+        # create action
+        action = recommendation.services
+
+        # Create next state
+        services_history_after = services_history_before + clicked_services_after
+        next_state = State(
+            user=user,
+            services_history=services_history_after,
+            last_search_data=recommendation.search_data,  # TODO: replace recommendation with "next recommendation"
+        ).save()
+
+        # Create SARS
+        Sars(state=state, action=action, reward=reward, next_state=next_state).save()
 
     return Sars.objects

@@ -2,14 +2,13 @@
 
 import pytest
 
-from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
-from recommender.engine.pre_agent.models import NeuralColaborativeFilteringModel
-from recommender.engine.pre_agent.models.common import (
-    NoSavedModuleError,
-    load_last_module,
+from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
+from recommender.engine.agents.pre_agent.models import (
+    NEURAL_CF,
+    NeuralColaborativeFilteringModel,
 )
-from recommender.engine.pre_agent.models import NEURAL_CF
-from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
+from recommender.engine.utils import NoSavedModuleError, load_last_module
+from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from recommender.tasks.neural_networks import execute_pre_agent_training
 from tests.factories.populate_database import populate_users_and_services
 

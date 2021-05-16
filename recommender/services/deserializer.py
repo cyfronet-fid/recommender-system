@@ -34,7 +34,7 @@ class Deserializer:
             scientific_domains=search_data_json_dict.get("scientific_domains"),
             sort=search_data_json_dict.get("sort"),
             target_users=search_data_json_dict.get("target_users"),
-        )
+        ).save()
 
         recommendation = Recommendation(
             user=json_dict.get("user_id"),

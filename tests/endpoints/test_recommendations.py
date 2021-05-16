@@ -31,7 +31,7 @@ def recommendation_data():
 
 
 def test_recommendations(client, mocker, recommendation_data):
-    pre_agent_call_mock = mocker.patch("recommender.PreAgentRecommender.call")
+    pre_agent_call_mock = mocker.patch("recommender.PreAgent.call")
     deserializer_mock = mocker.patch(
         "recommender.services.deserializer.Deserializer.deserialize_recommendation"
     )

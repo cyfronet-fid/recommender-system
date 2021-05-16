@@ -1,16 +1,19 @@
 # pylint: disable=invalid-name, no-member
 
-"""Utilities"""
+"""Project Utilities"""
 
 import json
+import random
 from datetime import datetime
-from typing import Tuple
+from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
 from bson import SON, ObjectId
-from graphviz import Digraph
 from mongoengine import Document
 
-from recommender.models import UserAction
+from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
+from recommender.models import User
+from recommender.models import Service
+from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
 
 
 def _son_to_dict(son_obj: SON) -> dict:
@@ -51,68 +54,103 @@ def printable(obj: Document) -> str:
     return string
 
 
-def _get_visit_ids(user_action: UserAction) -> Tuple[str, str]:
-    """
-    Get source and target visit ids of the user action.
+def _get_services_with_non_empty_list_fileds():
+    size_not_zero = {"$not": {"$size": 0}}
+    q = Service.objects(
+        __raw__={
+            "categories": size_not_zero,
+            "countries": size_not_zero,
+            "providers": size_not_zero,
+            "platforms": size_not_zero,
+            "scientific_domains": size_not_zero,
+            "target_users": size_not_zero,
+        }
+    )
+    return q
 
-    Args:
-        user_action: User action object.
+
+def _get_search_data_examples(
+    k: Optional[int] = None, deterministic: Optional[bool] = False
+) -> Dict[str, List[Union[int, str]]]:
+    """
+    Generates examples of search_data fields based on Services in the database.
+
     Returns:
-        visit_ids: Tuple of the source and target visit ids.
+        examples: examples for each field of search_data
+         (except: q, order_type, rating, sort)
     """
 
-    rua_svid = user_action.source.visit_id
-    rua_tvid = user_action.target.visit_id
+    # If some list fields of service are empty then this service won't be
+    # found later because it will not match set of values (that will be
+    # most probably not empty because of other services), so we have to use
+    # this function:
+    q = _get_services_with_non_empty_list_fileds()
 
-    visit_ids = (str(rua_svid), str(rua_tvid))
+    q = q(status__in=AVAILABLE_FOR_RECOMMENDATION)
+    services = list(q)
 
-    return visit_ids
+    if k is None:
+        k = 3
 
-
-def _generate_tree(
-        user_action: UserAction,
-        graph: Digraph) -> Digraph:
-    """
-    Utility function implementing recursive user actions tree generation.
-
-    Args:
-        user_action: User action that is the root of the tree.
-        graph: Graph accumulator.
-    """
-
-    ua_svid, ua_tvid = _get_visit_ids(user_action)
-
-    graph.node(ua_svid, label=ua_svid[:3])
-    graph.node(ua_tvid, label=ua_tvid[:3])
-    if user_action.action.order:
-        color = "red"
-        label = "Order"
+    if deterministic:
+        services = services[:k]
     else:
-        color = "black"
-        label = ""
+        services = random.sample(services, k=k)
 
-    if user_action.source.root is not None:
-        service_id = user_action.source.root.service.id
-        label = f"service id: {service_id}"
-        color = "green"
+    categories_ids = set()
+    geographical_availabilities = set()
+    provider_ids = set()
+    related_platform_ids = set()
+    scientific_domain_ids = set()
+    target_user_ids = set()
+    for service in services:
+        categories_ids.update([c.id for c in service.categories])
+        geographical_availabilities.update(service.countries)
+        provider_ids.update([p.id for p in service.providers])
+        related_platform_ids.update([rp.id for rp in service.platforms])
+        scientific_domain_ids.update([sd.id for sd in service.scientific_domains])
+        target_user_ids.update([tu.id for tu in service.target_users])
 
-    graph.edge(ua_svid, ua_tvid, color=color, label=label)
+    examples = {
+        "categories": list(categories_ids),
+        "geographical_availabilities": list(geographical_availabilities),
+        "providers": list(provider_ids),
+        "related_platforms": list(related_platform_ids),
+        "scientific_domains": list(scientific_domain_ids),
+        "target_users": list(target_user_ids),
+    }
 
-    children = list(UserAction.objects(source__visit_id=ua_tvid))
-    for ua in children:
-        _generate_tree(ua, graph)
-
-    return graph
+    return examples
 
 
-def generate_tree(user_action: UserAction) -> Digraph:
+def gen_json_dict(panel_id: str, anonymous_user: bool = False) -> Dict[str, Any]:
     """
-    This method is used for generating the user actions' tree
-    rooted in the user action given as a parameter.
+    Generate json_dict ready for using in any agent based on database
+     and provided panel_id.
 
     Args:
-        user_action: User action that is the root of the tree.
+        panel_id: Version of the panel, could be `"v1"` or `"v1"`
+
+    Returns:
+        json_dict: dictionary compatible with body of the /recommendations
+         endpoint.
     """
 
-    graph = Digraph(comment="User Actions Tree")
-    return _generate_tree(user_action, graph)
+    K = PANEL_ID_TO_K.get(panel_id)
+
+    search_data = _get_search_data_examples(k=K, deterministic=True)
+    search_data["q"] = ""
+
+    json_dict = {
+        "unique_id": "5642c351-80fe-44cf-b606-304f2f338122",
+        "timestamp": "2021-05-21T18:43:12.295Z",
+        "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
+        "page_id": "/services",
+        "panel_id": panel_id,
+        "search_data": search_data,
+    }
+
+    if not anonymous_user:
+        json_dict["user_id"] = User.objects.first().id
+
+    return json_dict

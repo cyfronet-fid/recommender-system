@@ -1,9 +1,7 @@
 # pylint: disable-all
-from unittest.mock import patch
-
-from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
-from recommender.engine.pre_agent.training.common import pre_agent_training
-from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
+from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
+from recommender.engine.agents.pre_agent.training.common import pre_agent_training
+from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from tests.factories.populate_database import populate_users_and_services
 
 

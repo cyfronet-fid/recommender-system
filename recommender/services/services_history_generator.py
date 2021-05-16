@@ -63,12 +63,6 @@ def leads_to_order(user_action: UserAction) -> bool:
 def _get_ruas_services(ruas):
     """
     Get services from root user actions.
-
-    Args:
-        ruas: Root user actions.
-
-    return:
-
     """
 
     services = [ua.source.root.service for ua in ruas]
@@ -77,16 +71,7 @@ def _get_ruas_services(ruas):
 
 
 def _list_difference(minuend: List[Any], subtrahend: List[Any]) -> List[Any]:
-    """
-    Get difference between two lists preserving order of items.
-
-    Args:
-        minuend: the minuend list.
-        subtrahend: the subtrahend list.
-
-    Returns:
-        difference: Lists difference.
-    """
+    """Get difference between two lists preserving order of items."""
 
     subtrahend = set(subtrahend)
     difference = [item for item in minuend if item not in subtrahend]
