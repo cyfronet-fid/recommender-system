@@ -9,6 +9,7 @@ from datetime import datetime
 
 from recommender.models import Recommendation
 from .marketplace import UserFactory, ServiceFactory
+from .search_data import SearchDataFactory
 
 reseed_random("test-seed")
 faker = FakerFactory.create()
@@ -24,9 +25,8 @@ class RecommendationFactory(MongoEngineFactory):
     visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None))
     page_id = LazyFunction(lambda: "_".join(faker.words(nb=random.randint(2, 6))))
     panel_id = LazyFunction(lambda: random.choice(["v1", "v2"]))
-
     services = LazyFunction(lambda: ServiceFactory.create_batch(random.randint(2, 10)))
-    search_data = None  # TODO: Add search_data to faker
+    search_data = SubFactory(SearchDataFactory)
 
     class Params:
         v1 = Trait(

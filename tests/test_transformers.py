@@ -5,8 +5,8 @@ import pickle
 import pytest
 from sklearn.compose import ColumnTransformer
 
-from recommender.engine.pre_agent.preprocessing import USERS, SERVICES, LABELS
-from recommender.engine.pre_agent.preprocessing.transformers import (
+from recommender.engine.preprocessing import USERS, SERVICES
+from recommender.engine.preprocessing.transformers import (
     create_users_transformer,
     create_services_transformer,
     create_transformer,

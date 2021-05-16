@@ -1,46 +1,23 @@
 # pylint: disable-all
-import sys
 
 import pytest
 
-from recommender.errors import InvalidRecommendationPanelIDError
-from recommender.engine.base_agent_recommender import BaseAgentRecommender
-from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
-from recommender.engine.pre_agent.training.common import pre_agent_training
-from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from recommender.engine.pre_agent.models import NeuralColaborativeFilteringModel
-from recommender.engine.pre_agent.pre_agent import (
-    PreAgentRecommender,
-    UntrainedPreAgentError,
-)
-from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
+from recommender import PreAgent
+from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
+from recommender.engine.agents.pre_agent.models import NeuralColaborativeFilteringModel
+from recommender.engine.agents.pre_agent.training.common import pre_agent_training
+from recommender.errors import InvalidRecommendationPanelIDError, MissingComponentError
+from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
+
+from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from recommender.models import User
-from recommender.models import Service
-from tests.factories.marketplace import ServiceFactory
 from tests.factories.populate_database import populate_users_and_services
-
-
-def test_fill_candidate_services(mongo):
-    all_services = list(ServiceFactory.create_batch(5))
-
-    recommender = BaseAgentRecommender()
-
-    for required_services_no in range(1, 4):
-        for candidate_services_no in range(1, required_services_no + 1):
-            candidate_services = all_services[:candidate_services_no]
-            filled_services = recommender._fill_candidate_services(
-                candidate_services, required_services_no
-            )
-
-            assert isinstance(filled_services, list)
-            assert len(filled_services) == required_services_no
-            assert all([isinstance(s, Service) for s in filled_services])
 
 
 def test_pre_agent_call(mongo):
     # With no model case
-    pre_agent = PreAgentRecommender()
-    with pytest.raises(UntrainedPreAgentError):
+    pre_agent = PreAgent()
+    with pytest.raises(MissingComponentError):
         place_holder_context = {"placeholder_key": "placeholder_value"}
         pre_agent.call(place_holder_context)
 
@@ -58,7 +35,7 @@ def test_pre_agent_call(mongo):
     pre_agent_training()
 
     # With model case
-    pre_agent = PreAgentRecommender()
+    pre_agent = PreAgent()
 
     for panel_id_version in list(PANEL_ID_TO_K.keys()):
         user = User.objects.first()

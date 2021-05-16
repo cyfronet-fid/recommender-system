@@ -6,7 +6,6 @@ from mongoengine import (
     DateTimeField,
     StringField,
     ListField,
-    EmbeddedDocumentField,
     UUIDField,
 )
 
@@ -23,4 +22,4 @@ class Recommendation(Document):
     page_id = StringField()
     panel_id = StringField()
     services = ListField(ReferenceField(Service))
-    search_data = EmbeddedDocumentField(SearchData)
+    search_data = ReferenceField(SearchData)

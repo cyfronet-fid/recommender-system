@@ -2,11 +2,11 @@
 import pytest
 from torch.utils.data import Subset
 
-from recommender.engine.pre_agent.datasets.autoencoders import (
+from recommender.engine.datasets.autoencoders import (
     get_autoencoder_dataset_name,
 )
-from recommender.engine.pre_agent.preprocessing import SERVICES
-from recommender.engine.pre_agent.datasets.common import (
+from recommender.engine.preprocessing import SERVICES
+from recommender.engine.utils import (
     NoSavedDatasetError,
     load_last_dataset,
     TRAIN,

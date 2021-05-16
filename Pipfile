@@ -12,6 +12,9 @@ pytest = "*"
 black = "==20.8b1"
 pre-commit = "*"
 pylint = "*"
+graphviz = "*"
+jupyter = "*"
+jupyterlab = "*"
 
 [packages]
 numpy = "*"
@@ -19,10 +22,8 @@ pandas = "*"
 torch = "*"
 torchvision = "*"
 matplotlib = "*"
-jupyter = "*"
-jupyterlab = "*"
-Flask = "*"
-flask-restx = "*"
+Flask = "==1.1.4"
+flask-restx = "==0.3.0"
 jsonref = "*"
 json-ref-dict = "*"
 pymongo = "*"
@@ -31,10 +32,8 @@ flask-mongoengine = "*"
 inflection = "*"
 sklearn = "*"
 tqdm = "*"
-celery = {extras = ["redis"], version = "*"}
 pytest-mock = "*"
 coverage = "*"
-sentry-sdk = {extras = ["flask"], version = "*"}
 python-dotenv = "*"
 tensorboard = "*"
 pytorch-nlp = "*"
@@ -42,3 +41,11 @@ graphviz = "*"
 
 [requires]
 python_version = "3.7"
+
+[packages.celery]
+extras = [ "redis",]
+version = "*"
+
+[packages.sentry-sdk]
+extras = [ "flask",]
+version = "*"

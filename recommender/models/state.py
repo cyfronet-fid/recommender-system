@@ -3,7 +3,7 @@
 from mongoengine import (
     ListField,
     ReferenceField,
-    EmbeddedDocumentField, Document,
+    Document,
 )
 
 from .search_data import SearchData
@@ -14,4 +14,4 @@ from .user import User
 class State(Document):
     user = ReferenceField(User, blank=True)
     services_history = ListField(ReferenceField(Service))
-    last_search_data = EmbeddedDocumentField(SearchData)
+    last_search_data = ReferenceField(SearchData)
