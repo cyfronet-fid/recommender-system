@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, fixme
 
 """
 This module contains logic for composing marketplace DB dump,
@@ -103,40 +103,43 @@ def generate_sarses():
     root_uas = UserAction.objects(source__root__type__="recommendation_panel")
 
     for recommendation in Recommendation.objects:
-        # Create reward
-        clicked_services_after, reward = _get_clicked_services_and_reward(
-            recommendation, root_uas
-        )
+        if recommendation.user is not None:  # TODO: Fix this for non-logged user
+            # Create reward
+            clicked_services_after, reward = _get_clicked_services_and_reward(
+                recommendation, root_uas
+            )
 
-        # Create state
-        root_uas_before = _find_root_uas_before(root_uas, recommendation)
-        clicked_services_before = _ruas2services(root_uas_before)
-        services_history_before = (
-            recommendation.user.accessed_services + clicked_services_before
-        )
-        # TODO: rethink uniqness of the services in the history of orders and
-        #  in the history of clicks and in both of them together.
-        # Make unique but preserve order
-        services_history_before = list(dict.fromkeys(services_history_before))
-        state = State(
-            user=recommendation.user,
-            services_history=services_history_before,
-            last_search_data=recommendation.search_data,
-        ).save()
+            # Create state
+            root_uas_before = _find_root_uas_before(root_uas, recommendation)
+            clicked_services_before = _ruas2services(root_uas_before)
+            services_history_before = (
+                recommendation.user.accessed_services + clicked_services_before
+            )
+            # TODO: rethink uniqness of the services in the history of orders and
+            #  in the history of clicks and in both of them together.
+            # Make unique but preserve order
+            services_history_before = list(dict.fromkeys(services_history_before))
+            state = State(
+                user=recommendation.user,
+                services_history=services_history_before,
+                last_search_data=recommendation.search_data,
+            ).save()
 
-        # create action
-        action = recommendation.services
-        # Create next state
-        services_history_after = services_history_before + clicked_services_after
-        # Make unique but preserve order
-        services_history_after = list(dict.fromkeys(services_history_after))
-        next_state = State(
-            user=recommendation.user,
-            services_history=services_history_after,
-            last_search_data=recommendation.search_data,
-        ).save()
+            # create action
+            action = recommendation.services
+            # Create next state
+            services_history_after = services_history_before + clicked_services_after
+            # Make unique but preserve order
+            services_history_after = list(dict.fromkeys(services_history_after))
+            next_state = State(
+                user=recommendation.user,
+                services_history=services_history_after,
+                last_search_data=recommendation.search_data,
+            ).save()
 
-        # Create SARS
-        Sars(state=state, action=action, reward=reward, next_state=next_state).save()
+            # Create SARS
+            Sars(
+                state=state, action=action, reward=reward, next_state=next_state
+            ).save()
 
     return Sars.objects
