@@ -7,8 +7,8 @@
 
 from mongoengine import connect
 
-from recommender.engine.pre_agent.datasets.all_datasets import create_datasets
-from recommender.engine.pre_agent.preprocessing import precalc_users_and_service_tensors
+from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
+from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from settings import DevelopmentConfig
 
 

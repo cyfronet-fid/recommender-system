@@ -22,4 +22,3 @@ class StateFactory(MongoEngineFactory):
         lambda: ServiceFactory.create_batch(random.randint(0, 10))
     )
     last_search_data = SubFactory(SearchDataFactory)
-

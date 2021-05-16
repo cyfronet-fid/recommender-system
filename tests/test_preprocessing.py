@@ -4,20 +4,24 @@ import torch
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
 
-from recommender.engine.pre_agent.preprocessing import USERS, SERVICES
-from recommender.engine.pre_agent.preprocessing.preprocessing import (
-    service_to_df,
-    user_to_df,
-    object_to_df,
-    df_to_tensor,
+from recommender.engine.preprocessing import (
+    USERS,
+    SERVICES,
+    precalculate_tensors,
     precalc_users_and_service_tensors,
+)
+from recommender.engine.preprocessing.preprocessing import (
+    NoPrecalculatedTensorsError,
     user_and_services_to_tensors,
     user_and_service_to_tensors,
     InvalidObject,
-    precalculate_tensors,
-    NoPrecalculatedTensorsError,
+    df_to_tensor,
+    service_to_df,
+    object_to_df,
+    user_to_df,
 )
-from recommender.engine.pre_agent.preprocessing.transformers import (
+
+from recommender.engine.preprocessing.transformers import (
     create_services_transformer,
     create_transformer,
     create_users_transformer,

@@ -5,7 +5,7 @@ import torch
 import numpy as np
 
 from recommender.services.synthetic_dataset_generator import (
-    normalize_embedded_services,
+    _normalize_embedded_services,
     get_service_indices,
     iou,
     predict_user_interest,
@@ -83,7 +83,7 @@ def user(services, categories, scientific_domains):
 
 def test_normalize_embedded_services(service_embeddings, normalized_embedded_services):
     assert torch.allclose(
-        normalize_embedded_services(service_embeddings),
+        _normalize_embedded_services(service_embeddings),
         normalized_embedded_services,
         atol=10e-5,
     )

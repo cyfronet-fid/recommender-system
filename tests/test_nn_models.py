@@ -3,11 +3,7 @@
 import pytest
 from torch.nn import Linear
 
-from recommender.engine.pre_agent.models.common import (
-    NoSavedModuleError,
-    load_last_module,
-    save_module,
-)
+from recommender.engine.utils import save_module, NoSavedModuleError, load_last_module
 
 
 def test_save_and_load_last_module(mongo):

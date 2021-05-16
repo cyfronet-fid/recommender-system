@@ -6,10 +6,25 @@ from factory.random import reseed_random, random
 from faker import Factory as FakerFactory
 from faker.providers import BaseProvider
 
-from recommender.models import SearchData, AccessMode, AccessType, Service, LifeCycleStatus, TargetUser, Trl, Category, Platform, \
-    Provider, ScientificDomain
+from recommender.models import (
+    SearchData,
+    AccessMode,
+    AccessType,
+    Service,
+    LifeCycleStatus,
+    TargetUser,
+    Trl,
+    Category,
+    Platform,
+    Provider,
+    ScientificDomain,
+)
 from .marketplace.category import CategoryFactory
-from .marketplace.faker_seeds.utils.loaders import load_names_descs, load_names, load_taglines
+from .marketplace.faker_seeds.utils.loaders import (
+    load_names_descs,
+    load_names,
+    load_taglines,
+)
 from .marketplace.platform import PlatformFactory
 from .marketplace.provider import ProviderFactory
 from .marketplace.scientific_domain import ScientificDomainFactory
@@ -31,7 +46,14 @@ class SearchDataProvider(BaseProvider):
 
         choice = random.randint(0, 2)
         if choice == 0:
-            name_desc_classes = [AccessMode, AccessType, LifeCycleStatus, Service, TargetUser, Trl]
+            name_desc_classes = [
+                AccessMode,
+                AccessType,
+                LifeCycleStatus,
+                Service,
+                TargetUser,
+                Trl,
+            ]
             clazz = random.choice(name_desc_classes)
 
             corpus = load_names_descs(clazz)
@@ -57,7 +79,7 @@ class SearchDataProvider(BaseProvider):
             search_phrase_words = words
         else:
             start_idx = random.randint(0, len(words) - search_phrase_len)
-            search_phrase_words = words[start_idx:start_idx + search_phrase_len]
+            search_phrase_words = words[start_idx : start_idx + search_phrase_len]
         search_phrase = " ".join(search_phrase_words)
 
         return search_phrase
@@ -79,9 +101,7 @@ class SearchDataFactory(MongoEngineFactory):
         lambda: [fake.country_code() for _ in range(random.randint(2, 5))]
     )
     order_type = "open_access"  # TODO: order type factories
-    providers = LazyFunction(
-        lambda: ProviderFactory.create_batch(random.randint(2, 5))
-    )
+    providers = LazyFunction(lambda: ProviderFactory.create_batch(random.randint(2, 5)))
     related_platforms = LazyFunction(
         lambda: PlatformFactory.create_batch(random.randint(2, 5))
     )
@@ -89,7 +109,7 @@ class SearchDataFactory(MongoEngineFactory):
         lambda: ScientificDomainFactory.create_batch(random.randint(2, 5))
     )
     sort = "_score"  # WARRNING: this field is useless and should be removed
-                     # from SearchData
+    # from SearchData
     target_users = LazyFunction(
         lambda: TargetUserFactory.create_batch(random.randint(2, 5))
     )

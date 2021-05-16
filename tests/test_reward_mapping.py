@@ -1,6 +1,9 @@
 # pylint: disable-all
 
-from recommender.engine.reward_mapping import _to_abstract_page_id, ua_to_reward_id
+from recommender.engine.agents.rl_agent.reward_mapping import (
+    _to_abstract_page_id,
+    ua_to_reward_id,
+)
 from tests.factories.user_action import UserActionFactory
 from tests.factories.user_action.action import ActionFactory
 from tests.factories.user_action.source import SourceFactory

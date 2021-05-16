@@ -31,12 +31,14 @@ def recommendation_data():
 
 
 def test_recommendations(client, mocker, recommendation_data):
-    pre_agent_call_mock = mocker.patch("recommender.PreAgentRecommender.call")
+    agent_call_mock = mocker.patch(
+        "recommender.engine.agents.base_agent.BaseAgent.call"
+    )
     deserializer_mock = mocker.patch(
         "recommender.services.deserializer.Deserializer.deserialize_recommendation"
     )
     mocked_recommended_services = [1, 2, 3]
-    pre_agent_call_mock.return_value = mocked_recommended_services
+    agent_call_mock.return_value = mocked_recommended_services
 
     response = client.post(
         "/recommendations",
@@ -47,6 +49,6 @@ def test_recommendations(client, mocker, recommendation_data):
     deserializer_data = deepcopy(recommendation_data)
     deserializer_data["services"] = mocked_recommended_services
 
-    pre_agent_call_mock.assert_called_once_with(recommendation_data)
+    agent_call_mock.assert_called_once_with(recommendation_data)
     deserializer_mock.assert_called_once_with(deserializer_data)
     assert response.get_json() == {"recommendations": mocked_recommended_services}
