@@ -6,7 +6,7 @@ from typing import Optional
 from typing import List
 import torch
 
-from recommender.engine.models.autoencoders import SERVICES_AUTOENCODER
+from recommender.engine.models.autoencoders import SERVICES_AUTOENCODER, create_embedder
 from recommender.engine.utils import load_last_module
 from recommender.models import Service
 
@@ -16,7 +16,7 @@ class ActionEncoder:
 
     def __init__(self, service_embedder: Optional[torch.nn.Module] = None):
         self.service_embedder = (
-            service_embedder or load_last_module(SERVICES_AUTOENCODER).encoder
+            service_embedder or create_embedder(load_last_module(SERVICES_AUTOENCODER))
         )
 
     def __call__(self, action: List[Service]) -> torch.Tensor:

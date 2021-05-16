@@ -51,13 +51,13 @@ class Actor(nn.Module):
         """
         super().__init__()
 
+        self.K = K
+        self.SE = SE
+
         self.history_embedder = history_embedder
         self.search_phrase_embedder = search_phrase_embedder
 
-        self._load_models(K)
-
-        self.K = K
-        self.SE = SE
+        self._load_models()
 
         layers = [nn.Linear(2 * SE + UE + SPE, layer_sizes[0]), nn.ReLU()]  # FE = SE
         layers += list(
@@ -98,11 +98,11 @@ class Actor(nn.Module):
         weights = x.reshape(-1, self.K, self.SE)
         return weights
 
-    def _load_models(self, K):
+    def _load_models(self):
         try:
-            if K == 3:
+            if self.K == 3:
                 history_embedder_name = HISTORY_EMBEDDER_V1
-            elif K == 2:
+            elif self.K == 2:
                 history_embedder_name = HISTORY_EMBEDDER_V2
             else:
                 raise NoHistoryEmbedderForK
@@ -110,9 +110,9 @@ class Actor(nn.Module):
                 history_embedder_name
             )
 
-            if K == 3:
+            if self.K == 3:
                 search_phrase_embedder_name = SEARCH_PHRASE_EMBEDDER_V1
-            elif K == 2:
+            elif self.K == 2:
                 search_phrase_embedder_name = SEARCH_PHRASE_EMBEDDER_V2
             else:
                 raise NoSearchPhraseEmbedderForK

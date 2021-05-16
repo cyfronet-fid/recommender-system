@@ -2,6 +2,8 @@
 
 import torch
 
+from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_embedder
+from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from recommender.models import Service
 from recommender.engine.agents.rl_agent.preprocessing.action_encoder import (
@@ -21,13 +23,15 @@ def test_action_encoder_proper_shape(mongo):
 
     precalc_users_and_service_tensors()
 
-    for K in (2, 3):
+    for K in list(PANEL_ID_TO_K.values()):
         SOH = len(Service.objects.first().tensor)
         SE = 128
 
-        services_embedder = torch.nn.Linear(SOH, SE)
-        ae = ActionEncoder(services_embedder)
+        service_auto_encoder = ServiceAutoEncoder(features_dim=SOH, embedding_dim=SE)
+        service_embedder = create_embedder(service_auto_encoder)
+
+        ae = ActionEncoder(service_embedder)
         action = list(Service.objects[:K])
 
-        embedded_action = ae(action)
-        assert embedded_action.shape == torch.Size([K, SE])
+        encoded_action = ae(action)
+        assert encoded_action.shape == torch.Size([K, SE])
