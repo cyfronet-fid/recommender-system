@@ -21,9 +21,11 @@ class AutoEncoder(Module):
 
         self.encoder = Sequential(
             Linear(features_dim, 128),
+            ReLU(),
             BatchNorm1d(128),
             ReLU(),
             Linear(128, 64),
+            ReLU(),
             BatchNorm1d(64),
             ReLU(),
             Linear(64, embedding_dim),
@@ -31,9 +33,11 @@ class AutoEncoder(Module):
 
         self.decoder = Sequential(
             Linear(embedding_dim, 64),
+            ReLU(),
             BatchNorm1d(64),
             ReLU(),
             Linear(64, 128),
+            ReLU(),
             BatchNorm1d(128),
             ReLU(),
             Linear(128, features_dim),

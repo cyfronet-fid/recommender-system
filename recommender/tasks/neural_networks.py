@@ -16,6 +16,9 @@ from recommender.extensions import celery
 def execute_pre_agent_training():
     pre_agent_training()
 
+@celery.task
+def execute_rl_agent_training():
+    rl_agent_training()
 
 @celery.task
 def execute_rl_agent_training():

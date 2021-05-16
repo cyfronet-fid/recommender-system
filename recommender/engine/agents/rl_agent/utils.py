@@ -106,6 +106,9 @@ def use_service_embedder(
 
 
 def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]:
+    print("index_id_map:")
+    print(index_id_map)
+    print(f"ids: {ids}")
     return index_id_map[index_id_map.id.isin(ids)].index.values.tolist()
 
 
