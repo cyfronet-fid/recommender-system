@@ -1,5 +1,6 @@
 """This module contains logic needed for mapping user actions to rewards"""
 import os
+from typing import List
 
 import pandas as pd
 
@@ -11,16 +12,28 @@ TRANSITION_REWARDS_CSV_PATH = os.path.join(
 )
 
 
-def _to_abstract_page_id(page_id: str):
+def _to_abstract_page_id(page_id: str, valid_page_ids: List[str]) -> str:
+    """Transforms marketplace page_id to abstract page_id used in transitions graph"""
     split = page_id.split("/")
 
-    if len(split) < 2:
+    if (
+        len(split) < 2
+        or (split[1] not in ["comparisons", "services"])
+        or (split[1] == "comparisons" and len(split) > 2)
+    ):
         return "unknown_page_id"
-    if split[1] == "comparisons":
+
+    if len(split) == 2:
         return page_id
-    if split[1] == "services" and len(split) > 2:
-        split[2] = "{id}"
-        return "/".join(split)
+
+    if split[2] == "c":
+        return "/services"
+
+    split[2] = "{id}"
+    abstract_page_id = "/".join(split)
+
+    if abstract_page_id in valid_page_ids:
+        return abstract_page_id
 
     return "unknown_page_id"
 
@@ -40,12 +53,13 @@ def ua_to_reward_id(user_action: UserAction) -> str:
     For now it just return generic reward id.
     """
     transition_rewards_df = pd.read_csv(TRANSITION_REWARDS_CSV_PATH, index_col="source")
+    valid_page_ids = transition_rewards_df.index.values.tolist()
 
-    source = _to_abstract_page_id(user_action.source.page_id)
+    source = _to_abstract_page_id(user_action.source.page_id, valid_page_ids)
     if user_action.action.order:
         target = "order"
     else:
-        target = _to_abstract_page_id(user_action.target.page_id)
+        target = _to_abstract_page_id(user_action.target.page_id, valid_page_ids)
 
     symbolic_reward = transition_rewards_df.loc[source, target]
     return symbolic_reward

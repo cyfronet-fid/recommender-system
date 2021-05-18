@@ -84,7 +84,7 @@ def use_service_embedder(
     services: Union[Iterable, QuerySet], embedder: torch.nn.Module
 ) -> Tuple[torch.Tensor, pd.DataFrame]:
     """
-    Embedd list of services with provided embedder.
+    Embed list of services with provided embedder.
 
     Args:
         services: List of services.
@@ -106,6 +106,9 @@ def use_service_embedder(
 
 
 def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]:
+    """Given a mapping between indices in the embedding and
+    database ids returns indices of services with given ids.
+    NOTE: Always return indices in alphanumerical order!"""
     return index_id_map[index_id_map.id.isin(ids)].index.values.tolist()
 
 
