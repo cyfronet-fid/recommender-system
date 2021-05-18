@@ -1,4 +1,5 @@
 # pylint: disable-all
+import pytest
 
 from recommender.engine.agents.rl_agent.reward_mapping import (
     _to_abstract_page_id,
@@ -10,22 +11,53 @@ from tests.factories.user_action.source import SourceFactory
 from tests.factories.user_action.target import TargetFactory
 
 
-def test__to_abstract_page_id():
-    assert _to_abstract_page_id("/services/egi-cloud-compute") == "/services/{id}"
+@pytest.fixture
+def valid_page_ids():
+    return [
+        "/services",
+        "/services/{id}",
+        "/services/{id}/details",
+        "/services/{id}/opinions",
+        "/services/{id}/offers",
+        "/services/{id}/information",
+        "/services/{id}/configuration",
+        "/services/{id}/summary",
+        "/comparisons",
+    ]
+
+
+def test__to_abstract_page_id(valid_page_ids):
     assert (
-        _to_abstract_page_id("/services/b2access/information")
+        _to_abstract_page_id("/services/egi-cloud-compute", valid_page_ids)
+        == "/services/{id}"
+    )
+    assert (
+        _to_abstract_page_id("/services/b2access/information", valid_page_ids)
         == "/services/{id}/information"
     )
     assert (
-        _to_abstract_page_id("/services/b2access/summary") == "/services/{id}/summary"
+        _to_abstract_page_id("/services/b2access/summary", valid_page_ids)
+        == "/services/{id}/summary"
     )
-    assert _to_abstract_page_id("/comparisons") == "/comparisons"
-    assert _to_abstract_page_id("/gibberish") == "unknown_page_id"
-    assert _to_abstract_page_id("XD") == "unknown_page_id"
-    assert _to_abstract_page_id("/services") == "unknown_page_id"
-    assert _to_abstract_page_id("/projects/1449/asd") == "unknown_page_id"
-    assert _to_abstract_page_id("/") == "unknown_page_id"
-    assert _to_abstract_page_id("") == "unknown_page_id"
+    assert _to_abstract_page_id("/services", valid_page_ids) == "/services"
+    assert _to_abstract_page_id("/services/c/compute", valid_page_ids) == "/services"
+    assert (
+        _to_abstract_page_id("/services/c/other-other", valid_page_ids) == "/services"
+    )
+    assert _to_abstract_page_id("/comparisons", valid_page_ids) == "/comparisons"
+
+    assert _to_abstract_page_id("/comparisons/asd", valid_page_ids) == "unknown_page_id"
+    assert _to_abstract_page_id("/gibberish", valid_page_ids) == "unknown_page_id"
+    assert _to_abstract_page_id("XD", valid_page_ids) == "unknown_page_id"
+    assert (
+        _to_abstract_page_id("/services/b2access/some-page", valid_page_ids)
+        == "unknown_page_id"
+    )
+    assert (
+        _to_abstract_page_id("/projects/1449/asd", valid_page_ids) == "unknown_page_id"
+    )
+    assert _to_abstract_page_id("/", valid_page_ids) == "unknown_page_id"
+    assert _to_abstract_page_id("", valid_page_ids) == "unknown_page_id"
 
 
 def test_ua_to_reward_id(mongo):
@@ -97,4 +129,14 @@ def test_ua_to_reward_id(mongo):
             )
         )
         == "order"
+    )
+
+    assert (
+        ua_to_reward_id(
+            UserActionFactory(
+                source=SourceFactory(page_id="/services/c/compute-other"),
+                target=TargetFactory(page_id="/services/egi-cloud-compute"),
+            )
+        )
+        == "mild_interest"
     )
