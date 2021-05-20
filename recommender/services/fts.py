@@ -26,4 +26,6 @@ def retrieve_services(search_data, accessed_services_ids=None):
     q = q.search_text(search_phrase) if search_phrase else q
     q = q(id__nin=accessed_services_ids) if accessed_services_ids else q
     q = q(status__in=AVAILABLE_FOR_RECOMMENDATION)
+
+    print(f"services available for recommendations: {len(q)}")
     return q

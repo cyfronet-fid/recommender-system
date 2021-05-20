@@ -2,7 +2,8 @@ import random
 from typing import Dict, Any, Tuple
 
 from engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from engine.pre_agent.pre_agent import InvalidRecommendationPanelIDError, _fill_candidate_services, _services_to_ids
+from engine.pre_agent.pre_agent import InvalidRecommendationPanelIDError, _services_to_ids
+from errors import TooSmallRecommendationSpace
 from models import User, SearchData
 from services.fts import retrieve_services
 
@@ -106,6 +107,7 @@ class BaseAgentRecommender:
         """
 
         candidate_services = list(retrieve_services(search_data))
-        candidate_services = _fill_candidate_services(candidate_services, K)
+        if len(candidate_services) < K:
+            raise TooSmallRecommendationSpace
         recommended_services = random.sample(list(candidate_services), K)
         return _services_to_ids(recommended_services)
