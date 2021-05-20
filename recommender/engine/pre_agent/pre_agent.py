@@ -15,7 +15,7 @@ from recommender.engine.pre_agent.models.neural_colaborative_filtering import NE
 from recommender.engine.pre_agent.preprocessing.preprocessing import (
     user_and_services_to_tensors,
 )
-from recommender.models import User, Service
+from recommender.models import User
 
 from recommender.engine.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.engine.pre_agent.models.common import (
@@ -31,33 +31,6 @@ def get_accessed_services_ids(user):
 
 def _services_to_ids(services):
     return [s.id for s in services]
-
-
-def _fill_candidate_services(
-    candidate_services, required_services_no, accessed_services_ids=None
-):
-    """Fallback in case of len of the candidate_services being too small"""
-    if len(candidate_services) < required_services_no:
-        missing_n = required_services_no - len(candidate_services)
-
-        # We don't want to recommend same service multiple times
-        # in one recommendation panel
-        forbidden_ids = set(_services_to_ids(candidate_services))
-
-        # We don't want to recommend a service if it already
-        # has been ordered by a user
-        if accessed_services_ids is not None:
-            forbidden_ids = forbidden_ids | set(accessed_services_ids)
-
-        allowed_services = list(Service.objects(id__nin=forbidden_ids))
-
-        if len(allowed_services) >= missing_n:
-            sampled = random.sample(allowed_services, missing_n)
-            candidate_services += sampled
-        else:
-            raise TooSmallRecommendationSpace
-
-    return candidate_services
 
 
 class PreAgentRecommender:
@@ -95,17 +68,18 @@ class PreAgentRecommender:
     def _for_logged_user(self, user, search_data, k):
         accessed_services_ids = get_accessed_services_ids(user)
         candidate_services = list(retrieve_services(search_data, accessed_services_ids))
-        recommended_services = _fill_candidate_services(
-            candidate_services, k, accessed_services_ids
-        )
-        recommended_services_ids = _services_to_ids(recommended_services)
+
+        if len(candidate_services) < k:
+            raise TooSmallRecommendationSpace
+
+        recommended_services_ids = _services_to_ids(candidate_services)
 
         (
             users_ids,
             users_tensor,
             services_ids,
             services_tensor,
-        ) = user_and_services_to_tensors(user, recommended_services)
+        ) = user_and_services_to_tensors(user, candidate_services)
 
         matching_probs = self.neural_cf_model(
             users_ids, users_tensor, services_ids, services_tensor
@@ -119,6 +93,7 @@ class PreAgentRecommender:
 
     def _for_anonymous_user(self, search_data, k):
         candidate_services = list(retrieve_services(search_data))
-        candidate_services = _fill_candidate_services(candidate_services, k)
-        recommended_services = random.sample(list(candidate_services), k)
+        if len(candidate_services) < k:
+            raise TooSmallRecommendationSpace
+        recommended_services = random.sample(candidate_services, k)
         return _services_to_ids(recommended_services)

@@ -26,9 +26,11 @@ class Recommendation(Resource):
         """Returns list of ids of recommended scientific services"""
 
         json_dict = request.get_json()
+        print(json_dict)
         with current_app.app_context():
             try:
                 services_ids = current_app.recommender_engine.call(json_dict)
+                print(f"recommended_ids: {services_ids}")
 
                 json_dict_with_services = copy.deepcopy(json_dict)
                 json_dict_with_services["services"] = services_ids
