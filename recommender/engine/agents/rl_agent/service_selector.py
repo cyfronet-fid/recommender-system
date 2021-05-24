@@ -2,17 +2,19 @@
 
 from typing import Optional, Tuple
 
+import pandas as pd
 import torch
 import torch.nn.functional as F
 from torch import nn
 
+from recommender.engine.agents.rl_agent.utils import use_service_embedder
 from recommender.engine.models.autoencoders import SERVICES_AUTOENCODER, create_embedder
-from recommender.engine.agents.rl_agent.utils import create_itemspace
 from recommender.engine.utils import load_last_module, NoSavedModuleError
 from recommender.errors import InsufficientRecommendationSpace, MissingComponentError
+from recommender.models import Service
 
 
-class ActionSelector:
+class ServiceSelector:
     """Responsible for strategy and selection of services to
     recommend, given output of the Actor"""
 
@@ -26,7 +28,7 @@ class ActionSelector:
 
         self._load_components()
 
-        self.itemspace, self.index_id_map = create_itemspace(self.service_embedder)
+        self.itemspace, self.index_id_map = self._create_itemspace()
         self.itemspace_size = self.itemspace.shape[0]
 
     def __call__(
@@ -37,7 +39,7 @@ class ActionSelector:
     ) -> Tuple[int]:
         """
         Based on weights_tensor, user and search_data, it selects services for
-         recommendation and create action out of them.
+         recommendation and returns them
 
         Args:
             K: number of recommended services
@@ -68,6 +70,14 @@ class ActionSelector:
             indices += [next(filter(lambda x: x not in indices, top_K_indices[k]))]
 
         return indices
+
+    def _create_itemspace(self) -> Tuple[torch.Tensor, pd.DataFrame]:
+        all_services = list(Service.objects.order_by("id"))
+        service_embedded_tensors, index_id_map = use_service_embedder(
+            all_services, self.service_embedder
+        )
+
+        return service_embedded_tensors, index_id_map
 
     def _load_components(self):
         try:

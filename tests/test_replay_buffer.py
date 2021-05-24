@@ -3,7 +3,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from recommender.engine.agents.rl_agent.action_inverter import ActionInverter
+from recommender.engine.agents.rl_agent.services2weights import Services2Weights
 from recommender.engine.agents.rl_agent.datasets.replay_buffer import (
     ReplayBuffer,
     collate_batch,
@@ -101,8 +101,7 @@ def test_replay_buffer(mongo):
         search_data_encoder=search_data_encoder,
     )
 
-    # ActionEncoder
-    action_inverter = ActionInverter(service_embedder=service_embedder)
+    services2weights = Services2Weights(service_embedder=service_embedder)
 
     # Reward Encoder
     reward_encoder = RewardEncoder()
@@ -110,7 +109,7 @@ def test_replay_buffer(mongo):
     sars_encoder = SarsEncoder(
         state_encoder=state_encoder,
         reward_encoder=reward_encoder,
-        action_inverter=action_inverter,
+        services2weights=services2weights,
     )
 
     for K in (2, 3):

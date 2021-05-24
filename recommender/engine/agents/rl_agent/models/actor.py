@@ -36,10 +36,10 @@ class Actor(nn.Module):
         """
         Args:
             K: number of services to recommend
-            SE: service embedding dimension and filters embedding dimension
+            SE: service embedding dimension
             UE: user embedding dimension
             I: itemspace size
-            service_sequence_embedder: pytorch module implementing history embedding
+            history_embedder: pytorch module implementing history embedding
             layer_sizes: list containing number of neurons in each hidden layer
         """
         super().__init__()
@@ -72,9 +72,7 @@ class Actor(nn.Module):
             state:
                 user: Embedded user content tensor of shape [batch_size, UE]
                 services_history: Services history tensor of shape [batch_size, N, SE]
-                filters: Embedded filters tensor of shape [batch_size, FE]
-                search_phrase: Embedded search phrase tensor of shape
-                 [batch_size, X, SPE]
+                search_data_mask: Batch of search data masks of shape [batch_size, I]
 
         Returns:
             weights: Weights tensor used for choosing action from the itemspace.

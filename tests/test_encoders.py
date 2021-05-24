@@ -1,6 +1,5 @@
 # pylint: disable-all
 
-import pytest
 import torch
 
 from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
@@ -13,17 +12,9 @@ from recommender.engine.models.autoencoders import (
     ServiceAutoEncoder,
     UserAutoEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
-    SearchPhraseEncoder,
-)
 from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
-from recommender.engine.preprocessing import (
-    precalculate_tensors,
-    create_transformer,
-    SERVICES,
-)
+
 from tests.factories.marketplace import ServiceFactory
-from tests.factories.populate_database import populate_users_and_services
 from tests.factories.search_data import SearchDataFactory
 from tests.factories.state import StateFactory
 

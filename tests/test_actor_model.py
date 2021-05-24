@@ -4,9 +4,6 @@ import torch
 
 from recommender.engine.agents.rl_agent.models.actor import Actor
 from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
-from recommender.engine.agents.rl_agent.models.search_phrase_embedder import (
-    SearchPhraseEmbedder,
-)
 
 
 def test_actor_proper_shape():

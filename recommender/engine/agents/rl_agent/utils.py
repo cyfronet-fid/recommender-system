@@ -137,7 +137,9 @@ def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]
 
 def iou(set1: set, set2: set) -> float:
     """Get intersection over union factor of two sets"""
-    return len(set1 & set2) / len(set1 | set2)
+    intersection = len(set1 & set2)
+    union = len(set1 | set2)
+    return intersection / union if union != 0 else 0
 
 
 def create_state(user: User, search_data: SearchData) -> State:

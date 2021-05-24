@@ -4,6 +4,7 @@ from mongoengine import (
     ListField,
     ReferenceField,
     Document,
+    BooleanField,
 )
 
 from .search_data import SearchData
@@ -15,3 +16,4 @@ class State(Document):
     user = ReferenceField(User, blank=True)
     services_history = ListField(ReferenceField(Service))
     search_data = ReferenceField(SearchData)
+    synthetic = BooleanField(default=False)

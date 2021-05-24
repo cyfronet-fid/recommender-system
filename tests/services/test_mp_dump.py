@@ -20,14 +20,15 @@ def test_load_and_drop_mp_dump(mongo, mp_dump_data):
         k: [mongo_model_to_json(x) for x in v] for k, v in mongo_objects.items()
     }
 
-    raw_mongo_objects_no_tensors = deepcopy(raw_mongo_objects)
+    raw_mongo_objects_no_internal_data = deepcopy(raw_mongo_objects)
 
-    for k, v in raw_mongo_objects_no_tensors.items():
+    for k, v in raw_mongo_objects_no_internal_data.items():
         if k == "services" or k == "users":
             for mongo_json_repr in v:
                 mongo_json_repr.pop("tensor", None)
+                mongo_json_repr.pop("synthetic", None)
 
-    assert raw_mongo_objects_no_tensors == mp_dump_data
+    assert raw_mongo_objects_no_internal_data == mp_dump_data
 
     # Some proper dereference model checks
     assert [
