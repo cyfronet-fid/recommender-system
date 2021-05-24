@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from recommender.engine.agents.rl_agent.action_selector import ActionSelector
+from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
 from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_embedder
 from recommender.errors import InsufficientRecommendationSpace
 from tests.factories.marketplace import ServiceFactory
@@ -59,13 +59,13 @@ def test_proper_initialization(
 
     FEATURES_DIM, _, SE = proper_parameters
     service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
-    action_selector = ActionSelector(service_embedder)
+    service_selector = ServiceSelector(service_embedder)
 
-    assert action_selector.itemspace_size == len(services)
-    assert action_selector.index_id_map.index.values.tolist() == list(
+    assert service_selector.itemspace_size == len(services)
+    assert service_selector.index_id_map.index.values.tolist() == list(
         range(len(services))
     )
-    assert action_selector.index_id_map.id.values.tolist() == list([2, 4, 6, 8])
+    assert service_selector.index_id_map.id.values.tolist() == list([2, 4, 6, 8])
     mock_torch_module_call.assert_called_once()
 
 
@@ -77,13 +77,13 @@ def test_call_with_matching_services(
 
     FEATURES_DIM, K, SE = proper_parameters
     service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
-    action_selector = ActionSelector(service_embedder)
+    service_selector = ServiceSelector(service_embedder)
 
-    assert action_selector(K, weights, mask=torch.ones(len(services))) == [4, 6]
-    assert action_selector(K, weights, mask=torch.Tensor([1, 1, 0, 1])) == [4, 2]
-    assert action_selector(K, weights, mask=torch.Tensor([1, 0, 0, 1])) == [2, 8]
-    assert action_selector(K, weights, mask=torch.Tensor([0, 0, 1, 1])) == [6, 8]
-    assert action_selector(K, weights, mask=torch.Tensor([0, 1, 0, 1])) == [4, 8]
+    assert service_selector(K, weights, mask=torch.ones(len(services))) == [4, 6]
+    assert service_selector(K, weights, mask=torch.Tensor([1, 1, 0, 1])) == [4, 2]
+    assert service_selector(K, weights, mask=torch.Tensor([1, 0, 0, 1])) == [2, 8]
+    assert service_selector(K, weights, mask=torch.Tensor([0, 0, 1, 1])) == [6, 8]
+    assert service_selector(K, weights, mask=torch.Tensor([0, 1, 0, 1])) == [4, 8]
 
 
 def test_raise_insufficient_recommendation_space(
@@ -94,8 +94,8 @@ def test_raise_insufficient_recommendation_space(
 
     FEATURES_DIM, K, SE = proper_parameters
     service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
-    action_selector = ActionSelector(service_embedder)
+    service_selector = ServiceSelector(service_embedder)
 
     with pytest.raises(InsufficientRecommendationSpace):
-        action_selector(K, weights, mask=torch.zeros(len(services)))
-        action_selector(K, weights, mask=torch.Tensor([0, 0, 0, 1]))
+        service_selector(K, weights, mask=torch.zeros(len(services)))
+        service_selector(K, weights, mask=torch.Tensor([0, 0, 0, 1]))

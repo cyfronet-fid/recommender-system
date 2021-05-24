@@ -15,7 +15,7 @@ from recommender.engine.agents.rl_agent.models.actor import (
     Actor,
 )
 from recommender.engine.agents.rl_agent.utils import create_state
-from recommender.engine.agents.rl_agent.action_selector import ActionSelector
+from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
 from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 
 RL_AGENT = "rl_agent"
@@ -31,13 +31,13 @@ class RLAgent(BaseAgent):
         actor_v1: Optional[Actor] = None,
         actor_v2: Optional[Actor] = None,
         state_encoder: Optional[StateEncoder] = None,
-        action_selector: Optional[ActionSelector] = None,
+        service_selector: Optional[ServiceSelector] = None,
     ) -> None:
         super().__init__()
         self.actor_v1 = actor_v1
         self.actor_v2 = actor_v2
         self.state_encoder = state_encoder
-        self.action_selector = action_selector
+        self.service_selector = service_selector
 
     def _load_models(self) -> None:
         """
@@ -58,9 +58,9 @@ class RLAgent(BaseAgent):
 
         # TODO: move this back to init (because now it takes time during
         #  each request!!! For now it has to be here because it breaks imports
-        #  when it is in the __init__)
+        #  when it's in __init__)
         self.state_encoder = self.state_encoder or StateEncoder()
-        self.action_selector = self.action_selector or ActionSelector()
+        self.service_selector = self.service_selector or ServiceSelector()
 
     def _for_logged_user(
         self, user: User, search_data: SearchData, K: int
@@ -85,7 +85,7 @@ class RLAgent(BaseAgent):
 
         search_data_mask = state_tensors[2][0]
 
-        recommended_service_ids = self.action_selector(
+        recommended_service_ids = self.service_selector(
             K, weights_tensor, search_data_mask
         )
 

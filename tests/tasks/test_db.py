@@ -25,7 +25,7 @@ def test_handle_db_dump(mongo, mp_dump_data):
             {
                 field: value
                 for field, value in mongo_model_to_json(x).items()
-                if field not in ("dataframe", "tensor")
+                if field not in ("dataframe", "tensor", "synthetic")
             }
             for x in v
         ]

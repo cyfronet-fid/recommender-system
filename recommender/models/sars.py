@@ -5,6 +5,7 @@ from mongoengine import (
     ReferenceField,
     Document,
     StringField,
+    BooleanField,
 )
 
 from .service import Service
@@ -16,3 +17,4 @@ class Sars(Document):
     action = ListField(ReferenceField(Service))
     reward = ListField(ListField(StringField()))
     next_state = ReferenceField(State)
+    synthetic = BooleanField(default=False)

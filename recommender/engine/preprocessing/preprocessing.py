@@ -130,7 +130,7 @@ def df_to_tensor(df, transformer, fit=False):
     return tensor, transformer
 
 
-def precalculate_tensors(objects, transformer, fit=True):
+def precalculate_tensors(objects, transformer, fit=True, save=True):
     """Precalculate tensors for MongoEngine models"""
 
     objects = list(objects)
@@ -153,7 +153,7 @@ def precalculate_tensors(objects, transformer, fit=True):
         objects[i].tensor = tensors[i].tolist()
         objects[i].save()
 
-    if fit:
+    if fit and save:  # fit here for backwards compatibility
         save_transformer(transformer, collection_name)
 
     return transformer

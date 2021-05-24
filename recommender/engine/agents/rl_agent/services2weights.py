@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, invalid-name, no-member, too-few-public-methods
+# pylint: disable=missing-module-docstring, invalid-name, no-member, too-few-public-methods, fixme
 from typing import List
 
 import torch
@@ -12,9 +12,10 @@ from recommender.engine.utils import load_last_module, NoSavedModuleError
 from recommender.errors import MissingComponentError
 
 
-class ActionInverter:
-    """This class converts action as ids of K services to
-    full weight matrix (of shape [K, SE] as returned by actor.
+class Services2Weights:
+    """This class converts list of services (of size K)
+    represented as their DB ids to
+    full weight matrix (of shape [K, SE] as returned by actor. It works on batches.
     It should be used when creating a dataset for RL agent"""
 
     def __init__(self, service_embedder=None):

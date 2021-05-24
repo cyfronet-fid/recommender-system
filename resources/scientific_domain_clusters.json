@@ -1,0 +1,258 @@
+{
+  "Aerospace Engineering":[
+    "physics"
+  ],
+  "Agricultural Biotechnology":[
+    "earth"
+  ],
+  "Agricultural Sciences":[
+    "earth"
+  ],
+  "Agriculture, Forestry & Fisheries":[
+    "earth"
+  ],
+  "Animal & Dairy Sciences":[
+    "earth"
+  ],
+  "Arts":[
+    "humanities"
+  ],
+  "Basic Medicine":[
+    "medicine"
+  ],
+  "Biological Sciences":[
+    "medicine",
+    "biology"
+  ],
+  "Chemical Engineering":[
+    "medicine",
+    "biology"
+  ],
+  "Chemical Sciences":[
+    "medicine",
+    "biology"
+  ],
+  "Civil Engineering":[
+    "earth"
+  ],
+  "Clinical Medicine":[
+    "medicine"
+  ],
+  "Computer & Information Sciences":[
+    "computer_science"
+  ],
+  "Digital Archives":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Earth & Related Environmental Sciences":[
+    "earth"
+  ],
+  "Economics & Business":[
+    "business"
+  ],
+  "Economics, Finance & Business":[
+    "business"
+  ],
+  "Educational Sciences":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science"
+  ],
+  "Electrical, Electronic & Information Engineering":[
+    "physics"
+  ],
+  "Engineering & Technology":[
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Environmental Biotechnology":[
+    "earth",
+    "biology"
+  ],
+  "Environmental Engineering":[
+    "earth"
+  ],
+  "Generic":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Health Sciences":[
+    "medicine"
+  ],
+  "History & Archaeology":[
+    "humanities"
+  ],
+  "Humanities":[
+    "humanities"
+  ],
+  "Industrial Biotechnology":[
+    "business",
+    "medicine",
+    "biology"
+  ],
+  "Information Sciences":[
+    "computer_science"
+  ],
+  "Infrastructure Development":[
+    "computer_science"
+  ],
+  "Languages & Literature":[
+    "humanities"
+  ],
+  "Law":[
+    "humanities"
+  ],
+  "Materials Engineering":[
+    "physics"
+  ],
+  "Mathematics":[
+    "physics",
+    "computer_science"
+  ],
+  "Mechanical Engineering":[
+    "physics",
+    "business"
+  ],
+  "Media & Communications":[
+    "humanities"
+  ],
+  "Medical & Health Sciences":[
+    "medicine"
+  ],
+  "Medical Biotechnology":[
+    "medicine",
+    "biology"
+  ],
+  "Medical Engineering":[
+    "medicine",
+    "biology"
+  ],
+  "Miscellaneous":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Nano-technology":[
+    "medicine",
+    "biology",
+    "physics"
+  ],
+  "Nanotechnology":[
+    "medicine",
+    "biology",
+    "physics"
+  ],
+  "Natural Sciences":[
+    "earth",
+    "medicine",
+    "biology",
+    "physics"
+  ],
+  "Other":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Other Agricultural Sciences":[
+    "earth"
+  ],
+  "Other Engineering & Technology Sciences":[
+    "business"
+  ],
+  "Other Humanities":[
+    "humanities"
+  ],
+  "Other Medical Science":[
+    "medicine"
+  ],
+  "Other Medical Sciences":[
+    "medicine"
+  ],
+  "Other Natural Sciences":[
+    "earth",
+    "medicine",
+    "biology",
+    "physics"
+  ],
+  "Other Social Sciences":[
+    "humanities"
+  ],
+  "Other Support Activities":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Philosophy, Ethics & Religion":[
+    "humanities"
+  ],
+  "Physical Sciences":[
+    "earth",
+    "medicine",
+    "biology",
+    "physics"
+  ],
+  "Political Sciences":[
+    "humanities"
+  ],
+  "Psychology":[
+    "humanities"
+  ],
+  "Social & Economic Geography":[
+    "humanities",
+    "business"
+  ],
+  "Social Sciences":[
+    "humanities"
+  ],
+  "Sociology":[
+    "humanities"
+  ],
+  "Support Activities":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Training/Demonstrations":[
+    "humanities",
+    "earth",
+    "medicine",
+    "biology",
+    "physics",
+    "computer_science",
+    "business"
+  ],
+  "Veterinary Sciences":[
+    "humanities"
+  ]
+}

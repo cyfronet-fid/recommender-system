@@ -6,7 +6,7 @@ from typing import Dict, Union, List
 
 import torch
 
-from recommender.engine.agents.rl_agent.action_inverter import ActionInverter
+from recommender.engine.agents.rl_agent.services2weights import Services2Weights
 from recommender.models import Sars
 from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
     RewardEncoder,
@@ -25,10 +25,10 @@ REWARD = "reward"
 class SarsEncoder:
     """SARS Encoder"""
 
-    def __init__(self, state_encoder=None, reward_encoder=None, action_inverter=None):
+    def __init__(self, state_encoder=None, reward_encoder=None, services2weights=None):
         self.state_encoder = state_encoder
         self.reward_encoder = reward_encoder
-        self.action_inverter = action_inverter
+        self.services2weights = services2weights
 
         self._load_components()
 
@@ -53,9 +53,11 @@ class SarsEncoder:
         states_tensors = tuple(t[: len(states)] for t in all_states_tensors)
         next_states_tensors = tuple(t[len(states) :] for t in all_states_tensors)
 
-        actions = [[s.id for s in SARS.action] for SARS in SARSes]
+        service_ids = [
+            [s.id for s in SARS.action] for SARS in SARSes
+        ]  # "actions" from DB
 
-        action_tensors = self.action_inverter(actions)
+        weight_tensors = self.services2weights(service_ids)  # actual action
 
         rewards = [SARS.reward for SARS in SARSes]
         reward_tensors = self.reward_encoder(rewards)
@@ -66,7 +68,7 @@ class SarsEncoder:
                 SERVICES_HISTORY: states_tensors[1],
                 MASK: states_tensors[2],
             },
-            ACTION: action_tensors,
+            ACTION: weight_tensors,
             REWARD: reward_tensors,
             NEXT_STATE: {
                 USER: next_states_tensors[0],
@@ -80,4 +82,4 @@ class SarsEncoder:
     def _load_components(self):
         self.state_encoder = self.state_encoder or StateEncoder()
         self.reward_encoder = self.reward_encoder or RewardEncoder()
-        self.action_inverter = self.action_inverter or ActionInverter()
+        self.services2weights = self.services2weights or Services2Weights()
