@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, no-member, too-few-public-methods, no-name-in-module
+# pylint: disable=missing-module-docstring, no-member, too-few-public-methods, no-name-in-module, invalid-name
 
 """Implementation of the State Encoder"""
 
