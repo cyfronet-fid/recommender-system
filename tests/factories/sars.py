@@ -1,6 +1,6 @@
 # pylint: disable-all
 
-from factory import SubFactory, LazyFunction, lazy_attribute
+from factory import SubFactory, LazyFunction, lazy_attribute, Trait
 from factory.mongoengine import MongoEngineFactory
 from factory.random import reseed_random, random
 from faker import Factory as FakerFactory
@@ -36,6 +36,9 @@ class SarsFactory(MongoEngineFactory):
         return StateFactory(
             user=self.state.user,
             services_history=self.state.services_history + self.action,
-            last_searchphrase=self.state.last_searchphrase,
-            last_filters=self.state.last_filters,
+            last_search_data=self.state.last_search_data,
         )
+
+    class Params:
+        K_2 = Trait(action=LazyFunction(lambda: ServiceFactory.create_batch(2)))
+        K_3 = Trait(action=LazyFunction(lambda: ServiceFactory.create_batch(3)))

@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, useless-super-delegation
+# pylint: disable=missing-module-docstring, useless-super-delegation, arguments-differ
 
 import torch
 
@@ -7,6 +7,7 @@ from recommender.engine.agents.rl_agent.models.base_lstm_embedder import (
 )
 
 ACTION_EMBEDDER = "Action Embedder"
+
 
 class ActionEmbedder(BaseLSTMEmbedder):
     """

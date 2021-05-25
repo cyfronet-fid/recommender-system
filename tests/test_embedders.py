@@ -118,6 +118,7 @@ def test_state_embedder(mongo, mocker):
     assert encoded_state[2].shape == torch.Size([SE])
     assert encoded_state[3].shape[1] == SPE
 
+
 def test_action_embedder(mongo, mocker):
     SE = 128
     for K in list(PANEL_ID_TO_K.values()):

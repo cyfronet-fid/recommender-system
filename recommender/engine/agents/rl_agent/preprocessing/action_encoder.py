@@ -15,8 +15,8 @@ class ActionEncoder:
     """Action Encoder"""
 
     def __init__(self, service_embedder: Optional[torch.nn.Module] = None):
-        self.service_embedder = (
-            service_embedder or create_embedder(load_last_module(SERVICES_AUTOENCODER))
+        self.service_embedder = service_embedder or create_embedder(
+            load_last_module(SERVICES_AUTOENCODER)
         )
 
     def __call__(self, action: List[Service]) -> torch.Tensor:
