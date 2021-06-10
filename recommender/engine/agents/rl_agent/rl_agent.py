@@ -1,5 +1,5 @@
 # pylint: disable=no-self-use, too-few-public-methods, no-member
-# pylint: disable=invalid-name, consider-using-generator
+# pylint: disable=invalid-name, consider-using-generator, fixme
 """RL Agent Recommender"""
 
 from typing import Tuple, Optional
@@ -82,8 +82,11 @@ class RLAgent(BaseAgent):
         state = create_state(user, search_data)
         state_tensors = self.state_encoder([state])
         weights_tensor = self._use_actor(state_tensors, actor)
+
+        search_data_mask = state_tensors[2][0]
+
         recommended_service_ids = self.action_selector(
-            K, weights_tensor, user, search_data
+            K, weights_tensor, search_data_mask
         )
 
         return recommended_service_ids
@@ -108,8 +111,6 @@ class RLAgent(BaseAgent):
             -> handle inference
             -> prepare output.
         """
-
-        state_tensors = tuple([t.unsqueeze(0) for t in state_tensors])
 
         with torch.no_grad():
             weights_tensor = actor(state_tensors)

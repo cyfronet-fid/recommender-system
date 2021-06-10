@@ -36,7 +36,7 @@ class SarsFactory(MongoEngineFactory):
         return StateFactory(
             user=self.state.user,
             services_history=self.state.services_history + self.action,
-            last_search_data=self.state.last_search_data,
+            search_data=self.state.search_data,
         )
 
     class Params:

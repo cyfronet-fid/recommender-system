@@ -10,17 +10,11 @@ from recommender.engine.utils import load_last_module, NoSavedModuleError
 from recommender.errors import (
     MissingComponentError,
     NoHistoryEmbedderForK,
-    NoSearchPhraseEmbedderForK,
 )
 from recommender.engine.agents.rl_agent.models.history_embedder import (
     HistoryEmbedder,
     HISTORY_EMBEDDER_V1,
     HISTORY_EMBEDDER_V2,
-)
-from recommender.engine.agents.rl_agent.models.search_phrase_embedder import (
-    SearchPhraseEmbedder,
-    SEARCH_PHRASE_EMBEDDER_V1,
-    SEARCH_PHRASE_EMBEDDER_V2,
 )
 
 ACTOR_V1 = "actor_v1"
@@ -35,8 +29,7 @@ class Actor(nn.Module):
         K: int,
         SE: int,
         UE: int,
-        SPE: int,
-        search_phrase_embedder: Optional[SearchPhraseEmbedder] = None,
+        I: int,
         history_embedder: Optional[HistoryEmbedder] = None,
         layer_sizes: Tuple[int] = (256, 512, 256),
     ):
@@ -45,8 +38,8 @@ class Actor(nn.Module):
             K: number of services to recommend
             SE: service embedding dimension and filters embedding dimension
             UE: user embedding dimension
-            SPE search phrase embedding dimension
-            history_embedder: pytorch module implementing history embedding
+            I: itemspace size
+            service_sequence_embedder: pytorch module implementing history embedding
             layer_sizes: list containing number of neurons in each hidden layer
         """
         super().__init__()
@@ -55,11 +48,10 @@ class Actor(nn.Module):
         self.SE = SE
 
         self.history_embedder = history_embedder
-        self.search_phrase_embedder = search_phrase_embedder
 
         self._load_models()
 
-        layers = [nn.Linear(2 * SE + UE + SPE, layer_sizes[0]), nn.ReLU()]  # FE = SE
+        layers = [nn.Linear(UE + SE + I, layer_sizes[0]), nn.ReLU()]
         layers += list(
             chain.from_iterable(
                 [
@@ -72,7 +64,7 @@ class Actor(nn.Module):
 
         self.network = nn.Sequential(*layers)
 
-    def forward(self, state: Tuple[(torch.Tensor,) * 4]) -> torch.Tensor:
+    def forward(self, state: Tuple[(torch.Tensor,) * 3]) -> torch.Tensor:
         """
         Performs forward propagation.
 
@@ -88,11 +80,10 @@ class Actor(nn.Module):
             weights: Weights tensor used for choosing action from the itemspace.
         """
 
-        user, services_history, filters, search_phrase = state
+        user, services_history, mask = state
 
         services_history = self.history_embedder(services_history)
-        search_phrase = self.search_phrase_embedder(search_phrase)
-        x = torch.cat([user, services_history, filters, search_phrase], dim=1)
+        x = torch.cat([user, services_history, mask], dim=1)
         x = self.network(x)
 
         weights = x.reshape(-1, self.K, self.SE)
@@ -110,15 +101,5 @@ class Actor(nn.Module):
                 history_embedder_name
             )
 
-            if self.K == 3:
-                search_phrase_embedder_name = SEARCH_PHRASE_EMBEDDER_V1
-            elif self.K == 2:
-                search_phrase_embedder_name = SEARCH_PHRASE_EMBEDDER_V2
-            else:
-                raise NoSearchPhraseEmbedderForK
-            self.search_phrase_embedder = (
-                self.search_phrase_embedder
-                or load_last_module(search_phrase_embedder_name)
-            )
         except NoSavedModuleError as no_saved_module:
             raise MissingComponentError from no_saved_module

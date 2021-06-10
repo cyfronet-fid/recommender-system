@@ -1,4 +1,4 @@
-# pylint: disable=duplicate-code, wrong-import-position
+# pylint: disable=duplicate-code, wrong-import-position, fixme, unused-import
 
 """Models for the recommendations endpoint"""
 
@@ -15,11 +15,21 @@ from settings import DevelopmentConfig
 from .common import api
 
 
-connect(host=DevelopmentConfig.MONGODB_HOST)
-examples = _get_search_data_examples(
-    k=max(list(PANEL_ID_TO_K.values())), deterministic=True
-)
-disconnect()
+# TODO: absolutely cannot be here
+# connect(host=DevelopmentConfig.MONGODB_HOST)
+# examples = _get_search_data_examples(
+#     k=max(list(PANEL_ID_TO_K.values())), deterministic=True
+# )
+# disconnect()
+
+examples = {
+    "categories": [1, 2, 3],
+    "geographical_availabilities": [1, 2, 3],
+    "providers": [1, 2, 3],
+    "related_platforms": [1, 2, 3],
+    "scientific_domains": [1, 2, 3],
+    "target_users": [1, 2, 3],
+}
 
 search_data = api.model(
     "Search Data",

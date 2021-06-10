@@ -3,16 +3,15 @@
 import pytest
 
 from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from recommender.engine.preprocessing import load_last_transformer, SERVICES
+from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
+    SearchDataEncoder,
+)
 from recommender.engine.utils import save_module
 from recommender.models import Service
 from recommender.engine.agents.rl_agent.rl_agent import RLAgent
 from recommender.engine.agents.rl_agent.models.actor import Actor, ACTOR_V1, ACTOR_V2
 from recommender.engine.agents.rl_agent.action_selector import ActionSelector
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
-    StateEncoder,
-    MaskEncoder,
-)
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 from recommender.engine.models.autoencoders import (
     UserAutoEncoder,
     ServiceAutoEncoder,
@@ -29,12 +28,6 @@ from recommender.engine.agents.rl_agent.models.search_phrase_embedder import (
     SearchPhraseEmbedder,
     SEARCH_PHRASE_EMBEDDER_V1,
     SEARCH_PHRASE_EMBEDDER_V2,
-)
-from recommender.engine.agents.rl_agent.preprocessing.filters_encoder import (
-    FiltersEncoder,
-)
-from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
-    SearchPhraseEncoder,
 )
 from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from recommender.models import User
@@ -53,15 +46,11 @@ def test_rl_agent_call(mongo):
 
     precalc_users_and_service_tensors()
 
-    service_transformer = load_last_transformer(SERVICES)
-
     UOH = len(User.objects[0].tensor)
     UE = 32
 
     SOH = len(Service.objects[0].tensor)
     SE = 64
-
-    SPE = 100
 
     user_autoencoder = UserAutoEncoder(features_dim=UOH, embedding_dim=UE)
     user_embedder = create_embedder(user_autoencoder)
@@ -71,49 +60,38 @@ def test_rl_agent_call(mongo):
     service_embedder = create_embedder(service_auto_encoder)
     save_module(module=service_auto_encoder, name=SERVICES_AUTOENCODER)
 
+    I = len(Service.objects)
+
     actor_v1_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
     save_module(module=actor_v1_history_embedder, name=HISTORY_EMBEDDER_V1)
-
-    actor_v1_search_phrase_embedder = SearchPhraseEmbedder(
-        SPE=SPE, num_layers=3, dropout=0.5
-    )
-    save_module(module=actor_v1_search_phrase_embedder, name=SEARCH_PHRASE_EMBEDDER_V1)
 
     actor_v1 = Actor(
         K=3,
         SE=SE,
         UE=UE,
-        SPE=SPE,
+        I=I,
         history_embedder=actor_v1_history_embedder,
-        search_phrase_embedder=actor_v1_search_phrase_embedder,
     )
     save_module(module=actor_v1, name=ACTOR_V1)
 
     actor_v2_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
     save_module(module=actor_v2_history_embedder, name=HISTORY_EMBEDDER_V2)
 
-    actor_v2_search_phrase_embedder = SearchPhraseEmbedder(
-        SPE=SPE, num_layers=3, dropout=0.5
-    )
-    save_module(module=actor_v2_search_phrase_embedder, name=SEARCH_PHRASE_EMBEDDER_V2)
-
     actor_v2 = Actor(
         K=2,
         SE=SE,
         UE=UE,
-        SPE=SPE,
+        I=I,
         history_embedder=actor_v2_history_embedder,
-        search_phrase_embedder=actor_v2_search_phrase_embedder,
     )
     save_module(module=actor_v2, name=ACTOR_V2)
 
-    word_to_vector = None
+    search_data_encoder = SearchDataEncoder()
 
-    mask_encoder = MaskEncoder()
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        mask_encoder=mask_encoder,
+        search_data_encoder=search_data_encoder,
     )
 
     action_selector = ActionSelector(service_embedder=service_embedder)

@@ -28,7 +28,7 @@ def test_get_service_indices(service_embeddings, index_id_map):
     assert get_service_indices(index_id_map, [4, 6]) == [1, 2]
     assert get_service_indices(index_id_map, [10]) == []
     assert get_service_indices(index_id_map, []) == []
-    assert get_service_indices(index_id_map, [8, 2]) == [0, 3]
+    assert get_service_indices(index_id_map, [8, 2]) == [3, 0]
 
 
 def test_iou():

@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, too-many-arguments, no-member
+# pylint: disable=invalid-name, too-many-arguments, no-member, fixme
 
 """Critic Model implementation"""
 from itertools import chain
@@ -10,14 +10,13 @@ from torch.nn import Linear, ReLU, Sequential
 from recommender.errors import (
     MissingComponentError,
     NoHistoryEmbedderForK,
-    NoSearchPhraseEmbedderForK,
+    NoActionEmbedderForK,
 )
 from recommender.engine.utils import load_last_module, NoSavedModuleError
-from recommender.engine.agents.rl_agent.models.action_embedder import ActionEmbedder
-from recommender.engine.agents.rl_agent.models.search_phrase_embedder import (
-    SearchPhraseEmbedder,
-    SEARCH_PHRASE_EMBEDDER_V1,
-    SEARCH_PHRASE_EMBEDDER_V2,
+from recommender.engine.agents.rl_agent.models.action_embedder import (
+    ActionEmbedder,
+    ACTION_EMBEDDER_V1,
+    ACTION_EMBEDDER_V2,
 )
 from recommender.engine.agents.rl_agent.models.history_embedder import (
     HistoryEmbedder,
@@ -34,8 +33,7 @@ class Critic(torch.nn.Module):
         K: int,
         SE: int,
         UE: int,
-        SPE: int,
-        search_phrase_embedder: Optional[SearchPhraseEmbedder] = None,
+        I: int,
         history_embedder: Optional[HistoryEmbedder] = None,
         action_embedder: Optional[ActionEmbedder] = None,
         layer_sizes: Tuple[int] = (256, 512, 256),
@@ -44,16 +42,12 @@ class Critic(torch.nn.Module):
         self.K = K
         self.SE = SE
 
-        self.search_phrase_embedder = search_phrase_embedder
         self.history_embedder = history_embedder
         self.action_embedder = action_embedder
 
         self._load_models()
 
-        layers = [
-            Linear(3 * SE + UE + SPE, layer_sizes[0]),
-            ReLU(),
-        ]  # 3 * SE because it includes filters, services and action
+        layers = [Linear(UE + SE + I + SE, layer_sizes[0]), ReLU()]
         layers += list(
             chain.from_iterable(
                 [
@@ -66,7 +60,9 @@ class Critic(torch.nn.Module):
 
         self.network = Sequential(*layers)
 
-    def forward(self, state: Tuple[torch.Tensor], action: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, state: Tuple[(torch.Tensor,) * 3], action: torch.Tensor
+    ) -> torch.Tensor:
         """
         Performs forward propagation.
 
@@ -87,18 +83,17 @@ class Critic(torch.nn.Module):
                   - N is user clicked services history length
                   - SE is service content tensor embedding dim
                   - SPE is search phrase tensor embedding dim
-                  - K is the nmber of services in the recommendation
+                  - K is the number of services in the recommendation
 
         Returns:
             action_value: Batch of action values - tensor of shape [batch_size, 1]
         """
-        user, services_history, filters, search_phrase = state
+        user, services_history, mask = state
 
         services_history = self.history_embedder(services_history)
-        search_phrase = self.search_phrase_embedder(search_phrase)
         action = self.action_embedder(action)
 
-        tensors_to_concat = [user, services_history, filters, search_phrase, action]
+        tensors_to_concat = [user, services_history, mask, action]
         network_input = torch.cat(tensors_to_concat, dim=1)
         action_value = self.network(network_input)
 
@@ -117,16 +112,13 @@ class Critic(torch.nn.Module):
             )
 
             if self.K == 3:
-                search_phrase_embedder_name = SEARCH_PHRASE_EMBEDDER_V1
+                action_embedder_name = ACTION_EMBEDDER_V1
             elif self.K == 2:
-                search_phrase_embedder_name = SEARCH_PHRASE_EMBEDDER_V2
+                action_embedder_name = ACTION_EMBEDDER_V2
             else:
-                raise NoSearchPhraseEmbedderForK
-            self.search_phrase_embedder = (
-                self.search_phrase_embedder
-                or load_last_module(search_phrase_embedder_name)
+                raise NoActionEmbedderForK
+            self.action_embedder = self.action_embedder or load_last_module(
+                action_embedder_name
             )
-
-            self.action_embedder = self.action_embedder or ActionEmbedder(self.SE)
         except NoSavedModuleError as no_saved_module:
             raise MissingComponentError from no_saved_module
