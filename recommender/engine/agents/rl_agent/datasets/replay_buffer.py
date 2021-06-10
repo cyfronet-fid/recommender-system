@@ -14,8 +14,7 @@ from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
     STATE,
     USER,
     SERVICES_HISTORY,
-    FILTERS,
-    SEARCH_PHRASE,
+    MASKS,
     ACTION,
     REWARD,
     NEXT_STATE,
@@ -42,7 +41,7 @@ class ReplayBuffer(Dataset):
 
         SARSes = list(SARSes)
         SARSes = list(filter(lambda sars: len(sars.action) == K, SARSes))
-        self.examples = [sars_encoder(SARS) for SARS in SARSes]
+        self.examples = self.sars_encoder(SARSes)
 
     def __getitem__(self, index):
         return self.examples[index]
@@ -56,40 +55,30 @@ class ReplayBuffer(Dataset):
 
 def collate_batch(batch):
     collated_batch = {
-        STATE: {
-            USER: [],
-            SERVICES_HISTORY: [],
-            FILTERS: [],
-            SEARCH_PHRASE: [],
-        },
+        STATE: {USER: [], SERVICES_HISTORY: [], MASKS: []},
         ACTION: [],
         REWARD: [],
-        NEXT_STATE: {
-            USER: [],
-            SERVICES_HISTORY: [],
-            FILTERS: [],
-            SEARCH_PHRASE: [],
-        },
+        NEXT_STATE: {USER: [], SERVICES_HISTORY: [], MASKS: []},
     }
 
     # Lists making
     for example in batch:
         for key1 in (STATE, NEXT_STATE):
-            for key2 in (USER, SERVICES_HISTORY, FILTERS, SEARCH_PHRASE):
+            for key2 in (USER, SERVICES_HISTORY, MASKS):
                 collated_batch[key1][key2].append(example[key1][key2])
         collated_batch[ACTION].append(example[ACTION])
         collated_batch[REWARD].append(example[REWARD])
 
     # Stacking
     for key1 in (STATE, NEXT_STATE):
-        for key2 in (USER, FILTERS):
+        for key2 in (USER, MASKS):
             collated_batch[key1][key2] = torch.stack(collated_batch[key1][key2])
     collated_batch[ACTION] = torch.stack(collated_batch[ACTION])
     collated_batch[REWARD] = torch.stack(collated_batch[REWARD])
 
     # Padding
     for key1 in (STATE, NEXT_STATE):
-        for key2 in (SERVICES_HISTORY, SEARCH_PHRASE):
+        for key2 in (SERVICES_HISTORY,):
             collated_batch[key1][key2] = pad_sequence(
                 collated_batch[key1][key2], batch_first=True
             )

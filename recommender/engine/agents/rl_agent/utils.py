@@ -138,36 +138,35 @@ def create_state(user: User, search_data: SearchData) -> State:
     return state
 
 
-def use_user_embedder(user: User, user_embedder: torch.nn.Module) -> torch.Tensor:
+def use_user_embedder(
+    users: List[User], user_embedder: torch.nn.Module
+) -> torch.Tensor:
     """
-    User cannot be directly embedded as a single example batch because it
-     is not handled by torch BatchNorm1D. To embedd it successfully it has
-     to be multiplied and embedded after it. Finally only one embedded
-     tensor is returned.
-
-    There is a "safe_batch_size" constant that has been arbitrarily set to
-     64 (there are some proofs that batchnorm can perform poorly if
-     batch_size is small (<32). It is probably important during training
-     - not inference - but this part of code will need some attention
-     during polishing this project. It is possible that safe_batch_size
-     should be same as batch_size during training. So, to sum it up, it's a
-      TODO)
+    # User cannot be directly embedded as a single example batch because it
+    #  is not handled by torch BatchNorm1D. To embedd it successfully it has
+    #  to be multiplied and embedded after it. Finally only one embedded
+    #  tensor is returned.
+    #
+    # There is a "safe_batch_size" constant that has been arbitrarily set to
+    #  64 (there are some proofs that batchnorm can perform poorly if
+    #  batch_size is small (<32). It is probably important during training
+    #  - not inference - but this part of code will need some attention
+    #  during polishing this project. It is possible that safe_batch_size
+    #  should be same as batch_size during training. So, to sum it up, it's a
+    #   TODO)
+    # TODO remove above bullshit
 
     Args:
-        user: MongoEngine User object.
+        users: List of MongoEngine User objects.
         user_embedder: User Embedder model.
 
     Returns:
-        embedded_user_tensor: Embedded user tensor
+        embedded_user_tensor: Embedded user tensors
     """
 
-    safe_batch_size = 64
-    user_tensor = torch.Tensor(user.tensor)
-    user_tensors_batch = torch.stack([user_tensor] * safe_batch_size, dim=0)
+    user_tensors_batch = torch.Tensor([user.tensor for user in users])
 
     with torch.no_grad():
         embedded_user_tensors_batch = user_embedder(user_tensors_batch)
 
-    embedded_user_tensor = embedded_user_tensors_batch[0]
-
-    return embedded_user_tensor
+    return embedded_user_tensors_batch

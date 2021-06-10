@@ -9,7 +9,10 @@ from recommender.models import Service
 from recommender.engine.agents.rl_agent.rl_agent import RLAgent
 from recommender.engine.agents.rl_agent.models.actor import Actor, ACTOR_V1, ACTOR_V2
 from recommender.engine.agents.rl_agent.action_selector import ActionSelector
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
+    StateEncoder,
+    MaskEncoder,
+)
 from recommender.engine.models.autoencoders import (
     UserAutoEncoder,
     ServiceAutoEncoder,
@@ -105,17 +108,12 @@ def test_rl_agent_call(mongo):
     save_module(module=actor_v2, name=ACTOR_V2)
 
     word_to_vector = None
-    search_phrase_encoder = SearchPhraseEncoder(word_to_vector=word_to_vector)
 
-    filters_encoder = FiltersEncoder(
-        service_transformer=service_transformer, service_embedder=service_embedder
-    )
-
+    mask_encoder = MaskEncoder()
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_phrase_encoder=search_phrase_encoder,
-        filters_encoder=filters_encoder,
+        mask_encoder=mask_encoder,
     )
 
     action_selector = ActionSelector(service_embedder=service_embedder)

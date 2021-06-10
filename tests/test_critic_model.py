@@ -19,7 +19,10 @@ from recommender.engine.agents.rl_agent.preprocessing.filters_encoder import (
 from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
     SearchPhraseEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
+    StateEncoder,
+    MaskEncoder,
+)
 from recommender.engine.models.autoencoders import (
     UserAutoEncoder,
     create_embedder,
@@ -44,9 +47,6 @@ def test_critic(mongo):
     precalc_users_and_service_tensors()
     state.reload()
     action = Service.objects[:3]
-
-    # Service transformer
-    service_transformer = load_last_transformer(SERVICES)
 
     # Constants
     UOH = len(User.objects.first().tensor)
@@ -83,20 +83,13 @@ def test_critic(mongo):
     history_embedder_v2 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
     save_module(module=history_embedder_v2, name=HISTORY_EMBEDDER_V2)
 
-    # SearchPhraseEncoder
-    search_phrase_encoder = SearchPhraseEncoder(dim=SPE)
-
-    # FiltersEncoder
-    filters_encoder = FiltersEncoder(
-        service_transformer=service_transformer, service_embedder=service_embedder
-    )
-
     # StateEncoder
+    mask_encoder = MaskEncoder()
+
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_phrase_encoder=search_phrase_encoder,
-        filters_encoder=filters_encoder,
+        mask_encoder=mask_encoder,
     )
 
     # ActionEncoder
@@ -141,10 +134,7 @@ def test_critic(mongo):
 
     for batch_size in (1, 64):
         # Input
-        state_tensors = state_encoder(state)
-        state_tensors_batch = tuple(
-            [torch.stack([t] * batch_size) for t in state_tensors]
-        )
+        state_tensors_batch = state_encoder([state])
 
         action_tensor = action_encoder(action)
         action_tensor_batch = torch.stack([action_tensor] * batch_size)
