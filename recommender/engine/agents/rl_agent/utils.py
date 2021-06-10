@@ -10,7 +10,7 @@ import torch.nn
 from graphviz import Digraph
 from mongoengine import QuerySet
 
-from recommender.models import State, SearchData, User
+from recommender.models import State, SearchData, User, Service
 from recommender.models import UserAction
 from recommender.services.services_history_generator import generate_services_history
 
@@ -80,6 +80,19 @@ def generate_tree(user_action: UserAction) -> Digraph:
     return _generate_tree(user_action, graph)
 
 
+def create_index_id_map(services: Union[Iterable, QuerySet]):
+    return pd.DataFrame([s.id for s in services], columns=["id"])
+
+
+def create_itemspace(embedder: torch.nn.Module) -> Tuple[torch.Tensor, pd.DataFrame]:
+    all_services = list(Service.objects.order_by("id"))
+    service_embedded_tensors, index_id_map = use_service_embedder(
+        all_services, embedder
+    )
+
+    return service_embedded_tensors, index_id_map
+
+
 def use_service_embedder(
     services: Union[Iterable, QuerySet], embedder: torch.nn.Module
 ) -> Tuple[torch.Tensor, pd.DataFrame]:
@@ -100,16 +113,26 @@ def use_service_embedder(
     with torch.no_grad():
         embedded_services = embedder(one_hot_service_tensors)
 
-    index_id_map = pd.DataFrame([s.id for s in services], columns=["id"])
+    index_id_map = create_index_id_map(services)
 
     return embedded_services, index_id_map
 
 
 def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]:
     """Given a mapping between indices in the embedding and
-    database ids returns indices of services with given ids.
-    NOTE: Always return indices in alphanumerical order!"""
-    return index_id_map[index_id_map.id.isin(ids)].index.values.tolist()
+    database ids returns indices of services with given ids."""
+
+    id_index_map = pd.Series(index_id_map["id"].index.values, index=index_id_map["id"])
+
+    # Below intersection is necessary to avoid key error in pandas .loc[]
+    # Checking for existence in set is O(1) because it's hash-based,
+    # so the overall complexity is O(len(ids))
+    possible_values = set(id_index_map.index.values.tolist())
+    valid_ids = [x for x in ids if x in possible_values]
+
+    indices = id_index_map.loc[valid_ids].values.reshape(-1).tolist()
+
+    return indices
 
 
 def iou(set1: set, set2: set) -> float:
@@ -132,7 +155,7 @@ def create_state(user: User, search_data: SearchData) -> State:
     state = State(
         user=user,
         services_history=generate_services_history(user),
-        last_search_data=search_data,
+        search_data=search_data,
     )
 
     return state
@@ -154,7 +177,7 @@ def use_user_embedder(
     #  during polishing this project. It is possible that safe_batch_size
     #  should be same as batch_size during training. So, to sum it up, it's a
     #   TODO)
-    # TODO remove above bullshit
+    # TODO remove above bullshit XD
 
     Args:
         users: List of MongoEngine User objects.

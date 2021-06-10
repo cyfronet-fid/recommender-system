@@ -28,6 +28,14 @@ class NoHistoryEmbedderForK(RecommendationEngineError):
         )
 
 
+class NoActionEmbedderForK(RecommendationEngineError):
+    def message(self):  # pragma: no cover
+        return (
+            "There is no ActionEmbedder for used K (number of services in"
+            " recommendation)."
+        )
+
+
 class NoSearchPhraseEmbedderForK(RecommendationEngineError):
     def message(self):  # pragma: no cover
         return (

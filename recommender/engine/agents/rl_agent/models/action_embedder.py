@@ -6,7 +6,8 @@ from recommender.engine.agents.rl_agent.models.base_lstm_embedder import (
     BaseLSTMEmbedder,
 )
 
-ACTION_EMBEDDER = "Action Embedder"
+ACTION_EMBEDDER_V1 = "Action Embedder v1"
+ACTION_EMBEDDER_V2 = "Action Embedder v2"
 
 
 class ActionEmbedder(BaseLSTMEmbedder):

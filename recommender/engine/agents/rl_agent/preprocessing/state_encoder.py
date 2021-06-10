@@ -2,12 +2,14 @@
 # pylint: disable=no-name-in-module, invalid-name, too-many-locals
 
 """Implementation of the State Encoder"""
-import random
 from typing import Tuple, Optional, List
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
+from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
+    SearchDataEncoder,
+)
 from recommender.models import Service
 from recommender.errors import MissingComponentError
 from recommender.engine.agents.rl_agent.utils import (
@@ -23,23 +25,6 @@ from recommender.engine.utils import load_last_module, NoSavedModuleError
 from recommender.models import State
 
 
-# Below class is only a mock and should be replaced with proper implementation
-class MaskEncoder:
-    def __init__(self):
-        pass
-
-    def __call__(self, search_data_list):
-        B = len(search_data_list)
-
-        K = 3
-
-        max_I = len(Service.objects)
-        min_I = 3
-        I = random.randint(min_I, max_I)
-
-        return torch.rand((B, K, I))
-
-
 class StateEncoder:
     """State Encoder"""
 
@@ -47,11 +32,11 @@ class StateEncoder:
         self,
         user_embedder: Optional[torch.nn.Module] = None,
         service_embedder: Optional[torch.nn.Module] = None,
-        mask_encoder: Optional[MaskEncoder] = None,
+        search_data_encoder: SearchDataEncoder = None,
     ):
         self.user_embedder = user_embedder
         self.service_embedder = service_embedder
-        self.mask_encoder = mask_encoder
+        self.search_data_encoder = search_data_encoder
 
         self._load_components()
 
@@ -66,8 +51,9 @@ class StateEncoder:
                 -> services_one_hot_tensors
                 --(service_embedder)--> services_dense_tensors
                 --(concat)--> services_histories_tensor
-            - state.last_search_data
-                --(mask_encoder)--> masks_tensor
+            - state.search_data
+                --(search_data_encoder)--> search_data_tensor (mask)
+
 
         It makes batches from parts of states whenever it is possible to
          optimally use embedders.
@@ -80,7 +66,7 @@ class StateEncoder:
             Tuple of following tensors (in this order):
                 - user of shape [B, UE]
                 - service_histories_batch of shape [B, N, SE]
-                - masks of shape [B, K, I]
+                - search_data_mask of shape [B, I]
 
                 where:
                     - B is the batch_size and it is equal to len(states)
@@ -89,20 +75,20 @@ class StateEncoder:
                      constant
                     - SE is service content tensor embedding dim
                     - K is the first mask dim
-                    - I is the second mask dim
+                    - I is equal to itemspace size
         """
 
         users = [state.user for state in states]
         services_histories = [state.services_history for state in states]
-        search_data_list = [state.last_search_data for state in states]
+        search_data_list = [state.search_data for state in states]
         with torch.no_grad():
             users_batch = use_user_embedder(users, self.user_embedder)
             service_histories_batch = self._create_service_histories_batch(
                 services_histories
             )
-            masks = self.mask_encoder(search_data_list)
+            search_data_masks_batch = self.search_data_encoder(users, search_data_list)
 
-        encoded_states = users_batch, service_histories_batch, masks
+        encoded_states = users_batch, service_histories_batch, search_data_masks_batch
 
         return encoded_states
 
@@ -120,7 +106,7 @@ class StateEncoder:
         self.user_embedder.eval()
         self.service_embedder.eval()
 
-        self.mask_encoder = self.mask_encoder or MaskEncoder()
+        self.search_data_encoder = self.search_data_encoder or SearchDataEncoder()
 
     def _create_service_histories_batch(
         self, services_histories: List[List[Service]]
@@ -156,10 +142,7 @@ class StateEncoder:
             else:
                 start_end_indices.append(None)
 
-        service_tensors, _ = use_service_embedder(
-            services,
-            self.service_embedder
-        )
+        service_tensors, _ = use_service_embedder(services, self.service_embedder)
 
         sequences = []
         for state_idx in range(states_number):

@@ -1,4 +1,4 @@
-# pylint: disable=too-few-public-methods, missing-function-docstring, no-member
+# pylint: disable=too-few-public-methods, missing-function-docstring, no-member, fixme
 
 """Replay Buffer implementation"""
 from typing import Iterable
@@ -14,10 +14,10 @@ from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
     STATE,
     USER,
     SERVICES_HISTORY,
-    MASKS,
     ACTION,
     REWARD,
     NEXT_STATE,
+    MASK,
 )
 
 
@@ -44,10 +44,24 @@ class ReplayBuffer(Dataset):
         self.examples = self.sars_encoder(SARSes)
 
     def __getitem__(self, index):
-        return self.examples[index]
+        item = {
+            STATE: {
+                USER: self.examples[STATE][USER][index],
+                SERVICES_HISTORY: self.examples[STATE][SERVICES_HISTORY][index],
+                MASK: self.examples[STATE][MASK][index],
+            },
+            ACTION: self.examples[ACTION][index],
+            REWARD: self.examples[REWARD][index],
+            NEXT_STATE: {
+                USER: self.examples[NEXT_STATE][USER][index],
+                SERVICES_HISTORY: self.examples[NEXT_STATE][SERVICES_HISTORY][index],
+                MASK: self.examples[NEXT_STATE][MASK][index],
+            },
+        }
+        return item
 
     def __len__(self):
-        return len(self.examples)
+        return self.examples[REWARD].shape[0]
 
     def _load_components(self):
         self.sars_encoder = self.sars_encoder or SarsEncoder()
@@ -55,24 +69,26 @@ class ReplayBuffer(Dataset):
 
 def collate_batch(batch):
     collated_batch = {
-        STATE: {USER: [], SERVICES_HISTORY: [], MASKS: []},
+        STATE: {USER: [], SERVICES_HISTORY: [], MASK: []},
         ACTION: [],
         REWARD: [],
-        NEXT_STATE: {USER: [], SERVICES_HISTORY: [], MASKS: []},
+        NEXT_STATE: {USER: [], SERVICES_HISTORY: [], MASK: []},
     }
 
     # Lists making
     for example in batch:
         for key1 in (STATE, NEXT_STATE):
-            for key2 in (USER, SERVICES_HISTORY, MASKS):
+            for key2 in (USER, SERVICES_HISTORY, MASK):
                 collated_batch[key1][key2].append(example[key1][key2])
         collated_batch[ACTION].append(example[ACTION])
         collated_batch[REWARD].append(example[REWARD])
 
     # Stacking
     for key1 in (STATE, NEXT_STATE):
-        for key2 in (USER, MASKS):
+        for key2 in (USER, MASK):
             collated_batch[key1][key2] = torch.stack(collated_batch[key1][key2])
+        # TODO: rework when batch implementation kicks in
+        collated_batch[key1][MASK] = collated_batch[key1][MASK].squeeze(dim=1)
     collated_batch[ACTION] = torch.stack(collated_batch[ACTION])
     collated_batch[REWARD] = torch.stack(collated_batch[REWARD])
 

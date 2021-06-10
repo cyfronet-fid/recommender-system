@@ -1,14 +1,13 @@
 # pylint: disable=invalid-name, too-few-public-methods, no-member
 
 """Implementation of the SARS Encoder"""
+
 from typing import Dict, Union, List
 
 import torch
 
+from recommender.engine.agents.rl_agent.action_inverter import ActionInverter
 from recommender.models import Sars
-from recommender.engine.agents.rl_agent.preprocessing.action_encoder import (
-    ActionEncoder,
-)
 from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
     RewardEncoder,
 )
@@ -18,7 +17,7 @@ STATE = "state"
 NEXT_STATE = "next_state"
 USER = "user"
 SERVICES_HISTORY = "services_history"
-MASKS = "masks"
+MASK = "mask"
 ACTION = "action"
 REWARD = "reward"
 
@@ -26,15 +25,10 @@ REWARD = "reward"
 class SarsEncoder:
     """SARS Encoder"""
 
-    def __init__(
-        self,
-        state_encoder=None,
-        action_encoder=None,
-        reward_encoder=None,
-    ):
+    def __init__(self, state_encoder=None, reward_encoder=None, action_inverter=None):
         self.state_encoder = state_encoder
-        self.action_encoder = action_encoder
         self.reward_encoder = reward_encoder
+        self.action_inverter = action_inverter
 
         self._load_components()
 
@@ -59,13 +53,9 @@ class SarsEncoder:
         states_tensors = tuple(t[: len(states)] for t in all_states_tensors)
         next_states_tensors = tuple(t[len(states) :] for t in all_states_tensors)
 
-        actions = [SARS.action for SARS in SARSes]
+        actions = [[s.id for s in SARS.action] for SARS in SARSes]
 
-        # TODO: replace (or delete) below code after merge of issue #108
-        # action_tensors = self.action_encoder(actions)
-        action_tensors = torch.rand(
-            (len(actions), len(actions[0]), states_tensors[1].shape[2])
-        )
+        action_tensors = self.action_inverter(actions)
 
         rewards = [SARS.reward for SARS in SARSes]
         reward_tensors = self.reward_encoder(rewards)
@@ -74,14 +64,14 @@ class SarsEncoder:
             STATE: {
                 USER: states_tensors[0],
                 SERVICES_HISTORY: states_tensors[1],
-                MASKS: states_tensors[2],
+                MASK: states_tensors[2],
             },
             ACTION: action_tensors,
             REWARD: reward_tensors,
             NEXT_STATE: {
                 USER: next_states_tensors[0],
                 SERVICES_HISTORY: next_states_tensors[1],
-                MASKS: next_states_tensors[2],
+                MASK: next_states_tensors[2],
             },
         }
 
@@ -89,5 +79,5 @@ class SarsEncoder:
 
     def _load_components(self):
         self.state_encoder = self.state_encoder or StateEncoder()
-        self.action_encoder = self.action_encoder or ActionEncoder()
         self.reward_encoder = self.reward_encoder or RewardEncoder()
+        self.action_inverter = self.action_inverter or ActionInverter()

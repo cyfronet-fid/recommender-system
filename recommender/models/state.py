@@ -14,4 +14,4 @@ from .user import User
 class State(Document):
     user = ReferenceField(User, blank=True)
     services_history = ListField(ReferenceField(Service))
-    last_search_data = ReferenceField(SearchData)
+    search_data = ReferenceField(SearchData)

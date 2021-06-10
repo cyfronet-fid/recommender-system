@@ -128,18 +128,18 @@ def generate_sarses():
         state = State(
             user=user,
             services_history=services_history_before,
-            last_search_data=recommendation.search_data,
+            search_data=recommendation.search_data,
         ).save()
 
-        # create action
-        action = recommendation.services
+        # Create action
+        action = recommendation.services  # TODO: reverse weights construction perhaps?
 
         # Create next state
         services_history_after = services_history_before + clicked_services_after
         next_state = State(
             user=user,
             services_history=services_history_after,
-            last_search_data=recommendation.search_data,  # TODO: replace recommendation with "next recommendation"
+            search_data=recommendation.search_data,  # TODO: replace recommendation with "next recommendation"
         ).save()
 
         # Create SARS

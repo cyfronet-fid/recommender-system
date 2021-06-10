@@ -3,7 +3,9 @@
 import pytest
 import torch
 
-from recommender.engine.preprocessing import load_last_transformer
+from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
+    SearchDataEncoder,
+)
 from recommender.models import User, Service
 from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from recommender.engine.models.autoencoders import (
@@ -14,20 +16,15 @@ from recommender.engine.models.autoencoders import (
 from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
     SearchPhraseEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
-    StateEncoder,
-    MaskEncoder,
-)
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 from recommender.engine.preprocessing import (
     precalculate_tensors,
     create_transformer,
     SERVICES,
 )
-from recommender.engine.agents.rl_agent.preprocessing.filters_encoder import (
-    FiltersEncoder,
-)
 from tests.factories.marketplace import ServiceFactory
 from tests.factories.populate_database import populate_users_and_services
+from tests.factories.search_data import SearchDataFactory
 from tests.factories.state import StateFactory
 
 
@@ -48,7 +45,7 @@ def test_state_encoder(mongo):
     states = []
     for services_history in services_histories:
         state = StateFactory(
-            services_history=services_history,
+            services_history=services_history, search_data=SearchDataFactory(q=None)
         )
         states.append(state)
 
@@ -73,12 +70,12 @@ def test_state_encoder(mongo):
     )
     service_embedder.eval()
 
-    mask_encoder = MaskEncoder()
+    search_data_encoder = SearchDataEncoder()
 
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        mask_encoder=mask_encoder,
+        search_data_encoder=search_data_encoder,
     )
 
     encoded_state = state_encoder(states)
@@ -89,6 +86,7 @@ def test_state_encoder(mongo):
         assert type(encoding) == torch.Tensor
 
     users_batch, service_histories_batch, masks_batch = encoded_state
+    print(masks_batch.shape)
 
     assert users_batch.shape == torch.Size([B, UE])
 
@@ -107,5 +105,6 @@ def test_state_encoder(mongo):
                 )
             )
 
-    assert len(masks_batch.shape) == 3
+    assert len(masks_batch.shape) == 2
     assert masks_batch.shape[0] == B
+    assert masks_batch.shape[1] == len(Service.objects)
