@@ -38,14 +38,10 @@ python-dotenv = "*"
 tensorboard = "*"
 pytorch-nlp = "*"
 graphviz = "*"
+jupyterlab = "*"
+celery = {extras = [ "redis",], version = "*"}
+sentry-sdk = {extras = [ "flask",], version = "*"}
+pytest-xdist = "*"
 
 [requires]
 python_version = "3.7"
-
-[packages.celery]
-extras = [ "redis",]
-version = "*"
-
-[packages.sentry-sdk]
-extras = [ "flask",]
-version = "*"

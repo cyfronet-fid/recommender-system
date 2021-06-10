@@ -25,13 +25,10 @@ from recommender.engine.agents.rl_agent.models.search_phrase_embedder import (
 from recommender.engine.agents.rl_agent.preprocessing.action_encoder import (
     ActionEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.filters_encoder import (
-    FiltersEncoder,
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
+    StateEncoder,
+    MaskEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
-    SearchPhraseEncoder,
-)
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 from recommender.engine.models.autoencoders import (
     UserAutoEncoder,
     create_embedder,
@@ -41,8 +38,6 @@ from recommender.engine.models.autoencoders import (
 )
 from recommender.engine.preprocessing import (
     precalc_users_and_service_tensors,
-    load_last_transformer,
-    SERVICES,
 )
 from recommender.engine.utils import save_module
 from recommender.models import User, Service
@@ -51,11 +46,10 @@ from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
     STATE,
     USER,
     SERVICES_HISTORY,
-    FILTERS,
-    SEARCH_PHRASE,
     ACTION,
     REWARD,
     NEXT_STATE,
+    MASKS,
 )
 
 
@@ -67,9 +61,6 @@ def test_replay_buffer(mongo):
     precalc_users_and_service_tensors()
     # SARS_K_2.reload()
     # SARS_K_3.reload()
-
-    # Service transformer
-    service_transformer = load_last_transformer(SERVICES)
 
     # Constants
     UOH = len(User.objects.first().tensor)
@@ -106,20 +97,13 @@ def test_replay_buffer(mongo):
     history_embedder_v2 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
     save_module(module=history_embedder_v2, name=HISTORY_EMBEDDER_V2)
 
-    # SearchPhraseEncoder
-    search_phrase_encoder = SearchPhraseEncoder(dim=SPE)
-
-    # FiltersEncoder
-    filters_encoder = FiltersEncoder(
-        service_transformer=service_transformer, service_embedder=service_embedder
-    )
-
     # StateEncoder
+    mask_encoder = MaskEncoder()
+
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_phrase_encoder=search_phrase_encoder,
-        filters_encoder=filters_encoder,
+        mask_encoder=mask_encoder,
     )
 
     # ActionEncoder
@@ -149,9 +133,8 @@ def test_replay_buffer(mongo):
             assert batch[STATE][USER].shape == torch.Size([BATCH_SIZE, UE])
             assert batch[STATE][SERVICES_HISTORY].shape[0] == BATCH_SIZE
             assert batch[STATE][SERVICES_HISTORY].shape[2] == SE
-            assert batch[STATE][FILTERS].shape == torch.Size([BATCH_SIZE, SE])
-            assert batch[STATE][SEARCH_PHRASE].shape[0] == BATCH_SIZE
-            assert batch[STATE][SEARCH_PHRASE].shape[2] == SPE
+            assert batch[STATE][MASKS].shape[0] == BATCH_SIZE
+            assert batch[STATE][MASKS].shape[1] == K
 
             assert batch[ACTION].shape == torch.Size([BATCH_SIZE, K, SE])
 
@@ -160,6 +143,5 @@ def test_replay_buffer(mongo):
             assert batch[NEXT_STATE][USER].shape == torch.Size([BATCH_SIZE, UE])
             assert batch[NEXT_STATE][SERVICES_HISTORY].shape[0] == BATCH_SIZE
             assert batch[NEXT_STATE][SERVICES_HISTORY].shape[2] == SE
-            assert batch[NEXT_STATE][FILTERS].shape == torch.Size([BATCH_SIZE, SE])
-            assert batch[NEXT_STATE][SEARCH_PHRASE].shape[0] == BATCH_SIZE
-            assert batch[NEXT_STATE][SEARCH_PHRASE].shape[2] == SPE
+            assert batch[NEXT_STATE][MASKS].shape[0] == BATCH_SIZE
+            assert batch[NEXT_STATE][MASKS].shape[1] == K

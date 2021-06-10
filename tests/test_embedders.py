@@ -16,7 +16,10 @@ from recommender.engine.models.autoencoders import (
 from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
     SearchPhraseEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
+    StateEncoder,
+    MaskEncoder,
+)
 from recommender.engine.preprocessing import (
     precalculate_tensors,
     create_transformer,
@@ -67,7 +70,6 @@ def test_filters_embedder(mongo):
 def test_state_embedder(mongo, mocker):
     UE = 32
     SE = 128
-    SPE = 100
     N = 10
 
     state = StateFactory(services_history=ServiceFactory.create_batch(N))
@@ -99,24 +101,23 @@ def test_state_embedder(mongo, mocker):
     )
 
     # state Encoder
+    mask_encoder = MaskEncoder()
+
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_phrase_encoder=search_phrase_encoder,
-        filters_encoder=filters_encoder,
+        mask_encoder=mask_encoder,
     )
 
-    encoded_state = state_encoder(state)
+    encoded_state = state_encoder([state])
 
     assert type(encoded_state) == tuple
-    assert len(encoded_state) == 4
+    assert len(encoded_state) == 3
     for embedding in encoded_state:
         assert type(embedding) == torch.Tensor
 
-    assert encoded_state[0].shape == torch.Size([UE])
-    assert encoded_state[1].shape == torch.Size([N, SE])
-    assert encoded_state[2].shape == torch.Size([SE])
-    assert encoded_state[3].shape[1] == SPE
+    assert encoded_state[0].shape == torch.Size([1, UE])
+    assert encoded_state[1].shape == torch.Size([1, N, SE])
 
 
 def test_action_embedder(mongo, mocker):

@@ -9,12 +9,14 @@ from tests.factories.sars import SarsFactory
 
 
 def test_reward_encoder_proper_shape(mongo):
-    SARS_K_2 = SarsFactory(K_2=True)
-    SARS_K_3 = SarsFactory(K_3=True)
+    B = 3
+    SARSes_K_2 = SarsFactory.create_batch(B, K_2=True)
+    SARSes_K_3 = SarsFactory.create_batch(B, K_3=True)
 
-    for SARS in (SARS_K_2, SARS_K_3):
+    for SARSes in (SARSes_K_2, SARSes_K_3):
         reward_encoder = RewardEncoder()
-        reward = reward_encoder(SARS.reward)
+        raw_rewards = [SARS.reward for SARS in SARSes]
+        rewards = reward_encoder(raw_rewards)
 
-        assert isinstance(reward, torch.Tensor)
-        assert reward.shape == torch.Size([])
+        assert isinstance(rewards, torch.Tensor)
+        assert rewards.shape == torch.Size([B])

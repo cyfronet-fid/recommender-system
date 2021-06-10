@@ -32,19 +32,24 @@ class RewardEncoder:
         self.reward_ids_to_subreward = reward_ids_to_subreward
         self.subrewards_to_reward = subrewards_to_reward
 
-    def __call__(self, raw_reward: List[List[str]]) -> torch.Tensor:
+    def __call__(self, raw_rewards: List[List[List[str]]]) -> torch.Tensor:
         """
         Encode list of rewards (each of them is a list of reward ids) into
          scalar tensor.
 
         Args:
-            raw_reward: List of lists of reward ids.
+            raw_rewards: Batch of lists of lists of reward ids.
 
         Returns:
             reward: Scalar tensor of the total reward.
         """
 
-        rewards = list(map(self.reward_ids_to_subreward, raw_reward))
-        reward = self.subrewards_to_reward(rewards)
+        encoded_rewards = []
+        for raw_reward in raw_rewards:
+            rewards = list(map(self.reward_ids_to_subreward, raw_reward))
+            reward = self.subrewards_to_reward(rewards)
+            encoded_rewards.append(reward)
 
-        return reward
+        encoded_reward = torch.stack(encoded_rewards)
+
+        return encoded_reward

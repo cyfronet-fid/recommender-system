@@ -80,7 +80,7 @@ class RLAgent(BaseAgent):
         actor = self._choose_actor(K)
 
         state = create_state(user, search_data)
-        state_tensors = self.state_encoder(state)
+        state_tensors = self.state_encoder([state])
         weights_tensor = self._use_actor(state_tensors, actor)
         recommended_service_ids = self.action_selector(
             K, weights_tensor, user, search_data

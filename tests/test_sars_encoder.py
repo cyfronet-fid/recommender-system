@@ -24,7 +24,10 @@ from recommender.engine.agents.rl_agent.preprocessing.filters_encoder import (
 from recommender.engine.agents.rl_agent.preprocessing.searchphrase_encoder import (
     SearchPhraseEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
+from recommender.engine.agents.rl_agent.preprocessing.state_encoder import (
+    StateEncoder,
+    MaskEncoder,
+)
 from recommender.engine.models.autoencoders import (
     UserAutoEncoder,
     create_embedder,
@@ -44,26 +47,25 @@ from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
     STATE,
     USER,
     SERVICES_HISTORY,
-    FILTERS,
-    SEARCH_PHRASE,
     ACTION,
     REWARD,
     NEXT_STATE,
+    MASKS,
 )
 from tests.factories.sars import SarsFactory
 
 
 def test_sars_encoder(mongo):
-    SARS_K_2 = SarsFactory(K_2=True)
-    SARS_K_3 = SarsFactory(K_3=True)
+    B = 3
+    SARSes_K_2 = SarsFactory.create_batch(B, K_2=True)
+    SARSes_K_3 = SarsFactory.create_batch(B, K_3=True)
 
     # Generate data
     precalc_users_and_service_tensors()
-    SARS_K_2.reload()
-    SARS_K_3.reload()
-
-    # Service transformer
-    service_transformer = load_last_transformer(SERVICES)
+    for SARS_K_2 in SARSes_K_2:
+        SARS_K_2.reload()
+    for SARS_K_3 in SARSes_K_3:
+        SARS_K_3.reload()
 
     # Constants
     UOH = len(User.objects.first().tensor)
@@ -100,20 +102,12 @@ def test_sars_encoder(mongo):
     history_embedder_v2 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
     save_module(module=history_embedder_v2, name=HISTORY_EMBEDDER_V2)
 
-    # SearchPhraseEncoder
-    search_phrase_encoder = SearchPhraseEncoder(dim=SPE)
-
-    # FiltersEncoder
-    filters_encoder = FiltersEncoder(
-        service_transformer=service_transformer, service_embedder=service_embedder
-    )
-
     # StateEncoder
+    mask_encoder = MaskEncoder()
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_phrase_encoder=search_phrase_encoder,
-        filters_encoder=filters_encoder,
+        mask_encoder=mask_encoder,
     )
 
     # ActionEncoder
@@ -131,18 +125,20 @@ def test_sars_encoder(mongo):
     sars_encoder_from_db = SarsEncoder()
 
     for sars_encoder in (sars_encoder_in_ram, sars_encoder_from_db):
-        for K, SARS_K in zip((2, 3), (SARS_K_2, SARS_K_3)):
-            example = sars_encoder(SARS_K)
+        for K, SARSes_K in zip((2, 3), (SARSes_K_2, SARSes_K_3)):
+            batch = sars_encoder(SARSes_K)
 
-            assert example[STATE][USER].shape == torch.Size([UE])
-            assert example[STATE][SERVICES_HISTORY].shape[1] == SE
-            assert example[STATE][FILTERS].shape == torch.Size([SE])
-            assert example[STATE][SEARCH_PHRASE].shape[1] == SPE
+            assert batch[STATE][USER].shape == torch.Size([B, UE])
+            assert batch[STATE][SERVICES_HISTORY].shape[0] == B
+            assert batch[STATE][SERVICES_HISTORY].shape[2] == SE
+            assert batch[STATE][MASKS].shape[0] == B
+            # assert batch[STATE][MASKS].shape[1] == K # TODO: uncomment after merge of issue #108
 
-            assert example[ACTION].shape == torch.Size([K, SE])
-            assert example[REWARD].shape == torch.Size([])
+            assert batch[ACTION].shape == torch.Size([B, K, SE])
+            assert batch[REWARD].shape == torch.Size([B])
 
-            assert example[NEXT_STATE][USER].shape == torch.Size([UE])
-            assert example[NEXT_STATE][SERVICES_HISTORY].shape[1] == SE
-            assert example[NEXT_STATE][FILTERS].shape == torch.Size([SE])
-            assert example[NEXT_STATE][SEARCH_PHRASE].shape[1] == SPE
+            assert batch[NEXT_STATE][USER].shape == torch.Size([B, UE])
+            assert batch[NEXT_STATE][SERVICES_HISTORY].shape[0] == B
+            assert batch[NEXT_STATE][SERVICES_HISTORY].shape[2] == SE
+            assert batch[NEXT_STATE][MASKS].shape[0] == B
+            # assert batch[NEXT_STATE][MASKS].shape[1] == K # TODO: uncomment after merge of issue #108
