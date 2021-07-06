@@ -22,6 +22,7 @@ from recommender.models import User
 from recommender.engine.utils import NoSavedModuleError, load_last_module
 from recommender.services.fts import retrieve_services_for_recommendation
 
+PRE_AGENT = "pre_agent"
 
 class PreAgent(BaseAgent):
     """Pre-Agent Recommender based on Neural Collaborative Filtering"""

@@ -3,10 +3,7 @@
 """Database dumps endpoint definition"""
 
 from flask_restx import Resource, Namespace
-from recommender.tasks.neural_networks import (
-    execute_pre_agent_training,
-    execute_rl_agent_training,
-)
+from recommender.tasks.neural_networks import execute_training
 
 api = Namespace(
     "training", "Endpoint used for training recommender engine neural networks"
@@ -19,6 +16,5 @@ class Training(Resource):
 
     @api.response(200, "Database dump successfully sent")
     def get(self):
-        # execute_pre_agent_training.delay()
-        execute_rl_agent_training.delay()
+        execute_training.delay()
         return None, 200

@@ -6,6 +6,8 @@ import os
 
 import torch
 
+from recommender.engine.agents.pre_agent.pre_agent import PRE_AGENT
+
 
 def get_device(env_variable):
     device_name = os.environ.get(env_variable, "cpu")
@@ -24,6 +26,7 @@ class Config:
     RESTPLUS_MASK_SWAGGER = False
     REDIS_HOST = f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1:6379')}"
     TRAINING_DEVICE = get_device("TRAINING_DEVICE")
+    AGENT_VERSION = os.environ.get("AGENT_VERSION", PRE_AGENT)
 
 
 class ProductionConfig(Config):
