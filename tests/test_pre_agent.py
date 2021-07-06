@@ -2,9 +2,9 @@
 
 import pytest
 
-from recommender import PreAgent
 from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
 from recommender.engine.agents.pre_agent.models import NeuralColaborativeFilteringModel
+from recommender.engine.agents.pre_agent.pre_agent import PreAgent
 from recommender.engine.agents.pre_agent.training.common import pre_agent_training
 from recommender.errors import InvalidRecommendationPanelIDError, MissingComponentError
 from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K

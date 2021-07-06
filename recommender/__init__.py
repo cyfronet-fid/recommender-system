@@ -11,8 +11,6 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
-from recommender.engine.agents.rl_agent.rl_agent import RLAgent
-from recommender.engine.agents.pre_agent.pre_agent import PreAgent
 from recommender.extensions import db, celery
 from recommender.api import api
 from settings import config_by_name
@@ -30,8 +28,6 @@ def create_app():
     _register_extensions(app)
     api.init_app(app)
     init_celery(app)
-
-    init_recommender_engine(app)
 
     return app
 
@@ -62,12 +58,6 @@ def init_celery(app=None):
 
     celery.Task = ContextTask
     return celery
-
-
-def init_recommender_engine(app):
-    """Instantiate a recommender engine in the Flask app"""
-
-    app.recommender_engine = RLAgent()
 
 
 def init_sentry_flask():

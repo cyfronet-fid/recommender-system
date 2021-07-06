@@ -204,5 +204,3 @@ def rl_agent_training() -> None:
     save_module(module=actor_v1, name=ACTOR_V1)
     save_module(module=actor_v2_history_embedder, name=HISTORY_EMBEDDER_V2)
     save_module(module=actor_v2, name=ACTOR_V2)
-
-    # TODO: models reloading callback
