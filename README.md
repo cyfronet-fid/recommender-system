@@ -187,6 +187,7 @@ present in the project root directory. Details:
 - `SENTRY_ENVIRONMENT` - environment name - it's optional and it can be a free-form string. If not specified and using docker, it is set to `development`/`testing`/`production` respectively to the docker environment.
 - `SENTRY_RELEASE` - human readable release name - it's optional and it can be a free-form string. If not specified, sentry automatically set it based on commit revision number.
 - `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
+- `AGENT_VERSION` - the version of the recommender agent (one of `pre_agent`, `rl_agent`)
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 

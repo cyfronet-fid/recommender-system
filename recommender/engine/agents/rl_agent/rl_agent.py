@@ -18,6 +18,8 @@ from recommender.engine.agents.rl_agent.utils import create_state
 from recommender.engine.agents.rl_agent.action_selector import ActionSelector
 from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 
+RL_AGENT = "rl_agent"
+
 
 class RLAgent(BaseAgent):
     """
