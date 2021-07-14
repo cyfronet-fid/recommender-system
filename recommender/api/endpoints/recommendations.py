@@ -20,8 +20,7 @@ api = Namespace("recommendations", "Endpoint used for getting recommendations")
 
 
 def load_agent():
-    agent_version = dotenv_values(find_dotenv())["AGENT_VERSION"]
-    print(f"agent_version: {agent_version}")
+    agent_version = dotenv_values(find_dotenv()).get("AGENT_VERSION")
     agents = {PRE_AGENT: PreAgent, RL_AGENT: RLAgent}
     agent = agents.get(agent_version, PreAgent)()
 

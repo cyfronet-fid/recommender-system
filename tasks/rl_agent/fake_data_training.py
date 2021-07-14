@@ -1,4 +1,4 @@
-# pylint: disable=no-member, wrong-import-position
+# pylint: disable=no-member, wrong-import-position, fixme
 
 """Fake data training"""
 
@@ -15,11 +15,7 @@ from recommender.engine.agents.rl_agent.models.history_embedder import (
     HISTORY_EMBEDDER_V1,
     HISTORY_EMBEDDER_V2,
 )
-from recommender.engine.agents.rl_agent.models.search_phrase_embedder import (
-    SearchPhraseEmbedder,
-    SEARCH_PHRASE_EMBEDDER_V1,
-    SEARCH_PHRASE_EMBEDDER_V2,
-)
+
 from recommender.engine.models.autoencoders import (
     UserAutoEncoder,
     create_embedder,
@@ -60,7 +56,7 @@ if __name__ == "__main__":
     SOH = len(Service.objects[0].tensor)
     SE = 64
 
-    SPE = 100
+    I = len(Service.objects)
 
     user_autoencoder = UserAutoEncoder(features_dim=UOH, embedding_dim=UE)
     # TODO: user_autoencoder training
@@ -72,33 +68,23 @@ if __name__ == "__main__":
 
     actor_v1_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
 
-    actor_v1_search_phrase_embedder = SearchPhraseEmbedder(
-        SPE=SPE, num_layers=3, dropout=0.5
-    )
-
     actor_v1 = Actor(
         K=3,
         SE=SE,
         UE=UE,
-        SPE=SPE,
+        I=I,
         history_embedder=actor_v1_history_embedder,
-        search_phrase_embedder=actor_v1_search_phrase_embedder,
     )
     # TODO: actor_v1 training
 
     actor_v2_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
 
-    actor_v2_search_phrase_embedder = SearchPhraseEmbedder(
-        SPE=SPE, num_layers=3, dropout=0.5
-    )
-
     actor_v2 = Actor(
         K=2,
         SE=SE,
         UE=UE,
-        SPE=SPE,
+        I=I,
         history_embedder=actor_v2_history_embedder,
-        search_phrase_embedder=actor_v2_search_phrase_embedder,
     )
     # TODO: actor_v2 training
 
@@ -108,10 +94,8 @@ if __name__ == "__main__":
     save_module(module=user_autoencoder, name=USERS_AUTOENCODER)
     save_module(module=service_auto_encoder, name=SERVICES_AUTOENCODER)
     save_module(module=actor_v1_history_embedder, name=HISTORY_EMBEDDER_V1)
-    save_module(module=actor_v1_search_phrase_embedder, name=SEARCH_PHRASE_EMBEDDER_V1)
     save_module(module=actor_v1, name=ACTOR_V1)
     save_module(module=actor_v2_history_embedder, name=HISTORY_EMBEDDER_V2)
-    save_module(module=actor_v2_search_phrase_embedder, name=SEARCH_PHRASE_EMBEDDER_V2)
     save_module(module=actor_v2, name=ACTOR_V2)
 
     save_transformer(user_transformer, USERS)

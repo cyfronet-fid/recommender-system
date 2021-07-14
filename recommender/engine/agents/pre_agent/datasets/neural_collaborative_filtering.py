@@ -1,4 +1,4 @@
-# pylint: disable=no-member, not-callable
+# pylint: disable=no-member, not-callable, too-many-branches
 
 """This module contains function that creates datasets needed for Neural
  Collaborative filtering model training"""

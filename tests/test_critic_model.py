@@ -30,7 +30,7 @@ from tests.factories.state import StateFactory
 
 def test_critic(mongo):
     # Generate data
-    state = StateFactory(search_data=SearchDataFactory(q=None))
+    state = StateFactory(search_data=SearchDataFactory(q=None), non_empty_history=True)
     precalc_users_and_service_tensors()
     state.reload()
     action_v1 = Service.objects[:3]

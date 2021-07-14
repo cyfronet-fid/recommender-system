@@ -15,6 +15,7 @@ pylint = "*"
 graphviz = "*"
 jupyter = "*"
 jupyterlab = "*"
+pytest-xdist = "*"
 
 [packages]
 numpy = "*"
