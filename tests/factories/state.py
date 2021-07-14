@@ -1,6 +1,6 @@
 # pylint: disable-all
 
-from factory import SubFactory, LazyFunction
+from factory import SubFactory, LazyFunction, Trait
 from factory.mongoengine import MongoEngineFactory
 from factory.random import reseed_random, random
 from faker import Factory as FakerFactory
@@ -22,3 +22,10 @@ class StateFactory(MongoEngineFactory):
         lambda: ServiceFactory.create_batch(random.randint(0, 10))
     )
     search_data = SubFactory(SearchDataFactory)
+
+    class Params:
+        non_empty_history = Trait(
+            services_history=LazyFunction(
+                lambda: ServiceFactory.create_batch(random.randint(3, 10))
+            )
+        )

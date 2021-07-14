@@ -24,6 +24,7 @@ from recommender.services.fts import retrieve_services_for_recommendation
 
 PRE_AGENT = "pre_agent"
 
+
 class PreAgent(BaseAgent):
     """Pre-Agent Recommender based on Neural Collaborative Filtering"""
 

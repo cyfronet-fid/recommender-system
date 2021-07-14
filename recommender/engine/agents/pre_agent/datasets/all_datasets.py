@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, line-too-long
 
 """This module contain implementation of creation all needed datasets for
  pre-agent training"""

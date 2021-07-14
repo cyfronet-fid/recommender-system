@@ -1,6 +1,8 @@
 # EOSC Marketplace Recommender System
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
+![Python-app workflow](https://github.com/cyfronet-fid/recommender-system/actions/workflows/python-app.yml/badge.svg)
+
 EOSC Marketplace Recommender System uses **Deep Reinforcement Learning** to suggests relevant scientific services to appropriate researchers on the EOSC Marketplace portal.
 
 ## Architecture

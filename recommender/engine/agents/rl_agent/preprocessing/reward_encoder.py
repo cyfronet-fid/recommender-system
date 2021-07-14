@@ -1,4 +1,5 @@
 # pylint: disable=missing-function-docstring, no-member, redefined-outer-name, too-few-public-methods
+# pylint: disable=fixme
 
 """Implementation of the Reward Encoder"""
 
@@ -8,7 +9,7 @@ import torch
 
 
 # TODO: these function should be reimplemented according to reward mapping algorithm
-def reward_id_to_number(reward_id: str) -> float:
+def reward_id_to_number(_reward_id: str) -> float:
     return random.random()
 
 
