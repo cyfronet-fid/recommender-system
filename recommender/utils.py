@@ -3,17 +3,19 @@
 """Project Utilities"""
 
 import json
+import os
 import random
 from datetime import datetime
 from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
 from bson import SON, ObjectId
-from mongoengine import Document
+from mongoengine import Document, connect, disconnect
 
 from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.models import User
 from recommender.models import Service
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
+from settings import DevelopmentConfig, ProductionConfig
 
 
 def _son_to_dict(son_obj: SON) -> dict:
@@ -154,3 +156,45 @@ def gen_json_dict(panel_id: str, anonymous_user: bool = False) -> Dict[str, Any]
         json_dict["user_id"] = User.objects.first().id
 
     return json_dict
+
+
+def load_examples() -> Dict:
+    """
+    If possible, generates examples for /recommendations request using
+     appropriate database.
+    If not, generates artificial examples.
+
+    Returns:
+        examples: Examples dict.
+    """
+
+    examples = {
+        "categories": [1, 2, 3],
+        "geographical_availabilities": [1, 2, 3],
+        "providers": [1, 2, 3],
+        "related_platforms": [1, 2, 3],
+        "scientific_domains": [1, 2, 3],
+        "target_users": [1, 2, 3],
+    }
+
+    # Below, `os.environ["FLASK_ENV"]` and manual connection is used rather
+    # than standard flask DB connection, because this code is executed before
+    # flask app building is finished. It has to be done in this way to provide
+    # realistic /recommendations endpoint examples in the swagger.
+
+    if os.environ["FLASK_ENV"] == "testing":
+        return examples
+
+    if os.environ["FLASK_ENV"] == "development":
+        host = DevelopmentConfig.MONGODB_HOST
+    elif os.environ["FLASK_ENV"] == "production":
+        host = ProductionConfig.MONGODB_HOST
+    else:
+        return examples
+    connect(host=host)
+    examples = _get_search_data_examples(
+        k=max(list(PANEL_ID_TO_K.values())), deterministic=True
+    )
+    disconnect()
+
+    return examples
