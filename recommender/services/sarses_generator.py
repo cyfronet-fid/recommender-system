@@ -132,7 +132,7 @@ def generate_sarses():
         ).save()
 
         # Create action
-        action = recommendation.services  # TODO: reverse weights construction perhaps?
+        action = recommendation.services
 
         # Create next state
         services_history_after = services_history_before + clicked_services_after

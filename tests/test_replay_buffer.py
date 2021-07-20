@@ -63,8 +63,6 @@ def test_replay_buffer(mongo):
     )
     # Generate data
     precalc_users_and_service_tensors()
-    # SARS_K_2.reload()
-    # SARS_K_3.reload()
 
     # Constants
     UOH = len(User.objects.first().tensor)
