@@ -33,11 +33,11 @@ class RLAgent(BaseAgent):
         state_encoder: Optional[StateEncoder] = None,
         service_selector: Optional[ServiceSelector] = None,
     ) -> None:
-        super().__init__()
         self.actor_v1 = actor_v1
         self.actor_v2 = actor_v2
         self.state_encoder = state_encoder
         self.service_selector = service_selector
+        super().__init__()
 
     def _load_models(self) -> None:
         """
@@ -56,9 +56,6 @@ class RLAgent(BaseAgent):
         self.actor_v1.eval()
         self.actor_v2.eval()
 
-        # TODO: move this back to init (because now it takes time during
-        #  each request!!! For now it has to be here because it breaks imports
-        #  when it's in __init__)
         self.state_encoder = self.state_encoder or StateEncoder()
         self.service_selector = self.service_selector or ServiceSelector()
 

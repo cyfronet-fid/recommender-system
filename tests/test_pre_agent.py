@@ -16,8 +16,8 @@ from tests.factories.populate_database import populate_users_and_services
 
 def test_pre_agent_call(mongo):
     # With no model case
-    pre_agent = PreAgent()
     with pytest.raises(MissingComponentError):
+        pre_agent = PreAgent()
         place_holder_context = {"placeholder_key": "placeholder_value"}
         pre_agent.call(place_holder_context)
 

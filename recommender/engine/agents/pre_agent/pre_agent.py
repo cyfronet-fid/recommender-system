@@ -31,8 +31,8 @@ class PreAgent(BaseAgent):
     def __init__(
         self, neural_cf_model: Optional[NeuralColaborativeFilteringModel] = None
     ) -> None:
-        super().__init__()
         self.neural_cf_model = neural_cf_model
+        super().__init__()
 
     def _load_models(self) -> None:
         """

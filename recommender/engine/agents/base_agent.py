@@ -25,6 +25,7 @@ class BaseAgent(ABC):
         """
         Initialization function.
         """
+        self._load_models()
 
     def call(self, context: Dict[str, Any]) -> List[int]:
         """
@@ -38,7 +39,6 @@ class BaseAgent(ABC):
             Tuple of recommended services ids.
         """
 
-        self._load_models()
         K = self._get_K(context)
         user = self._get_user(context)
         search_data = self._get_search_data(context)
