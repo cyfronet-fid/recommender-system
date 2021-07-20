@@ -5,8 +5,6 @@
 
 """Implementation of the RL Agent training"""
 
-# TODO: models reloading callback
-
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 

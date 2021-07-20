@@ -117,16 +117,6 @@ def test_rl_agent_call(mongo):
                 # but for non anonymous user they should stay same over time.
                 recommendations = [rl_agent.call(json_dict) for _ in range(10)]
 
-                print(f"kind: {kind}")
-                print(f"panel_id: {panel_id}")
-                print(f"anonymous_user: {anonymous_user}")
-                print(f"recommendations: {recommendations}")
-                # TODO: fix this test, it nondeterministically fails for logged
-                #  user: recommendations should be then always same but
-                #  sometimes they change when they shouldn't. I've checked that
-                #  weights tensor from actor is always the same but
-                #  ActionSelector sometimes select other different action based
-                #  on it.
                 assert (
                     all([recommendations[0] == r for r in recommendations])
                     != anonymous_user

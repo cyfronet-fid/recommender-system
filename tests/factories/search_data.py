@@ -36,7 +36,6 @@ fake = FakerFactory.create()
 
 class SearchDataProvider(BaseProvider):
     def search_phrase(self) -> str:
-        # TODO: preloading of corpuses (now they are loaded from the disc each time)
         """
         Generates search phrase based on text data in the database.
 

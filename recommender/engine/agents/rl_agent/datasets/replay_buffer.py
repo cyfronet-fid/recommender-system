@@ -1,7 +1,8 @@
-# pylint: disable=too-few-public-methods, missing-function-docstring, no-member, fixme
+# pylint: disable=too-few-public-methods, missing-function-docstring, no-member
+# pylint: disable=fixme, too-many-branches
 
 """Replay Buffer implementation"""
-from typing import Iterable
+from typing import Iterable, Optional
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
@@ -24,7 +25,9 @@ from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
 class ReplayBuffer(Dataset):
     """Replay Buffer used in Reinforcement Learning Actor Critic algorithm training."""
 
-    def __init__(self, SARSes: Iterable[Sars], K: int, sars_encoder=None) -> None:
+    def __init__(
+        self, SARSes: Iterable[Sars], K: int, sars_encoder: Optional[SarsEncoder] = None
+    ) -> None:
         """
         Create pytorch dataset out of SARSes.
 
@@ -87,8 +90,6 @@ def collate_batch(batch):
     for key1 in (STATE, NEXT_STATE):
         for key2 in (USER, MASK):
             collated_batch[key1][key2] = torch.stack(collated_batch[key1][key2])
-        # TODO: rework when batch implementation kicks in
-        collated_batch[key1][MASK] = collated_batch[key1][MASK].squeeze(dim=1)
     collated_batch[ACTION] = torch.stack(collated_batch[ACTION])
     collated_batch[REWARD] = torch.stack(collated_batch[REWARD])
 

@@ -249,5 +249,3 @@ def pre_agent_training():
     print(classification_report(labels, preds > 0.5))
 
     save_module(trained_ncf_model, name=NEURAL_CF)
-
-    # TODO: models reloading callback
