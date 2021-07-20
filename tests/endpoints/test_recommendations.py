@@ -31,6 +31,9 @@ def recommendation_data():
 
 
 def test_recommendations(client, mocker, recommendation_data):
+    _agent_init_mock = mocker.patch(
+        "recommender.engine.agents.base_agent.BaseAgent.__init__"
+    )
     agent_call_mock = mocker.patch(
         "recommender.engine.agents.base_agent.BaseAgent.call"
     )
