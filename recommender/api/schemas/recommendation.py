@@ -7,29 +7,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from flask_restx import fields
-from mongoengine import connect, disconnect
-from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from recommender.utils import _get_search_data_examples
-
-from settings import DevelopmentConfig
+from recommender.utils import load_examples
 from .common import api
 
 
-# TODO: absolutely cannot be here
-# connect(host=DevelopmentConfig.MONGODB_HOST)
-# examples = _get_search_data_examples(
-#     k=max(list(PANEL_ID_TO_K.values())), deterministic=True
-# )
-# disconnect()
-
-examples = {
-    "categories": [1, 2, 3],
-    "geographical_availabilities": [1, 2, 3],
-    "providers": [1, 2, 3],
-    "related_platforms": [1, 2, 3],
-    "scientific_domains": [1, 2, 3],
-    "target_users": [1, 2, 3],
-}
+examples = load_examples()
 
 search_data = api.model(
     "Search Data",
