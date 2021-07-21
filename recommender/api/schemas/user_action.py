@@ -1,8 +1,10 @@
+# pylint: disable=fixme
+
 """Models for the user_actions endpoint"""
 
 from flask_restx import fields
 
-from .common import api
+from .common import api, NullableString
 
 root = api.model(
     "Root info",
@@ -36,7 +38,8 @@ root = api.model(
 source = api.model(
     "Source",
     {
-        "visit_id": fields.String(
+        # TODO: there should be non-nullable string eventually.
+        "visit_id": NullableString(
             required=True,
             title="Visit ID",
             description="The unique identifier of a user presence on the user "

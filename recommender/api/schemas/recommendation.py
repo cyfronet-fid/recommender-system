@@ -8,8 +8,7 @@ load_dotenv()
 
 from flask_restx import fields
 from recommender.utils import load_examples
-from .common import api
-
+from .common import api, NullableString
 
 examples = load_examples()
 
@@ -66,7 +65,8 @@ recommendation_context = api.model(
             description="The exact time of the recommendation request sending "
             "in iso8601 format",
         ),
-        "visit_id": fields.String(
+        # TODO: there should be non-nullable string eventually.
+        "visit_id": NullableString(
             required=True,
             title="recommendation page visit ID",
             description="The unique identifier of the user presence on the "
