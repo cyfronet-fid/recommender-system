@@ -6,9 +6,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
-- This CHANGELOG file [@JanKapala]
-- Project refactoring [@JanKapala]
 
 ### Changed
+
+### Fixed
+
+### Removed
+
+## [2.2.0] 2021-07-22
+### Added
+- Services History Generator [@JanKapala]
+- Base Agent Recommender [@JanKapala]
+- RL Agent Recommender [@JanKapala]
+- History Embedder [@wujuu]
+- Actor Model [@wujuu]
+- Synthetic Dataset [@wujuu]
+- Service Selector  [@wujuu]
+- Services2weights [@wujuu]
+- Services2weights [@wujuu]
+- Action Encoder, Action Embedder and Critic [@JanKapala]
+- Replay Buffer [@JanKapala]
+- Update endpoint, model reloading [@JanKapala]
+- Batch compatibility [@JanKapala]
+- Continuous Integration [@wujuu]
+
+### Changed
+- Represent action as weights [@wujuu]
+- Smart Examples in Swagger [@JanKapala]
+
+### Fixed
+- Handle invalid /recommendations and /user_actions requests [@JanKapala, @wujuu]
 
 ### Removed
