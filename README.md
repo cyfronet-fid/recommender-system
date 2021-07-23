@@ -127,22 +127,22 @@ NOTE: The url of the jupyter server will be displayed in the docker-compose outp
 ### Training
 
 Recommender system can use one of two recommendation engines implemented as agents:
-- `Pre Agent` - that implements [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) algorithm.
-- `RL Agent` - that implements [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) algorithm.
+- `Pre Agent` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
+- `RL Agent` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
 
-To choose prefered agent, use `AGENT_VERSION` env variable (look into [ENV variables](#env-variables) section). After change of this variable in the .env file no reloading is needed - system will use appropriate agent dynamically (if it is trained).
+Use `AGENT_VERSION` env variable to select an agent version (look into [ENV variables](#env-variables) section). You don't have to restart the server after the modification of this variable in the .env file - the system will use an appropriate agent dynamically (if it is trained).
 
 For now the only trainable recommendation agent is the Pre Agent. RL Agent training will be available soon.
 
-The simplest way to train chosen agent is using `./bin/rails recommender:update` task on the Marketplace side to send request to the `/update` endpoint of the Recommender System. It automatically sends most recent training data, preprocesses and uses them to train needed models.
+The simplest way to train a chosen agent is using `./bin/rails recommender:update` task on the Marketplace side. It sends a request to the `/update` endpoint of the Recommender System. It automatically sends most recent training data, preprocesses and uses it to train needed models.
 
-If you want to have more fine-grained controll, you can split this process into two parts:
-- sending most recent data from MP to Recommender System `/database_dumps` endpoint (using `./bin/rails recommender:serialize_db` task on the MP side)
-- triggering training by sending request to the Recommender System `/training` endpoint (after above process finished)
+If you want to have more fine-grained control, you can split this process into two parts:
+- sending the most recent data from MP to Recommender System `/database_dumps` endpoint (using `./bin/rails recommender:serialize_db` task on the MP side)
+- triggering training by sending request to the Recommender System `/training` endpoint (after the process described above finished)
 
-GPU support can be enabled using environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section) , but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`. Fix will be available soon.
+GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section), but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`. Fix will be available soon.
 
-After training is finished, system is immediately ready for serving recommendations (no manual reloading needed).
+After training is finished, system is immediately ready for serving recommendations (no manual reloading is needed).
 
 ### Tests
 To run all the tests in our app run:
@@ -208,4 +208,4 @@ os.environ['PATH'] = f'{os.path.dirname(INSTALL_PYTHON)}{os.pathsep}{os.environ[
 
 #### Sentry
 `Sentry` is integrated with the `flask` server and the `celery` task queue manager so all unhandled exceptions from these entities will be tracked and sent to the sentry.
-Customization of the sentry ntegration can be done vie environmental variables (look into [ENV variables](#env-variables) section) - more about them [here](https://docs.sentry.io/platforms/python/configuration/options/)
+Customization of the sentry integration can be done vie environmental variables (look into [ENV variables](#env-variables) section) - you can read more about them [here](https://docs.sentry.io/platforms/python/configuration/options/)
