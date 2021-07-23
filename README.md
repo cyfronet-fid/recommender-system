@@ -125,42 +125,24 @@ NOTE: The url of the jupyter server will be displayed in the docker-compose outp
 (default: `http://127.0.0.1:8888/?token=SOME_JUPYTER_TOKEN`) (you can customize jupyter port and host using [env](#env-variables) variables)
 
 ### Training
-Currently GPU support is available only in the experimental jupyter notebook `neural_cf` that contains whole ML cycle:
-- Datasets creation, preprocessing and inspections
-- Models creation (Autoencoders, NCF)
-- Trainings
-- Evaluation
-- Inferention
 
-GPU support can be enabled using environmental variable TRAINING_DEVICE (look into [ENV variables](#env-variables) section) , but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`.
+Recommender system can use one of two recommendation engines implemented as agents:
+- `Pre Agent` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
+- `RL Agent` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
 
-For now the only trainable recommendation agent is the Pre-Agent.
+Use `AGENT_VERSION` env variable to select an agent version (look into [ENV variables](#env-variables) section). You don't have to restart the server after the modification of this variable in the .env file - the system will use an appropriate agent dynamically (if it is trained).
 
-It can be trained via training endpoint (used in production) or via training tasks.
+For now the only trainable recommendation agent is the Pre Agent. RL Agent training will be available soon.
 
-Before training, the development database should be populated. It can be accomplished in two ways:
- - posting marketplace database dump to the `database_dumps` endpoint
- - loading it manually using `load_mp_dump` function
+The simplest way to train a chosen agent is using `./bin/rails recommender:update` task on the Marketplace side. It sends a request to the `/update` endpoint of the Recommender System. It automatically sends most recent training data, preprocesses and uses it to train needed models.
 
-If you load dump manually, don't forget to run `tasks/neural_cf/real_data_preprocessing.py` to preprocess data (In case of loading dump via endpoint preprocessing is done automatically).
+If you want to have more fine-grained control, you can split this process into two parts:
+- sending the most recent data from MP to Recommender System `/database_dumps` endpoint (using `./bin/rails recommender:serialize_db` task on the MP side)
+- triggering training by sending request to the Recommender System `/training` endpoint (after the process described above finished)
 
-After populating database you can run training in following ways:
- - using `training` endpoint
- - using `tasks/neural_cf/real_data_training.py`
+GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section), but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`. Fix will be available soon.
 
-Training automatically:
- - creates dataset and split it into train/validation/test datasets 
- - saves datasets
- - creates new model
- - trains model and saves it
- - displays training statistics and plots.
-
-Server Pre Agent will use last saved model for recommendations.
-
-If you don't have data, but you want to see how training looks like, use `tasks/neural_cf/fake_data_training.py` task.
-It prepares fake data and run training on it. All of it uses testing database but the final trained model and transformers (used for data preprocessing) are saved into development database, so it can be used for recommendations in development environment.
-
-If you're interested in ML experiments related to model or training you can use `training_and_inferention_example.ipynb`.
+After training is finished, system is immediately ready for serving recommendations (no manual reloading is needed).
 
 ### Tests
 To run all the tests in our app run:
@@ -226,4 +208,4 @@ os.environ['PATH'] = f'{os.path.dirname(INSTALL_PYTHON)}{os.pathsep}{os.environ[
 
 #### Sentry
 `Sentry` is integrated with the `flask` server and the `celery` task queue manager so all unhandled exceptions from these entities will be tracked and sent to the sentry.
-Customization of the sentry ntegration can be done vie environmental variables (look into [ENV variables](#env-variables) section) - more about them [here](https://docs.sentry.io/platforms/python/configuration/options/)
+Customization of the sentry integration can be done vie environmental variables (look into [ENV variables](#env-variables) section) - you can read more about them [here](https://docs.sentry.io/platforms/python/configuration/options/)
