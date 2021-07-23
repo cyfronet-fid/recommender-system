@@ -125,42 +125,24 @@ NOTE: The url of the jupyter server will be displayed in the docker-compose outp
 (default: `http://127.0.0.1:8888/?token=SOME_JUPYTER_TOKEN`) (you can customize jupyter port and host using [env](#env-variables) variables)
 
 ### Training
-Currently GPU support is available only in the experimental jupyter notebook `neural_cf` that contains whole ML cycle:
-- Datasets creation, preprocessing and inspections
-- Models creation (Autoencoders, NCF)
-- Trainings
-- Evaluation
-- Inferention
 
-GPU support can be enabled using environmental variable TRAINING_DEVICE (look into [ENV variables](#env-variables) section) , but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`.
+Recommender system can use one of two recommendation engines implemented as agents:
+- `Pre Agent` - that implements [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) algorithm.
+- `RL Agent` - that implements [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) algorithm.
 
-For now the only trainable recommendation agent is the Pre-Agent.
+To choose prefered agent, use `AGENT_VERSION` env variable (look into [ENV variables](#env-variables) section). After change of this variable in the .env file no reloading is needed - system will use appropriate agent dynamically (if it is trained).
 
-It can be trained via training endpoint (used in production) or via training tasks.
+For now the only trainable recommendation agent is the Pre Agent. RL Agent training will be available soon.
 
-Before training, the development database should be populated. It can be accomplished in two ways:
- - posting marketplace database dump to the `database_dumps` endpoint
- - loading it manually using `load_mp_dump` function
+The simplest way to train chosen agent is using `./bin/rails recommender:update` task on the Marketplace side to send request to the `/update` endpoint of the Recommender System. It automatically sends most recent training data, preprocesses and uses them to train needed models.
 
-If you load dump manually, don't forget to run `tasks/neural_cf/real_data_preprocessing.py` to preprocess data (In case of loading dump via endpoint preprocessing is done automatically).
+If you want to have more fine-grained controll, you can split this process into two parts:
+- sending most recent data from MP to Recommender System `/database_dumps` endpoint (using `./bin/rails recommender:serialize_db` task on the MP side)
+- triggering training by sending request to the Recommender System `/training` endpoint (after above process finished)
 
-After populating database you can run training in following ways:
- - using `training` endpoint
- - using `tasks/neural_cf/real_data_training.py`
+GPU support can be enabled using environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section) , but for now it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatibile with `CUDA`. Fix will be available soon.
 
-Training automatically:
- - creates dataset and split it into train/validation/test datasets 
- - saves datasets
- - creates new model
- - trains model and saves it
- - displays training statistics and plots.
-
-Server Pre Agent will use last saved model for recommendations.
-
-If you don't have data, but you want to see how training looks like, use `tasks/neural_cf/fake_data_training.py` task.
-It prepares fake data and run training on it. All of it uses testing database but the final trained model and transformers (used for data preprocessing) are saved into development database, so it can be used for recommendations in development environment.
-
-If you're interested in ML experiments related to model or training you can use `training_and_inferention_example.ipynb`.
+After training is finished, system is immediately ready for serving recommendations (no manual reloading needed).
 
 ### Tests
 To run all the tests in our app run:
