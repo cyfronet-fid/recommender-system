@@ -18,7 +18,7 @@ from recommender.extensions import celery
 
 @celery.task
 def execute_training(_=None):
-    agent_version = dotenv_values(find_dotenv())["AGENT_VERSION"]
+    agent_version = dotenv_values(find_dotenv()).get("AGENT_VERSION")
     trainings = {PRE_AGENT: pre_agent_training, RL_AGENT: rl_agent_training}
     training = trainings.get(agent_version, pre_agent_training)
     training()

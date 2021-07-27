@@ -36,5 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Handle invalid /recommendations and /user_actions requests [@JanKapala, @wujuu]
+- fix AGENT_VERSION default in execute_training task [@JanKapala]
 
 ### Removed
