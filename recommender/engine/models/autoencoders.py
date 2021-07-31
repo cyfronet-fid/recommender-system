@@ -6,8 +6,13 @@ from copy import deepcopy
 
 import torch
 from torch.nn import Module, Sequential, Linear, BatchNorm1d, ReLU
+from tqdm.auto import tqdm
 
 from recommender.engine.preprocessing import USERS, SERVICES
+from recommender.engine.utils import load_last_module
+from recommender.models import User, Service
+
+import torch.nn.functional as F
 
 SERVICES_AUTOENCODER = "Services Auto-Encoder mMdel"
 USERS_AUTOENCODER = "Users Auto-Encoder Model"
@@ -92,3 +97,32 @@ def create_embedder(autoencoder):
         parameter.requires_grad = False
 
     return embedder
+
+
+def precalc_embedded_tensors(collection_name):
+    if collection_name == USERS:
+        embedder_name = USERS_AUTOENCODER
+        Collection = User
+    elif collection_name == SERVICES:
+        embedder_name = SERVICES_AUTOENCODER
+        Collection = Service
+    else:
+        raise Exception("Invalid collection name")
+
+    embedder = create_embedder(load_last_module(embedder_name))
+
+    ids = []
+    tensors = []
+    for obj in tqdm(Collection.objects, total=len(Collection.objects)):
+        ids.append(obj.id)
+        tensors.append(obj.tensor)
+
+    embedded_tensors_batch = embedder(torch.Tensor(tensors))
+    # embedded_tensors_batch = F.normalize(embedded_tensors_batch, dim=1)
+    factor = torch.max(torch.abs(embedded_tensors_batch))
+    embedded_tensors_batch = embedded_tensors_batch / factor
+
+    for id, embedded_tensor in tqdm(zip(ids, embedded_tensors_batch), total=len(ids)):
+        obj = Collection.objects(id=id).first()
+        obj.embedded_tensor = embedded_tensor.tolist()
+        obj.save()

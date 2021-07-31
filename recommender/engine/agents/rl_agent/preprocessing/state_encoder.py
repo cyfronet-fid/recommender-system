@@ -142,7 +142,8 @@ class StateEncoder:
             else:
                 start_end_indices.append(None)
 
-        service_tensors, _ = use_service_embedder(services, self.service_embedder)
+        if services:
+            service_tensors, _ = use_service_embedder(services, self.service_embedder)
 
         sequences = []
         for state_idx in range(states_number):

@@ -5,7 +5,7 @@ from itertools import chain
 from typing import Tuple, Optional
 
 import torch
-from torch.nn import Linear, ReLU, Sequential
+from torch.nn import Linear, ReLU, Sequential, BatchNorm1d
 
 from recommender.errors import MissingComponentError, NoHistoryEmbedderForK
 from recommender.engine.utils import load_last_module, NoSavedModuleError
@@ -40,7 +40,7 @@ class Critic(torch.nn.Module):
         layers += list(
             chain.from_iterable(
                 [
-                    [Linear(n_size, next_n_size), ReLU()]
+                    [Linear(n_size, next_n_size), ReLU()] # BatchNorm1d(next_n_size)
                     for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
                 ]
             )

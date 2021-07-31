@@ -22,12 +22,13 @@ class SearchDataEncoder:
 
         forbidden_services = retrieve_forbidden_services()
         self.forbidden_service_indices = get_service_indices(
-            self.index_id_map, [s.id for s in forbidden_services]
+            self.index_id_map, forbidden_services.distinct("id")
         )
 
     def __call__(
         self, users: List[User], search_data: List[SearchData]
     ) -> torch.Tensor:
+
         assert len(users) == len(search_data)
         batch_size = len(users)
 
@@ -36,8 +37,9 @@ class SearchDataEncoder:
         for i in range(batch_size):
             filtered_services = filter_services(search_data[i])
             ordered_services = get_ordered_services(users[i])
+
             filtered_service_indices = get_service_indices(
-                self.index_id_map, [s.id for s in filtered_services]
+                self.index_id_map, filtered_services.distinct("id")
             )
             ordered_service_indices = get_service_indices(
                 self.index_id_map, [s.id for s in ordered_services]

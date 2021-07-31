@@ -96,24 +96,26 @@ def env(
     )
     use_service_embedder_mock.return_value = (service_embeddings, index_id_map)
 
-    return SyntheticMP(interactions_per_user=interactions_per_user)
+    return SyntheticMP(
+        interactions_per_user=interactions_per_user, advanced_search_data=False
+    )
 
 
 def test_env_init(mongo):
     with pytest.raises(NoSyntheticUsers):
-        SyntheticMP()
+        SyntheticMP(advanced_search_data=False)
 
 
 def test_env_reset(env, users):
     assert env.current_user is None
-    assert env.engaged_services is None
+    assert env.current_engaged_services is None
     assert env.ordered_services is None
     assert env.interaction is None
 
     state = env.reset()
 
     assert env.current_user in users
-    assert env.engaged_services == []
+    assert env.current_engaged_services == []
     assert env.ordered_services == []
     assert env.interaction == 0
     assert state.user == env.current_user
