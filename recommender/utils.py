@@ -10,12 +10,17 @@ from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
 from bson import SON, ObjectId
 from mongoengine import Document, connect, disconnect
+from torch.utils.tensorboard import SummaryWriter
 
+from definitions import LOG_DIR
 from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.models import User
 from recommender.models import Service
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
 from settings import DevelopmentConfig, ProductionConfig
+
+import functools
+from time import time
 
 
 def _son_to_dict(son_obj: SON) -> dict:
@@ -182,12 +187,12 @@ def load_examples() -> Dict:
     # flask app building is finished. It has to be done in this way to provide
     # realistic /recommendations endpoint examples in the swagger.
 
-    if os.environ["FLASK_ENV"] == "testing":
+    if os.environ.get("FLASK_ENV") == "testing":
         return examples
 
-    if os.environ["FLASK_ENV"] == "development":
+    if os.environ.get("FLASK_ENV") == "development":
         host = DevelopmentConfig.MONGODB_HOST
-    elif os.environ["FLASK_ENV"] == "production":
+    elif os.environ.get("FLASK_ENV") == "production":
         host = ProductionConfig.MONGODB_HOST
     else:
         return examples
@@ -198,3 +203,52 @@ def load_examples() -> Dict:
     disconnect()
 
     return examples
+
+
+WRITER = SummaryWriter(log_dir=LOG_DIR)
+
+
+def timeit(func):
+    if "performance_measurements" not in globals():
+        global performance_measurements
+        performance_measurements = dict()
+
+    @functools.wraps(func)
+    def newfunc(*args, **kwargs):
+        start = time()
+        ret_val = func(*args, **kwargs)
+        end = time()
+        elapsed = end - start
+
+        key = f"{func.__name__}"
+        if isinstance(performance_measurements.get(key), list):
+            performance_measurements[key].append(elapsed)
+        elif performance_measurements.get(key) is None:
+            performance_measurements[key] = [elapsed]
+
+        step = len(performance_measurements[key])
+        WRITER.add_scalars("Performance", {key: elapsed}, step)
+        WRITER.flush()
+
+        return ret_val
+
+    return newfunc
+
+
+def show_times():
+    if "performance_measurements" not in globals():
+        global performance_measurements
+        performance_measurements = dict()
+
+    for key, value in performance_measurements.items():
+        records = len(value)
+        mean = sum(value) / records
+        print(f"[{key}] Mean execution time: {mean}, records number: {records}")
+
+    return performance_measurements
+
+
+def clear_times():
+    if "performance_measurements" not in globals():
+        global performance_measurements
+    performance_measurements = dict()

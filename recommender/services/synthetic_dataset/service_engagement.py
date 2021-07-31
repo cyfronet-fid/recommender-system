@@ -5,8 +5,10 @@ from typing import List
 import numpy as np
 import torch
 import pandas as pd
+from torch.utils.tensorboard import SummaryWriter
 
-from recommender.engine.agents.rl_agent.utils import get_service_indices, iou
+from definitions import LOG_DIR
+from recommender.engine.agents.rl_agent.utils import get_service_indices, cfr
 from recommender.models import User, Service
 
 
@@ -42,15 +44,23 @@ def approx_service_engagement(
         user_engagement: user's interest in the given service
     """
 
-    iou_categories = iou(set(user.categories), set(service.categories))
-    iou_scientific_domains = iou(
-        set(user.scientific_domains), set(service.scientific_domains)
-    )
+    common_cat_no = len(set(user.categories) & set(service.categories))
+    common_sd_no = len(set(user.scientific_domains) & set(service.scientific_domains))
+
+    x = common_cat_no + common_sd_no
+
+    # Sigmoid function over threshold
+    if x == 0:
+        common_measure = 0
+    else:
+        common_measure = 1 / (1 + np.exp(-(x - 1)))
+
+    # return common_measure
 
     if len(engaged_services_history) == 0:
-        return np.array([iou_categories, iou_scientific_domains]).mean()
+        return common_measure
 
-    engaged_service_ids = list(map(lambda s: s.id, engaged_services_history))
+    engaged_service_ids = [s.id for s in engaged_services_history]
 
     embedded_engaged_services = normalized_embedded_services[
         get_service_indices(index_id_map, engaged_service_ids)
@@ -64,6 +74,8 @@ def approx_service_engagement(
 
     engaged_services_score = _dist_score(dist.item())
 
-    return np.array(
-        [iou_categories, iou_scientific_domains, engaged_services_score]
+    user_engagement = np.array(
+        [common_measure, engaged_services_score]
     ).mean()
+
+    return user_engagement

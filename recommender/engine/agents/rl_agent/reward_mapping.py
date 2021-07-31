@@ -40,7 +40,7 @@ def _to_abstract_page_id(page_id: str, valid_page_ids: List[str]) -> str:
 
 def ua_to_reward_id(user_action: UserAction) -> str:
     """
-    This function should maps user_action to the symbolic reward.
+    This function maps user_action to the symbolic reward.
     Mapping is using ONLY following fields of user_action:
     source.page_id, target.page_id, user_action.action.order.
 

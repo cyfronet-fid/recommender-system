@@ -39,6 +39,7 @@ class Recommendation(Resource):
         json_dict = request.get_json()
         agent = load_agent()
         try:
+            # TODO: searchdata pre-checking
             services_ids = agent.call(json_dict)
 
             json_dict_with_services = copy.deepcopy(json_dict)

@@ -35,6 +35,7 @@ class Service(MarketplaceDocument):
     required_services = ListField(ReferenceField("Service"))
     dataframe = BinaryField(blank=True)
     tensor = ListField(FloatField(), blank=True)
+    embedded_tensor = ListField(FloatField(), blank=True)
     status = StringField()
 
     meta = {

@@ -15,3 +15,4 @@ class User(MarketplaceDocument):
     synthetic = BooleanField(default=False)
     dataframe = BinaryField(blank=True)
     tensor = ListField(FloatField(), blank=True)
+    embedded_tensor = ListField(FloatField(), blank=True)
