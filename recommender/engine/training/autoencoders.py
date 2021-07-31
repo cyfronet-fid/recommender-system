@@ -35,12 +35,14 @@ def train_autoencoder(
     loss_function,
     epochs,
     train_ds_dl,
-    valid_ds_dl,
+    valid_ds_dl=None,
     save_period=10,
     writer=None,
     verbose=False,
     device=torch.device("cpu"),
 ):
+    if valid_ds_dl is None:
+        valid_ds_dl = deepcopy(train_ds_dl)
     model = model.to(device)
 
     best_model = deepcopy(model)
@@ -75,7 +77,7 @@ def train_autoencoder(
                     best_model_flag = True
 
             if writer is not None:
-                writer.add_scalars("Loss", {"train": loss, "valid": val_loss}, epoch)
+                writer.add_scalars(f"Loss/{model.__class__.__name__}", {"train": loss, "valid": val_loss}, epoch)
                 writer.flush()
 
             tepoch.set_postfix(

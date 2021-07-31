@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 import torch
 
-from recommender.engine.agents.rl_agent.utils import get_service_indices, iou
+from recommender.engine.agents.rl_agent.utils import get_service_indices, cfr
 
 
 @pytest.fixture
@@ -34,4 +34,4 @@ def test_get_service_indices(service_embeddings, index_id_map):
 def test_iou():
     s1 = {0, 1, 2, 3}
     s2 = {2, 3, 4, 5}
-    assert iou(s1, s2) == 1 / 3
+    assert cfr(s1, s2) == 1 / 3

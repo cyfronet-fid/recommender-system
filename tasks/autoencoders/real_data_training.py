@@ -62,7 +62,10 @@ if __name__ == "__main__":
     for collection_name in (USERS, SERVICES):
         print(f"Creating {collection_name} autoencoder datasets...")
         datasets = create_autoencoder_datasets(
-            collection_name, train_ds_size=1.0, valid_ds_size=0.0, device=device
+            collection_name,
+            train_ds_size=1.0,
+            valid_ds_size=0.0,
+            device=device
         )
         print(f"{collection_name} autoencoder datasets created successfully!")
 
@@ -148,6 +151,8 @@ if __name__ == "__main__":
     print(f"User Autoencoder testing loss: {loss}")
 
     save_module(trained_user_autoencoder_model, name=USERS_AUTOENCODER)
+
+
 
     # SERVICE AUTOENCODER
     service_autoencoder_train_ds = load_last_dataset(

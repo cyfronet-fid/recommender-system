@@ -54,7 +54,7 @@ class ServiceSelector:
         if (mask > 0).sum() < K:
             raise InsufficientRecommendationSpace
 
-        engagement_values = F.softmax(weights @ self.itemspace.T, dim=1)
+        engagement_values = weights @ self.itemspace.T
         recommended_indices = self._choose_recommended_indices(
             engagement_values, mask, K
         )

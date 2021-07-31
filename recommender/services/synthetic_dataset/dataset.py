@@ -34,7 +34,7 @@ def _normalize_embedded_services(embedded_services: torch.Tensor) -> torch.Tenso
 def _get_engaged_services(rewards_dict: Dict[Service, List[str]]) -> List[Service]:
     """Returns list of services that were engaged
     by user in some way, based on reward history"""
-    return [service for service, rewards in rewards_dict.items() if len(rewards) > 1]
+    return [service for service, rewards in rewards_dict.items() if len(rewards) > 0]
 
 
 def _get_ordered_services(rewards_dict: Dict[Service, List[str]]) -> List[Service]:
@@ -42,7 +42,7 @@ def _get_ordered_services(rewards_dict: Dict[Service, List[str]]) -> List[Servic
     return [
         service
         for service, rewards in rewards_dict.items()
-        if len(rewards) > 1 and rewards[-1] == "order"
+        if len(rewards) > 0 and rewards[-1] == "order"
     ]
 
 

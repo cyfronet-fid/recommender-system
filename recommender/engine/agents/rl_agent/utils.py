@@ -94,7 +94,7 @@ def create_itemspace(embedder: torch.nn.Module) -> Tuple[torch.Tensor, pd.DataFr
 
 
 def use_service_embedder(
-    services: Union[Iterable, QuerySet], embedder: torch.nn.Module
+    services: Union[Iterable, QuerySet], embedder: torch.nn.Module, use_precalc_embeddings=True
 ) -> Tuple[torch.Tensor, pd.DataFrame]:
     """
     Embed list of services with provided embedder.
@@ -102,16 +102,20 @@ def use_service_embedder(
     Args:
         services: List of services.
         embedder: Embeder model.
+        use_precalc_embeddings: determine if precalculated embeddings from database should be used.
 
     Returns:
         embedded_services: embedded services.
         index_id_map: index to id mapping.
     """
 
-    one_hot_service_tensors = torch.Tensor([s.tensor for s in services])
+    if use_precalc_embeddings:
+        embedded_services = torch.Tensor([s.embedded_tensor for s in services])
+    else:
+        one_hot_service_tensors = torch.Tensor([s.tensor for s in services])
 
-    with torch.no_grad():
-        embedded_services = embedder(one_hot_service_tensors)
+        with torch.no_grad():
+            embedded_services = embedder(one_hot_service_tensors)
 
     index_id_map = create_index_id_map(services)
 
@@ -135,11 +139,10 @@ def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]
     return indices
 
 
-def iou(set1: set, set2: set) -> float:
-    """Get intersection over union factor of two sets"""
-    intersection = len(set1 & set2)
-    union = len(set1 | set2)
-    return intersection / union if union != 0 else 0
+def cfr(user_set: set, service_set: set) -> float: # TODO: rework this
+    """Get common features ratio"""
+
+    return len(user_set & service_set)
 
 
 def create_state(user: User, search_data: SearchData) -> State:
@@ -164,20 +167,24 @@ def create_state(user: User, search_data: SearchData) -> State:
 
 
 def use_user_embedder(
-    users: List[User], user_embedder: torch.nn.Module
+    users: List[User], user_embedder: torch.nn.Module, use_precalc_embeddings=True
 ) -> torch.Tensor:
     """
     Args:
         users: List of MongoEngine User objects.
         user_embedder: User Embedder model.
+        use_precalc_embeddings: determine if precalculated embeddings from database should be used.
 
     Returns:
         embedded_user_tensor: Embedded user tensors
     """
 
-    user_tensors_batch = torch.Tensor([user.tensor for user in users])
+    if use_precalc_embeddings:
+        embedded_user_tensors_batch = torch.Tensor([u.embedded_tensor for u in users])
+    else:
+        user_tensors_batch = torch.Tensor([user.tensor for user in users])
 
-    with torch.no_grad():
-        embedded_user_tensors_batch = user_embedder(user_tensors_batch)
+        with torch.no_grad():
+            embedded_user_tensors_batch = user_embedder(user_tensors_batch)
 
     return embedded_user_tensors_batch

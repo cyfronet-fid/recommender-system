@@ -15,6 +15,7 @@ from settings import DevelopmentConfig
 from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import trange, tqdm
 
+from recommender.engine.agents.rl_agent.training.ddpg_agent import DDPGAgent
 from recommender.models import User, Service
 from recommender.services.synthetic_dataset.env import SyntheticMP
 
@@ -52,13 +53,11 @@ def simulate(
                     break
     env.close()
 
-
 def get_random_string(length):
     # choose from all lowercase letter
     letters = string.ascii_lowercase
-    result_str = "".join(random.choice(letters) for i in range(length))
+    result_str = ''.join(random.choice(letters) for i in range(length))
     return result_str
-
 
 if __name__ == "__main__":
     disconnect()
@@ -74,7 +73,11 @@ if __name__ == "__main__":
     writer = SummaryWriter(log_dir=real_logdir)
 
     MAX_DEPTH = 1
-    env = SyntheticMP(N=20, advanced_search_data=False, max_depth=MAX_DEPTH)
+    env = SyntheticMP(
+        N=20,
+        advanced_search_data=False,
+        max_depth=MAX_DEPTH
+    )
 
     UE = len(User.objects.first().embedded_tensor)
     SE = len(Service.objects.first().embedded_tensor)
@@ -85,8 +88,8 @@ if __name__ == "__main__":
         SE=SE,
         UE=UE,
         I=I,
-        actor_layer_sizes=(64, 128, 256),  # (64, 128, 64),
-        critic_layer_sizes=(64, 128, 256),  # (64, 128, 64),
+        actor_layer_sizes=(64, 128, 256),#(64, 128, 64),
+        critic_layer_sizes=(64, 128, 256), #(64, 128, 64),
         replay_buffer_max_size=1e6,
         batch_size=64,
         γ=1,
@@ -108,7 +111,7 @@ if __name__ == "__main__":
         noise_clip=0.5,
         policy_delay=2,
         act_max=1,
-        act_min=-1,
+        act_min=-1
     )
 
     simulate(
