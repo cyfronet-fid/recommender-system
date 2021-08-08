@@ -27,3 +27,5 @@ class UserFactory(MarketplaceDocument):
     accessed_services = LazyFunction(
         lambda: ServiceFactory.create_batch(random.randint(0, 10))
     )
+
+    synthetic = False
