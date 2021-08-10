@@ -1,4 +1,4 @@
-# pylint: disable=too-many-instance-attributes, no-self-use
+# pylint: disable=too-many-instance-attributes, no-self-use, invalid-name
 
 """Module containing SyntheticMP gym ENV"""
 import random
@@ -38,10 +38,11 @@ class SyntheticMP(gym.Env):
     assumes that the synthetic users are already generated
     """
 
-    def __init__(self, interactions_per_user: int = 100):
+    def __init__(self, interactions_per_user: int = 100, N=20):
         super().__init__()
         self.users = self._get_users()
         self.interactions_per_user = interactions_per_user
+        self.N = N
 
         self.current_user = None
         self.engaged_services = None
@@ -88,7 +89,7 @@ class SyntheticMP(gym.Env):
     def _get_state(self):
         return State(
             user=self.current_user,
-            services_history=self.engaged_services,
+            services_history=self.engaged_services[-self.N :],
             search_data=self._get_search_data(),
             synthetic=True,
         )
