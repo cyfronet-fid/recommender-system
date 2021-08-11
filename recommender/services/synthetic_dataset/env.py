@@ -71,8 +71,8 @@ def _generate_c2xs():
 
         if services_len > 2:
             key = (
-                tuple(c.name if c else None for c in categories),
-                domain.name if domain else None,
+                tuple(c.id if c else -1 for c in categories),
+                domain.id if domain else -1,
             )
             c2xs_map[key] = services_len
 
@@ -107,8 +107,8 @@ def _generate_s2xc():
 
         if services_len > 2:
             key = (
-                tuple(d.name if d else None for d in domains),
-                category.name if category else None,
+                tuple(d.id if d else -1 for d in domains),
+                category.id if category else -1,
             )
             s2xc_map[key] = services_len
 
@@ -156,9 +156,9 @@ class SyntheticMP(gym.Env):
 
     def _get_search_data(self):
         if self.advanced_search_data:
-            categories = [None] + [c.name for c in self.current_user.categories]
-            scientific_domains = [None] + [
-                sd.name for sd in self.current_user.scientific_domains
+            categories = [-1] + [c.id for c in self.current_user.categories]
+            scientific_domains = [-1] + [
+                sd.id for sd in self.current_user.scientific_domains
             ]
 
             if random.uniform(0, 1) > 0.5:  # more categories
@@ -168,10 +168,22 @@ class SyntheticMP(gym.Env):
 
                 for subgroup in c2xs:
                     if self.c2xs_map.get(subgroup):
-                        categories, domain = subgroup
-                        c = list(filter(lambda x: x is not None, categories))
-                        sd = list(filter(lambda x: x is not None, [domain]))
-                        return SearchData(scientific_domains=sd, categories=c)
+                        category_ids, domain_id = subgroup
+                        categories = Category.objects(id__in=category_ids)
+                        if domain_id != -1:
+                            chosen_scientific_domain_ids = [domain_id] + random.sample(
+                                scientific_domains,
+                                k=random.randint(0, len(scientific_domains)),
+                            )
+                            scientific_domains = ScientificDomain.objects(
+                                id__in=chosen_scientific_domain_ids
+                            )
+                        else:
+                            scientific_domains = []
+
+                        return SearchData(
+                            scientific_domains=scientific_domains, categories=categories
+                        )
 
             else:  # more scientific_domains
                 s2 = list(product(scientific_domains, scientific_domains))
@@ -180,11 +192,21 @@ class SyntheticMP(gym.Env):
 
                 for subgroup in s2xc:
                     if self.s2xc_map.get(subgroup):
-                        domains, category = subgroup
-                        c = list(filter(lambda x: x is not None, [category]))
-                        sd = list(filter(lambda x: x is not None, domains))
+                        domain_ids, category_id = subgroup
+                        scientific_domains = ScientificDomain.objects(id__in=domain_ids)
+                        if category_id == -1:
+                            chosen_category_ids = [category_id] + random.sample(
+                                categories, k=random.randint(0, len(categories))
+                            )
+                            categories = ScientificDomain.objects(
+                                id__in=chosen_category_ids
+                            )
+                        else:
+                            categories = []
 
-                        return SearchData(scientific_domains=sd, categories=c)
+                        return SearchData(
+                            scientific_domains=scientific_domains, categories=categories
+                        )
 
         return SearchData()
 
@@ -246,3 +268,7 @@ class SyntheticMP(gym.Env):
 
     def render(self, mode="human"):
         pass
+
+
+if __name__ == "__main__":
+    env = SyntheticMP()
