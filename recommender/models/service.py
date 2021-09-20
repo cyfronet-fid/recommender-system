@@ -35,6 +35,7 @@ class Service(MarketplaceDocument):
     required_services = ListField(ReferenceField("Service"))
     dataframe = BinaryField(blank=True)
     tensor = ListField(FloatField(), blank=True)
+    embedded_tensor = ListField(FloatField(), blank=True)
     status = StringField()
 
     meta = {
@@ -42,7 +43,7 @@ class Service(MarketplaceDocument):
             {
                 "fields": ["$name", "$description", "$tagline"],
                 "default_language": "english",
-                "weights": {"title": 10, "content": 5, "tagline": 2},
+                "weights": {"name": 10, "description": 5, "tagline": 2},
             }
         ]
     }
