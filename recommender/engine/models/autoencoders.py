@@ -98,6 +98,21 @@ def create_embedder(autoencoder):
 
     return embedder
 
+def normalize(matrix: torch.Tensor) -> torch.Tensor:
+    """Gets matrix that can be decomposed into row vectors and divide each
+     dimension of these vectors by max value in this dimension (column)
+
+     Args:
+         matrix: input matrix of shape: [vectors_num, dimensions_num]
+     Returns:
+         normalised_matrix: normalised matrix of the same shape as input.
+     """
+
+    dimensions_maxes = torch.max(torch.abs(matrix), 0).values
+    normalised_matrix = matrix / dimensions_maxes
+
+    return normalised_matrix
+
 
 def precalc_embedded_tensors(collection_name):
     if collection_name == USERS:
@@ -118,9 +133,8 @@ def precalc_embedded_tensors(collection_name):
         tensors.append(obj.tensor)
 
     embedded_tensors_batch = embedder(torch.Tensor(tensors))
-    # embedded_tensors_batch = F.normalize(embedded_tensors_batch, dim=1)
-    factor = torch.max(torch.abs(embedded_tensors_batch))
-    embedded_tensors_batch = embedded_tensors_batch / factor
+
+    embedded_tensors_batch = normalize(embedded_tensors_batch)
 
     for id, embedded_tensor in tqdm(zip(ids, embedded_tensors_batch), total=len(ids)):
         obj = Collection.objects(id=id).first()
