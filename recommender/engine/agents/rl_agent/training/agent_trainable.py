@@ -26,9 +26,7 @@ class AgentTrainable(tune.Trainable):
 
         # Instantiate environment and agent
         self.env = SyntheticMP(
-            N=SERVICES_HISTORY_MAX_LEN,
-            advanced_search_data=False,
-            max_depth=MAX_DEPTH
+            N=SERVICES_HISTORY_MAX_LEN, advanced_search_data=False, max_depth=MAX_DEPTH
         )
 
         UE = len(User.objects.first().embedded_tensor)
@@ -40,8 +38,8 @@ class AgentTrainable(tune.Trainable):
             SE=SE,
             UE=UE,
             I=I,
-            actor_layer_sizes=(64, 128, 256),#(64, 128, 64),
-            critic_layer_sizes=(64, 128, 256), #(64, 128, 64),
+            actor_layer_sizes=(64, 128, 256),  # (64, 128, 64),
+            critic_layer_sizes=(64, 128, 256),  # (64, 128, 64),
             replay_buffer_max_size=1e4,
             batch_size=64,
             γ=1,
@@ -63,7 +61,7 @@ class AgentTrainable(tune.Trainable):
             noise_clip=0.5,
             policy_delay=2,
             act_max=1,
-            act_min=-1
+            act_min=-1,
         )
 
         self._update_agent_params(config)
@@ -96,7 +94,9 @@ class AgentTrainable(tune.Trainable):
         # train_steps_per_update and learning_freq should be
         # synchronized to keep the same execution time among trials
         # Use old value if "learning_freq" hyper parameter isn't present in config
-        self.agent.train_steps_per_update = config.get("learning_freq") or self.agent.train_steps_per_update
+        self.agent.train_steps_per_update = (
+            config.get("learning_freq") or self.agent.train_steps_per_update
+        )
 
     def reset_config(self, new_config):
         self._update_agent_params(new_config)

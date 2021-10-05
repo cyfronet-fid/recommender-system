@@ -10,7 +10,9 @@ from torch.optim import Adam
 
 from recommender.engine.agents.rl_agent.models.actor import Actor
 from recommender.engine.agents.rl_agent.models.critic import Critic
-from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
+from recommender.engine.agents.rl_agent.models.history_embedder import (
+    MLPHistoryEmbedder,
+)
 from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
     RewardEncoder,
 )
@@ -65,15 +67,14 @@ class TD3Agent:
         target_noise=0.2,
         noise_clip=0.5,
         policy_delay=2,
-        act_max=1.,
-        act_min=-1.
+        act_max=1.0,
+        act_min=-1.0,
     ):
         self.state_encoder = state_encoder or StateEncoder()
         self.service_selector = service_selector or ServiceSelector()
         self.reward_encoder = reward_encoder or RewardEncoder(
-            max_depth=max_depth,
-            max_steps_per_episode=max_steps_per_episode
-        ) # TODO: what about passing reward_encoder as a parameter?? (max_depth)
+            max_depth=max_depth, max_steps_per_episode=max_steps_per_episode
+        )  # TODO: what about passing reward_encoder as a parameter?? (max_depth)
 
         # TODO: getter/setter methods
         self.K = K
@@ -83,7 +84,7 @@ class TD3Agent:
 
         self.device = device
 
-        self.N = N # TODO: to make it assignable, setter method handling history embedders should be implemented
+        self.N = N  # TODO: to make it assignable, setter method handling history embedders should be implemented
 
         # Actor
         self.μ_θ = Actor(
@@ -92,7 +93,9 @@ class TD3Agent:
             UE=UE,
             I=I,
             layer_sizes=actor_layer_sizes,
-            history_embedder=HistoryEmbedder(SE=SE, N=N), # TODO: proper history embedder loading from database
+            history_embedder=MLPHistoryEmbedder(
+                SE=SE, N=N
+            ),  # TODO: proper history embedder loading from database
         ).to(device)
 
         self.μ_θ_ℒ_function = (
@@ -101,8 +104,12 @@ class TD3Agent:
         self._μ_θ_α = μ_θ_α
         self.μ_θ_optimizer = Adam(self.μ_θ.parameters(), μ_θ_α)
 
-        common_critic_history_embedder_1 = HistoryEmbedder(SE=SE, N=N) #  TODO: proper history embedder loading from database
-        common_critic_history_embedder_2 = HistoryEmbedder(SE=SE, N=N)  # TODO: proper history embedder loading from database
+        common_critic_history_embedder_1 = MLPHistoryEmbedder(
+            SE=SE, N=N
+        )  #  TODO: proper history embedder loading from database
+        common_critic_history_embedder_2 = MLPHistoryEmbedder(
+            SE=SE, N=N
+        )  # TODO: proper history embedder loading from database
 
         # Critic 1
         self.Q1_Φ = Critic(
@@ -111,7 +118,7 @@ class TD3Agent:
             UE=UE,
             I=I,
             layer_sizes=critic_layer_sizes,
-            history_embedder=common_critic_history_embedder_1
+            history_embedder=common_critic_history_embedder_1,
         ).to(device)
 
         # Critic 2
@@ -121,12 +128,14 @@ class TD3Agent:
             UE=UE,
             I=I,
             layer_sizes=critic_layer_sizes,
-            history_embedder=common_critic_history_embedder_2
+            history_embedder=common_critic_history_embedder_2,
         ).to(device)
 
         self.Q_Φ_ℒ_function = MSELoss()
         self._Q_Φ_α = Q_Φ_α
-        self._Q_Φ_params = itertools.chain(self.Q1_Φ.parameters(), self.Q2_Φ.parameters())
+        self._Q_Φ_params = itertools.chain(
+            self.Q1_Φ.parameters(), self.Q2_Φ.parameters()
+        )
         self.Q_Φ_optimizer = Adam(self._Q_Φ_params, Q_Φ_α)
 
         # Target networks
@@ -142,7 +151,9 @@ class TD3Agent:
         for p in self.μ_θ_targ.parameters():
             p.requires_grad = False
 
-        for p in itertools.chain(self.Q1_Φ_targ.parameters(), self.Q2_Φ_targ.parameters()):
+        for p in itertools.chain(
+            self.Q1_Φ_targ.parameters(), self.Q2_Φ_targ.parameters()
+        ):
             p.requires_grad = False
 
         # Replay Buffer
@@ -223,7 +234,9 @@ class TD3Agent:
         if not self.last_sars_valid:
             return
 
-        encoded_reward = self.reward_encoder([R]).item() # TODO: should be removed for better performance
+        encoded_reward = self.reward_encoder(
+            [R]
+        ).item()  # TODO: should be removed for better performance
         self._log_scalar("STEP/R", encoded_reward)
         self._last_return += encoded_reward
 
@@ -268,7 +281,9 @@ class TD3Agent:
             A_prim = self._add_noise_observe(self.μ_θ_targ(S_prim))
             Q1_targ_action_value = self.Q1_Φ_targ(S_prim, A_prim).squeeze(1)
             Q2_targ_action_value = self.Q2_Φ_targ(S_prim, A_prim).squeeze(1)
-            y = R + self.γ * (1 - d) * torch.min(Q1_targ_action_value, Q2_targ_action_value)
+            y = R + self.γ * (1 - d) * torch.min(
+                Q1_targ_action_value, Q2_targ_action_value
+            )
             y = y.reshape(-1, 1)
         y1_pred = self.Q1_Φ(S, A)
         y2_pred = self.Q2_Φ(S, A)
@@ -315,7 +330,10 @@ class TD3Agent:
             for θ, θ_targ in zip(self.μ_θ.parameters(), self.μ_θ_targ.parameters()):
                 θ_targ.data.copy_(self.ρ * θ_targ.data + (1 - self.ρ) * θ.data)
 
-            for Q_Φ, Q_Φ_targ in [(self.Q1_Φ, self.Q1_Φ_targ), (self.Q2_Φ, self.Q2_Φ_targ)]:
+            for Q_Φ, Q_Φ_targ in [
+                (self.Q1_Φ, self.Q1_Φ_targ),
+                (self.Q2_Φ, self.Q2_Φ_targ),
+            ]:
                 for Φ, Φ_targ in zip(Q_Φ.parameters(), Q_Φ_targ.parameters()):
                     Φ_targ.data.copy_(self.ρ * Φ_targ.data + (1 - self.ρ) * Φ.data)
 
@@ -340,23 +358,18 @@ class TD3Agent:
         return action
 
     def _add_noise_act(self, action):
-        noise = torch.randn_like(action)\
-            .to(self.device)
+        noise = torch.randn_like(action).to(self.device)
         noise *= self.act_noise
         return self._clamp_action(action + noise)
 
     def _add_noise_observe(self, action):
-        noise = torch.randn_like(action) \
-            .to(self.device)
+        noise = torch.randn_like(action).to(self.device)
         noise *= self.target_noise
         noise = noise.clamp(max=self.noise_clip, min=-self.noise_clip)
         return self._clamp_action(action + noise)
 
     def _clamp_action(self, noised_action):
-        return noised_action.clamp(
-            max=self.act_max,
-            min=self.act_min
-        )
+        return noised_action.clamp(max=self.act_max, min=self.act_min)
 
     # JIC (Just in Case)
     # def _add_noise(self, action):
@@ -463,8 +476,7 @@ class TD3Agent:
         # Optimizers have to be re-instantiated after moving nets to selected device
         new.μ_θ_optimizer = new.μ_θ_optimizer.__class__(new.μ_θ.parameters(), new.μ_θ_α)
         new.Q_Φ_optimizer = new.Q_Φ_optimizer.__class__(
-            itertools.chain(new.Q1_Φ.parameters(), new.Q2_Φ.parameters()),
-            new.Q_Φ_α
+            itertools.chain(new.Q1_Φ.parameters(), new.Q2_Φ.parameters()), new.Q_Φ_α
         )
 
         return new
@@ -472,7 +484,7 @@ class TD3Agent:
     def save(self, file_path, suppress_warning=False):
         writer = self.writer
         self.writer = None
-        self._last_S = None # WARNING:
+        self._last_S = None  # WARNING:
         with open(file_path, "wb") as file:
             pickle.dump(self, file)
         self.writer = writer

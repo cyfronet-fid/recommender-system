@@ -3,7 +3,9 @@
 import torch
 
 from recommender.engine.agents.rl_agent.models.actor import Actor
-from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
+from recommender.engine.agents.rl_agent.models.history_embedder import (
+    MLPHistoryEmbedder,
+)
 
 
 def test_actor_proper_shape():
@@ -20,6 +22,6 @@ def test_actor_proper_shape():
 
     example_state = (example_user, example_services_history, example_mask)
 
-    actor = Actor(K, SE, UE, I, HistoryEmbedder(SE))
+    actor = Actor(K, SE, UE, I, MLPHistoryEmbedder(SE))
 
     assert actor(example_state).shape == torch.Size([BATCH_SIZE, K, SE])

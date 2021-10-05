@@ -94,7 +94,9 @@ def create_itemspace(embedder: torch.nn.Module) -> Tuple[torch.Tensor, pd.DataFr
 
 
 def use_service_embedder(
-    services: Union[Iterable, QuerySet], embedder: torch.nn.Module, use_precalc_embeddings=True
+    services: Union[Iterable, QuerySet],
+    embedder: torch.nn.Module,
+    use_precalc_embeddings=True,
 ) -> Tuple[torch.Tensor, pd.DataFrame]:
     """
     Embed list of services with provided embedder.
@@ -139,7 +141,7 @@ def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]
     return indices
 
 
-def cfr(user_set: set, service_set: set) -> float: # TODO: rework this
+def cfr(user_set: set, service_set: set) -> float:  # TODO: rework this
     """Get common features ratio"""
 
     return len(user_set & service_set)

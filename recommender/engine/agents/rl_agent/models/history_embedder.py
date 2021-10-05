@@ -1,63 +1,37 @@
-# pylint: disable=missing-module-docstring, useless-super-delegation
+# pylint: disable=missing-class-docstring
 from itertools import chain
+from abc import ABC, abstractmethod
 
 import torch
-from torch import nn
-from torch.nn import BatchNorm1d
-
-from recommender.engine.agents.rl_agent.models.base_lstm_embedder import (
-    BaseLSTMEmbedder,
-)
-
 import torch.nn.functional as F
+from torch import nn
 
-HISTORY_EMBEDDER_V1 = "history embedder v1"
-HISTORY_EMBEDDER_V2 = "history embedder v2"
+LSTM_HISTORY_EMBEDDER_V1 = "lstm history embedder v1"
+LSTM_HISTORY_EMBEDDER_V2 = "lstm history embedder v2"
+MLP_HISTORY_EMBEDDER_V1 = "mlp history embedder v1"
+MLP_HISTORY_EMBEDDER_V2 = "mlp history embedder v2"
 
 
-# class HistoryEmbedder(BaseLSTMEmbedder):
-#     """
-#     Model used for transforming services history tensor [N, SE]
-#     into a history tensor [SE].
-#      It should be used and trained inside both actor and critic.
-#     """
-#
-#     def __init__(self, SE: int, num_layers: int = 3, dropout: float = 0.5):
-#         """
-#         NOTE: hidden_size is always equal to SE
-#
-#         Args:
-#             SE: service embedding dimension
-#             num_layers: number of hidden layers
-#             dropout: a dropout probability
-#         """
-#         super().__init__(SE, num_layers, dropout)
-#
-#     def forward(self, temporal_data: torch.Tensor) -> torch.Tensor:
-#         """
-#         RNN is used for reducing history's N dimension.
-#
-#         Args:
-#             temporal_data: history of services engaged by the
-#             user represented as a tensor of shape [N, SE]
-#             where N is the history length and SE is service content tensor embedding dim
-#
-#         Returns:
-#             Embedded history of services engaged by the user as a tensor of shape [SE]
-#         """
-#
-#         return super().forward(temporal_data)
+class HistoryEmbedder(torch.nn.Module, ABC):
+    """History Embedder base class"""
 
-class HistoryEmbedder(torch.nn.Module):
+    @abstractmethod
+    def forward(self, service_history: torch.Tensor) -> torch.Tensor:
+        """Reduces the temporal dimension of the service history"""
+        pass
+
+
+class LSTMHistoryEmbedder(HistoryEmbedder):
     """
     Model used for transforming services history tensor [N, SE]
-    into a history tensor [SE].
-     It should be used and trained inside both actor and critic.
+    into a history tensor [SE] using an LSTM network.
+    It should be used and trained inside both actor and critic.
     """
 
-    def __init__(self, SE: int, N=20, layer_sizes=(256, 128), num_layers: int = 3, dropout: float = 0.5):
+    def __init__(self, SE: int, num_layers: int = 3, dropout: float = 0.2):
+
         """
-        NOTE: hidden_size is always equal to SE
+        NOTE: Hidden size is always equal to SE, to ensure proper output dimension.
 
         Args:
             SE: service embedding dimension
@@ -65,15 +39,54 @@ class HistoryEmbedder(torch.nn.Module):
             dropout: a dropout probability
         """
         super().__init__()
-        self.N = N # TODO: make it even wiser
-        self.SE = SE
-        # self.network = torch.nn.Linear(self.N * SE, SE)
+        self.lstm = nn.LSTM(
+            input_size=SE,
+            hidden_size=SE,
+            num_layers=num_layers,
+            dropout=dropout,
+            batch_first=True,
+        )
 
-        layers = [torch.nn.Linear(self.N * SE, layer_sizes[0]), nn.ReLU()] # , BatchNorm1d(layer_sizes[0])
+    def forward(self, service_history: torch.Tensor) -> torch.Tensor:
+        """
+        Reduces service_history's temporal dimension using LSTM network.
+
+        Args:
+            service_history: history of services engaged by the
+            user represented as a tensor of shape [N, input_size]
+            where N is the length of the time steps
+
+        Returns:
+            service_history with reduced temporal dim of shape [input_size]
+        """
+
+        output, _ = self.lstm(service_history)
+        return output[:, -1]
+
+
+class MLPHistoryEmbedder(HistoryEmbedder):
+    """
+    Model used for transforming services history tensor [N, SE]
+    into a history tensor [SE], using a simple feed forward network.
+    It should be used and trained inside both actor and critic.
+    """
+
+    def __init__(self, SE: int, N=20, layer_sizes=(256, 128)):
+        """
+        Args:
+            SE: service embedding dimension
+            N: upper bound on history length
+            layer_sizes: list of layers to use in a network
+        """
+        super().__init__()
+        self.N = N
+        self.SE = SE
+
+        layers = [torch.nn.Linear(self.N * SE, layer_sizes[0]), nn.ReLU()]
         layers += list(
             chain.from_iterable(
                 [
-                    [nn.Linear(n_size, next_n_size), nn.ReLU()] # , BatchNorm1d(next_n_size)
+                    [nn.Linear(n_size, next_n_size), nn.ReLU()]
                     for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
                 ]
             )
@@ -82,25 +95,25 @@ class HistoryEmbedder(torch.nn.Module):
 
         self.network = nn.Sequential(*layers)
 
-    def forward(self, temporal_data: torch.Tensor) -> torch.Tensor:
+    def forward(self, service_history: torch.Tensor) -> torch.Tensor:
         """
-        RNN is used for reducing history's N dimension.
+        Reduces service_history's temporal dimension using MLP feed forward network.
 
         Args:
-            temporal_data: history of services engaged by the
+            service_history: history of services engaged by the
             user represented as a tensor of shape [N, SE]
             where N is the history length and SE is service content tensor embedding dim
 
         Returns:
-            Embedded history of services engaged by the user as a tensor of shape [SE]
+            Processed history of services engaged by the user as a tensor of shape [SE]
         """
 
-        B = temporal_data.shape[0]
+        B = service_history.shape[0]
 
-        concated_history = temporal_data.reshape((B, -1))
-        zeros = torch.zeros((B, self.N*self.SE))
-        zeros[:, :concated_history.shape[1]] = concated_history
-        padded_history = zeros.to(temporal_data.device)
+        merged_history = service_history.reshape((B, -1))
+        zeros = torch.zeros((B, self.N * self.SE))
+        zeros[:, : merged_history.shape[1]] = merged_history
+        padded_history = zeros.to(service_history.device)
 
         x = self.network(padded_history)
         x = F.relu(x)

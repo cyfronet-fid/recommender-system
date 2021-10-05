@@ -31,7 +31,7 @@ if __name__ == "__main__":
         hyperparam_mutations=hyperparam_mutations,
         custom_explore_fn=explore,
         resample_probability=0.25,
-        synch=True
+        synch=True,
     )
 
     analysis = tune.run(
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         fail_fast=True,
         stop={"training_iteration": 400, "mean_return": 1},
         num_samples=TRIALS_N,
-        resources_per_trial={'cpu': cpu_per_trial, 'gpu': gpu_per_trial},
+        resources_per_trial={"cpu": cpu_per_trial, "gpu": gpu_per_trial},
         local_dir=LOG_DIR,
         verbose=ONLY_STATUS_UPDATES,
         reuse_actors=True,
