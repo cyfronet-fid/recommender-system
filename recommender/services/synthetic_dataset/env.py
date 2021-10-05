@@ -46,6 +46,7 @@ from recommender.utils import printable, timeit
 
 WRITER = SummaryWriter(log_dir=LOG_DIR)
 
+
 class NoSyntheticUsers(Exception):
     """Raised when the input value is too small"""
 
@@ -129,7 +130,12 @@ class SyntheticMP(gym.Env):
     """
 
     def __init__(
-        self, interactions_per_user: int = 100, N=20, advanced_search_data=True, max_depth=10, users_n=1
+        self,
+        interactions_per_user: int = 100,
+        N=20,
+        advanced_search_data=True,
+        max_depth=10,
+        users_n=1,
     ):
         super().__init__()
         self.max_depth = max_depth
@@ -147,7 +153,6 @@ class SyntheticMP(gym.Env):
         self.users_n = users_n
 
         self.users = self._get_users()
-
 
         service_embedded_tensors, self.index_id_map = use_service_embedder(
             Service.objects.order_by("id"),
@@ -225,7 +230,7 @@ class SyntheticMP(gym.Env):
         return SearchData()
 
     def _get_users(self):
-        users = User.objects(synthetic=True)[:self.users_n]
+        users = User.objects(synthetic=True)[: self.users_n]
 
         if len(users) < 1:
             raise NoSyntheticUsers
@@ -244,7 +249,7 @@ class SyntheticMP(gym.Env):
     def _get_state(self):
         return State(
             user=self.current_user,
-            services_history=self.current_engaged_services[-self.N:],
+            services_history=self.current_engaged_services[-self.N :],
             search_data=self._get_search_data(),
             synthetic=True,
         )
@@ -275,23 +280,32 @@ class SyntheticMP(gym.Env):
             for s in action
         }
 
-        d = {f"{i}": engagement for i, engagement in enumerate(service_engagements.values())}
+        d = {
+            f"{i}": engagement
+            for i, engagement in enumerate(service_engagements.values())
+        }
         WRITER.add_scalars(f"STEP/Services engagement", d, self.counter)
-        WRITER.add_scalar(f"STEP/history len of user {self.current_user_idx}", len(self.current_engaged_services), self.counter)
+        WRITER.add_scalar(
+            f"STEP/history len of user {self.current_user_idx}",
+            len(self.current_engaged_services),
+            self.counter,
+        )
         WRITER.flush()
 
         rewards_dict = {
-            s: synthesize_reward(self.transition_rewards_df, engagement, max_depth=self.max_depth)
+            s: synthesize_reward(
+                self.transition_rewards_df, engagement, max_depth=self.max_depth
+            )
             for s, engagement in service_engagements.items()
         }
 
         # TODO: below filtering may potentially break something in the future
         new_engaged_services = _get_engaged_services(rewards_dict)
         # self.current_engaged_services += new_engaged_services
-        self.current_engaged_services += list(set(new_engaged_services) - set(self.current_engaged_services))
+        self.current_engaged_services += list(
+            set(new_engaged_services) - set(self.current_engaged_services)
+        )
         self.engaged_services[self.current_user_idx] = self.current_engaged_services
-
-
 
         # self.ordered_services += _get_ordered_services(rewards_dict) # TODO: uncomment
         state = self._get_state()

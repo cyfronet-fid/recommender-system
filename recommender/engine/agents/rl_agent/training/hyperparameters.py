@@ -1,19 +1,20 @@
 from ray import tune
 
+
 def get_hp_staff():
     config = {
-            # "replay_buffer_max_size": tune.grid_search([10 ** x for x in range(3, 7)]),
-            # "batch_size": tune.grid_search([2 ** x for x in range(4, 10)]),
-            # "learning_freq": tune.grid_search([2 ** x for x in range(0, 5)]),
-            "γ": tune.uniform(0.9, 1),
-            "μ_θ_α": tune.loguniform(1e-4, 1e-1),
-            "Q_Φ_α": tune.loguniform(1e-4, 1e-1),
-            "ρ": tune.loguniform(0.5, 0.95),
-            "act_noise": tune.uniform(0.1, 0.5),
-            "target_noise": tune.uniform(0.1, 0.5),
-            "noise_clip": tune.uniform(0.1, 0.5),
-            "policy_delay": tune.choice([2, 3, 4]),
-        }
+        # "replay_buffer_max_size": tune.grid_search([10 ** x for x in range(3, 7)]),
+        # "batch_size": tune.grid_search([2 ** x for x in range(4, 10)]),
+        # "learning_freq": tune.grid_search([2 ** x for x in range(0, 5)]),
+        "γ": tune.uniform(0.9, 1),
+        "μ_θ_α": tune.loguniform(1e-4, 1e-1),
+        "Q_Φ_α": tune.loguniform(1e-4, 1e-1),
+        "ρ": tune.loguniform(0.5, 0.95),
+        "act_noise": tune.uniform(0.1, 0.5),
+        "target_noise": tune.uniform(0.1, 0.5),
+        "noise_clip": tune.uniform(0.1, 0.5),
+        "policy_delay": tune.choice([2, 3, 4]),
+    }
 
     hyperparam_mutations = {
         # "replay_buffer_max_size": tune.choice([10 ** x for x in range(3, 7)]),
@@ -27,7 +28,6 @@ def get_hp_staff():
         "target_noise": tune.uniform(0.1, 0.5),
         "noise_clip": tune.uniform(0.1, 0.5),
         "policy_delay": tune.choice([2, 3, 4]),
-
     }
 
     # Utility function

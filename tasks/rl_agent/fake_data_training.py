@@ -11,9 +11,9 @@ from settings import TestingConfig, DevelopmentConfig
 
 from recommender.engine.agents.rl_agent.models.actor import Actor, ACTOR_V1, ACTOR_V2
 from recommender.engine.agents.rl_agent.models.history_embedder import (
-    HistoryEmbedder,
-    HISTORY_EMBEDDER_V1,
-    HISTORY_EMBEDDER_V2,
+    MLPHistoryEmbedder,
+    MLP_HISTORY_EMBEDDER_V1,
+    MLP_HISTORY_EMBEDDER_V2,
 )
 
 from recommender.engine.models.autoencoders import (
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     # TODO: service_autoencoder training
     service_embedder = create_embedder(service_auto_encoder)
 
-    actor_v1_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
+    actor_v1_history_embedder = MLPHistoryEmbedder(SE=SE)
 
     actor_v1 = Actor(
         K=3,
@@ -77,7 +77,7 @@ if __name__ == "__main__":
     )
     # TODO: actor_v1 training
 
-    actor_v2_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
+    actor_v2_history_embedder = MLPHistoryEmbedder(SE=SE)
 
     actor_v2 = Actor(
         K=2,
@@ -93,9 +93,9 @@ if __name__ == "__main__":
 
     save_module(module=user_autoencoder, name=USERS_AUTOENCODER)
     save_module(module=service_auto_encoder, name=SERVICES_AUTOENCODER)
-    save_module(module=actor_v1_history_embedder, name=HISTORY_EMBEDDER_V1)
+    save_module(module=actor_v1_history_embedder, name=MLP_HISTORY_EMBEDDER_V1)
     save_module(module=actor_v1, name=ACTOR_V1)
-    save_module(module=actor_v2_history_embedder, name=HISTORY_EMBEDDER_V2)
+    save_module(module=actor_v2_history_embedder, name=MLP_HISTORY_EMBEDDER_V2)
     save_module(module=actor_v2, name=ACTOR_V2)
 
     save_transformer(user_transformer, USERS)
