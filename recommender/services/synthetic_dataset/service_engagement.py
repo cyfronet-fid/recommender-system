@@ -74,8 +74,6 @@ def approx_service_engagement(
 
     engaged_services_score = _dist_score(dist.item())
 
-    user_engagement = np.array(
-        [common_measure, engaged_services_score]
-    ).mean()
+    user_engagement = np.array([common_measure, engaged_services_score]).mean()
 
     return user_engagement

@@ -3,12 +3,13 @@ from copy import deepcopy, copy
 
 import torch
 from torch.nn import MSELoss, DataParallel
-from torch.nn.utils import clip_grad_value_, clip_grad_norm_
 from torch.optim import Adam
 
 from recommender.engine.agents.rl_agent.models.actor import Actor
 from recommender.engine.agents.rl_agent.models.critic import Critic
-from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
+from recommender.engine.agents.rl_agent.models.history_embedder import (
+    MLPHistoryEmbedder,
+)
 from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
     RewardEncoder,
 )
@@ -63,9 +64,8 @@ class DDPGAgent:
         self.state_encoder = state_encoder or StateEncoder()
         self.service_selector = service_selector or ServiceSelector()
         self.reward_encoder = reward_encoder or RewardEncoder(
-            max_depth=max_depth,
-            max_steps_per_episode=max_steps_per_episode
-        ) # TODO: what about passing reward_encoder as a parameter?? (max_depth)
+            max_depth=max_depth, max_steps_per_episode=max_steps_per_episode
+        )  # TODO: what about passing reward_encoder as a parameter?? (max_depth)
 
         # TODO: getter/setter methods
         self.K = K
@@ -75,7 +75,7 @@ class DDPGAgent:
 
         self.device = device
 
-        self.N = N # TODO: to make it assignable, setter method handling history embedders should be implemented
+        self.N = N  # TODO: to make it assignable, setter method handling history embedders should be implemented
 
         # Actor
         self.μ_θ = Actor(
@@ -84,7 +84,9 @@ class DDPGAgent:
             UE=UE,
             I=I,
             layer_sizes=actor_layer_sizes,
-            history_embedder=HistoryEmbedder(SE=SE, N=N), # TODO: proper history embedder loading from database
+            history_embedder=MLPHistoryEmbedder(
+                SE=SE, N=N
+            ),  # TODO: proper history embedder loading from database
         ).to(device)
 
         self.μ_θ_ℒ_function = (
@@ -100,7 +102,9 @@ class DDPGAgent:
             UE=UE,
             I=I,
             layer_sizes=critic_layer_sizes,
-            history_embedder=HistoryEmbedder(SE=SE, N=N) # TODO: proper history embedder loading from database
+            history_embedder=MLPHistoryEmbedder(
+                SE=SE, N=N
+            ),  # TODO: proper history embedder loading from database
         ).to(device)
 
         self.Q_Φ_ℒ_function = MSELoss()
@@ -215,7 +219,9 @@ class DDPGAgent:
 
         # Critic loss calculation
         with torch.no_grad():
-            y = R + self.γ * (1 - d) * self.Q_Φ_targ(S_prim, self.μ_θ_targ(S_prim)).squeeze(1)
+            y = R + self.γ * (1 - d) * self.Q_Φ_targ(
+                S_prim, self.μ_θ_targ(S_prim)
+            ).squeeze(1)
             y = y.reshape(-1, 1)
         y_pred = self.Q_Φ(S, A)
         Q_Φ_ℒ = self.Q_Φ_ℒ_function(y_pred, y)
@@ -322,12 +328,13 @@ class DDPGAgent:
         S, A, R, S_prim, d = batch
 
         self.writer.add_scalars(
-            "Batch/S", {
+            "Batch/S",
+            {
                 "user norm": torch.norm(S[0]),
                 "services_history norm": torch.norm(S[1]),
                 "mask norm": torch.norm(S[2]),
             },
-            self.steps_counter
+            self.steps_counter,
         )
 
         self.writer.add_scalar("Batch/A", torch.norm(A), self.steps_counter)
@@ -335,12 +342,13 @@ class DDPGAgent:
         self.writer.add_scalar("Batch/R", torch.norm(R), self.steps_counter)
 
         self.writer.add_scalars(
-            "Batch/S_prim", {
+            "Batch/S_prim",
+            {
                 "user norm": torch.norm(S_prim[0]),
                 "services_history norm": torch.norm(S_prim[1]),
                 "mask norm": torch.norm(S_prim[2]),
             },
-            self.steps_counter
+            self.steps_counter,
         )
 
     def _flush_logs(self):
@@ -392,7 +400,7 @@ class DDPGAgent:
     def save(self, file_path, suppress_warning=False):
         writer = self.writer
         self.writer = None
-        self._last_S = None # WARNING:
+        self._last_S = None  # WARNING:
         with open(file_path, "wb") as file:
             pickle.dump(self, file)
         self.writer = writer

@@ -20,9 +20,9 @@ from recommender.engine.models.autoencoders import (
 )
 from recommender.engine.agents.pre_agent.training.common import create_embedder
 from recommender.engine.agents.rl_agent.models.history_embedder import (
-    HistoryEmbedder,
-    HISTORY_EMBEDDER_V1,
-    HISTORY_EMBEDDER_V2,
+    MLPHistoryEmbedder,
+    MLP_HISTORY_EMBEDDER_V1,
+    MLP_HISTORY_EMBEDDER_V2,
 )
 from recommender.engine.preprocessing import precalc_users_and_service_tensors
 from recommender.models import User
@@ -57,8 +57,8 @@ def test_rl_agent_call(mongo):
 
     I = len(Service.objects)
 
-    actor_v1_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
-    save_module(module=actor_v1_history_embedder, name=HISTORY_EMBEDDER_V1)
+    actor_v1_history_embedder = MLPHistoryEmbedder(SE=SE)
+    save_module(module=actor_v1_history_embedder, name=MLP_HISTORY_EMBEDDER_V1)
 
     actor_v1 = Actor(
         K=3,
@@ -69,8 +69,8 @@ def test_rl_agent_call(mongo):
     )
     save_module(module=actor_v1, name=ACTOR_V1)
 
-    actor_v2_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
-    save_module(module=actor_v2_history_embedder, name=HISTORY_EMBEDDER_V2)
+    actor_v2_history_embedder = MLPHistoryEmbedder(SE=SE)
+    save_module(module=actor_v2_history_embedder, name=MLP_HISTORY_EMBEDDER_V2)
 
     actor_v2 = Actor(
         K=2,

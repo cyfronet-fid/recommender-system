@@ -20,9 +20,11 @@ def reward_id_to_number(_reward_id: str) -> float:
     return mapping.get(_reward_id, 0.0)
 
 
-def reward_ids_to_subreward(reward_ids: List[str], max_depth, max_steps_per_episode) -> float:
+def reward_ids_to_subreward(
+    reward_ids: List[str], max_depth, max_steps_per_episode
+) -> float:
     sub_reward = sum([reward_id_to_number(reward_id) for reward_id in reward_ids])
-    sub_reward = sub_reward/(max_depth*max_steps_per_episode)
+    sub_reward = sub_reward / (max_depth * max_steps_per_episode)
     return sub_reward
 
 
@@ -38,7 +40,7 @@ class RewardEncoder:
         reward_ids_to_subreward=reward_ids_to_subreward,
         subrewards_to_reward=subrewards_to_reward,
         max_depth=10,
-        max_steps_per_episode=100
+        max_steps_per_episode=100,
     ):
         self.reward_ids_to_subreward = reward_ids_to_subreward
         self.subrewards_to_reward = subrewards_to_reward
@@ -59,7 +61,14 @@ class RewardEncoder:
 
         encoded_rewards = []
         for raw_reward in raw_rewards:
-            rewards = list(map(lambda x: self.reward_ids_to_subreward(x, self.max_depth, self.max_steps_per_episode), raw_reward))
+            rewards = list(
+                map(
+                    lambda x: self.reward_ids_to_subreward(
+                        x, self.max_depth, self.max_steps_per_episode
+                    ),
+                    raw_reward,
+                )
+            )
             reward = self.subrewards_to_reward(rewards)
             encoded_rewards.append(reward)
 

@@ -5,9 +5,9 @@ import torch
 from recommender.engine.agents.rl_agent.services2weights import Services2Weights
 from recommender.engine.agents.rl_agent.models.critic import Critic
 from recommender.engine.agents.rl_agent.models.history_embedder import (
-    HistoryEmbedder,
-    HISTORY_EMBEDDER_V1,
-    HISTORY_EMBEDDER_V2,
+    MLPHistoryEmbedder,
+    MLP_HISTORY_EMBEDDER_V1,
+    MLP_HISTORY_EMBEDDER_V2,
 )
 from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
     SearchDataEncoder,
@@ -56,12 +56,12 @@ def test_critic(mongo):
     save_module(module=service_auto_encoder, name=SERVICES_AUTOENCODER)
 
     # HistoryEmbedder v1
-    history_embedder_v1 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
-    save_module(module=history_embedder_v1, name=HISTORY_EMBEDDER_V1)
+    history_embedder_v1 = MLPHistoryEmbedder(SE=SE)
+    save_module(module=history_embedder_v1, name=MLP_HISTORY_EMBEDDER_V1)
 
     # HistoryEmbedder v2
-    history_embedder_v2 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
-    save_module(module=history_embedder_v2, name=HISTORY_EMBEDDER_V2)
+    history_embedder_v2 = MLPHistoryEmbedder(SE=SE)
+    save_module(module=history_embedder_v2, name=MLP_HISTORY_EMBEDDER_V2)
 
     # Search data encoder
     search_data_encoder = SearchDataEncoder()
