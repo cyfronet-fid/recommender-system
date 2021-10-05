@@ -1,11 +1,9 @@
 import itertools
 import pickle
-from collections import deque
 from copy import deepcopy, copy
 
 import torch
 from torch.nn import MSELoss, DataParallel
-from torch.nn.utils import clip_grad_value_, clip_grad_norm_
 from torch.optim import Adam
 
 from recommender.engine.agents.rl_agent.models.actor import Actor
@@ -18,13 +16,9 @@ from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
 )
 from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
-from recommender.engine.agents.rl_agent.training.ornstein_uhlenbeck_process import (
-    OrnsteinUhlenbeckProcess,
-)
 from recommender.engine.agents.rl_agent.training.replay_buffer import ReplayBuffer
 from recommender.errors import InsufficientRecommendationSpace
 from recommender.models import State, Service
-from recommender.utils import timeit
 
 
 def negative_mean_loss_function(x):
@@ -169,7 +163,6 @@ class TD3Agent:
         self.act_noise = act_noise
         self.target_noise = target_noise
         self.noise_clip = noise_clip
-        # self._ouprocess = OrnsteinUhlenbeckProcess(K=K, SE=SE, sigma=self.act_noise) # Just in case (JIC)
 
         # Other hyper-parameters
         self.γ = γ
@@ -206,7 +199,6 @@ class TD3Agent:
         with torch.no_grad():
             self.μ_θ.eval()
             weights = self.μ_θ(S)
-            # self.writer.add_histogram("STEP/A (weights)", weights, self.steps_counter)
 
             action_value = self.Q1_Φ(S, weights)
             self._log_scalar("STEP/Q(A)", action_value)
@@ -217,7 +209,6 @@ class TD3Agent:
             action_value = self.Q1_Φ(S, weights)
             self._log_scalar("STEP/Q(A noised)", action_value)
 
-            # self.writer.add_histogram("STEP/A noised (weights)", weights, self.steps_counter)
             self.μ_θ.train()
             try:
                 A = self._prepare_action(weights, mask)
@@ -291,14 +282,6 @@ class TD3Agent:
         Q2_Φ_ℒ = self.Q_Φ_ℒ_function(y2_pred, y)
         Q_Φ_ℒ = Q1_Φ_ℒ + Q2_Φ_ℒ
 
-        # self.writer.add_scalars(
-        #     "REPLAY BUFFER/Q_MSE", {
-        #         "Q1_Φ_ℒ": Q1_Φ_ℒ,
-        #         "Q2_Φ_ℒ": Q2_Φ_ℒ
-        #     },
-        #     self.steps_counter
-        # )
-
         # Weights update
         self.Q_Φ_optimizer.zero_grad()
         Q_Φ_ℒ.backward()
@@ -326,16 +309,17 @@ class TD3Agent:
                 p.requires_grad = True
 
     def _target_nets_train_step(self):
-        with torch.no_grad():
-            for θ, θ_targ in zip(self.μ_θ.parameters(), self.μ_θ_targ.parameters()):
-                θ_targ.data.copy_(self.ρ * θ_targ.data + (1 - self.ρ) * θ.data)
+        if self.update_times_counter % self.policy_delay == 0:
+            with torch.no_grad():
+                for θ, θ_targ in zip(self.μ_θ.parameters(), self.μ_θ_targ.parameters()):
+                    θ_targ.data.copy_(self.ρ * θ_targ.data + (1 - self.ρ) * θ.data)
 
-            for Q_Φ, Q_Φ_targ in [
-                (self.Q1_Φ, self.Q1_Φ_targ),
-                (self.Q2_Φ, self.Q2_Φ_targ),
-            ]:
-                for Φ, Φ_targ in zip(Q_Φ.parameters(), Q_Φ_targ.parameters()):
-                    Φ_targ.data.copy_(self.ρ * Φ_targ.data + (1 - self.ρ) * Φ.data)
+                for Q_Φ, Q_Φ_targ in [
+                    (self.Q1_Φ, self.Q1_Φ_targ),
+                    (self.Q2_Φ, self.Q2_Φ_targ),
+                ]:
+                    for Φ, Φ_targ in zip(Q_Φ.parameters(), Q_Φ_targ.parameters()):
+                        Φ_targ.data.copy_(self.ρ * Φ_targ.data + (1 - self.ρ) * Φ.data)
 
     # DATA TRANSFORMING AND UTILITIES
     def _prepare_state(self, S: State):
@@ -349,10 +333,6 @@ class TD3Agent:
         services_ids = self.service_selector(
             K=self.K, weights=weights.cpu().squeeze(), mask=mask.cpu().squeeze()
         )
-
-        # self.writer.add_histogram("Service_histogram/k1", torch.Tensor([services_ids[0]]), self.steps_counter)
-        # self.writer.add_histogram("Service_histogram/k2", torch.Tensor([services_ids[1]]), self.steps_counter)
-        # self.writer.add_histogram("Service_histogram/k3", torch.Tensor([services_ids[2]]), self.steps_counter)
 
         action = Service.objects(id__in=services_ids)
         return action
@@ -370,11 +350,6 @@ class TD3Agent:
 
     def _clamp_action(self, noised_action):
         return noised_action.clamp(max=self.act_max, min=self.act_min)
-
-    # JIC (Just in Case)
-    # def _add_noise(self, action):
-    #     noise = torch.Tensor(self._ouprocess.sample()).to(self.device)
-    #     return self._clamp_action(action + noise)
 
     def _cast_batch_to_device(self, batch):
         casted_batch = []
@@ -421,12 +396,6 @@ class TD3Agent:
                 self.writer.add_histogram(
                     f"{net_name}/{param_name}", param.data, self.episodes_counter
                 )
-
-    def _log_inputs(self, batch):
-        if self.writer is None:
-            return
-
-        S, A, R, S_prim, d = batch
 
     def _flush_logs(self):
         if self.writer is not None:
@@ -508,15 +477,6 @@ class TD3Agent:
     def batch_size(self, new_batch_size):
         self._batch_size = new_batch_size
         self.Ɗ.batch_size = new_batch_size
-
-    # @property
-    # def noise_sigma(self):
-    #     return self._noise_sigma
-    #
-    # @noise_sigma.setter
-    # def noise_sigma(self, new_value):
-    #     self._noise_sigma = new_value
-    #     self._ouprocess.sigma = new_value
 
     @property
     def replay_buffer_max_size(self):
