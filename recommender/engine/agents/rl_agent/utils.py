@@ -157,12 +157,6 @@ def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]
     return indices
 
 
-def cfr(user_set: set, service_set: set) -> float:  # TODO: rework this
-    """Get common features ratio"""
-
-    return len(user_set & service_set)
-
-
 def create_state(user: User, search_data: SearchData) -> State:
     """
     Get needed information from context and create state.
@@ -182,6 +176,7 @@ def create_state(user: User, search_data: SearchData) -> State:
     )
 
     return state
+
 
 def use_user_embedder(
     users: List[User], user_embedder: torch.nn.Module, use_precalc_embeddings=True
