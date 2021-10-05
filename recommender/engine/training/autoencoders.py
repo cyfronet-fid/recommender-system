@@ -77,7 +77,11 @@ def train_autoencoder(
                     best_model_flag = True
 
             if writer is not None:
-                writer.add_scalars(f"Loss/{model.__class__.__name__}", {"train": loss, "valid": val_loss}, epoch)
+                writer.add_scalars(
+                    f"Loss/{model.__class__.__name__}",
+                    {"train": loss, "valid": val_loss},
+                    epoch,
+                )
                 writer.flush()
 
             tepoch.set_postfix(

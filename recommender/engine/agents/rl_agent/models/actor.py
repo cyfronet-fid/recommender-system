@@ -14,11 +14,9 @@ from recommender.errors import (
 )
 from recommender.engine.agents.rl_agent.models.history_embedder import (
     HistoryEmbedder,
-    HISTORY_EMBEDDER_V1,
-    HISTORY_EMBEDDER_V2,
+    MLP_HISTORY_EMBEDDER_V1,
+    MLP_HISTORY_EMBEDDER_V2,
 )
-
-import torch.nn.functional as F
 
 ACTOR_V1 = "actor_v1"
 ACTOR_V2 = "actor_v2"
@@ -54,11 +52,19 @@ class Actor(nn.Module):
 
         self._load_models()
 
-        layers = [nn.Linear(UE + SE + I, layer_sizes[0]), nn.ReLU(), BatchNorm1d(layer_sizes[0])]
+        layers = [
+            nn.Linear(UE + SE + I, layer_sizes[0]),
+            nn.ReLU(),
+            BatchNorm1d(layer_sizes[0]),
+        ]
         layers += list(
             chain.from_iterable(
                 [
-                    [nn.Linear(n_size, next_n_size), nn.ReLU(), BatchNorm1d(next_n_size)]
+                    [
+                        nn.Linear(n_size, next_n_size),
+                        nn.ReLU(),
+                        BatchNorm1d(next_n_size),
+                    ]
                     for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
                 ]
             )
@@ -88,15 +94,15 @@ class Actor(nn.Module):
         x = self.network(x)
 
         weights = x.reshape(-1, self.K, self.SE)
-        weights = torch.tanh(weights) # TODO: normalization??? what normalization???
+        weights = torch.tanh(weights)  # TODO: normalization??? what normalization???
         return weights
 
     def _load_models(self):
         try:
             if self.K == 3:
-                history_embedder_name = HISTORY_EMBEDDER_V1
+                history_embedder_name = MLP_HISTORY_EMBEDDER_V1
             elif self.K == 2:
-                history_embedder_name = HISTORY_EMBEDDER_V2
+                history_embedder_name = MLP_HISTORY_EMBEDDER_V2
             else:
                 raise NoHistoryEmbedderForK
             self.history_embedder = self.history_embedder or load_last_module(

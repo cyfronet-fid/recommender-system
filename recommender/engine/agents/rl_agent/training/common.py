@@ -10,9 +10,9 @@ from torch.utils.data import DataLoader
 
 from recommender.engine.agents.rl_agent.models.actor import Actor, ACTOR_V1, ACTOR_V2
 from recommender.engine.agents.rl_agent.models.history_embedder import (
-    HistoryEmbedder,
-    HISTORY_EMBEDDER_V1,
-    HISTORY_EMBEDDER_V2,
+    MLPHistoryEmbedder,
+    MLP_HISTORY_EMBEDDER_V1,
+    MLP_HISTORY_EMBEDDER_V2,
 )
 
 from recommender.engine.datasets.autoencoders import (
@@ -176,7 +176,7 @@ def rl_agent_training() -> None:
 
     SE = SERVICE_EMBEDDING_DIM
 
-    actor_v1_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
+    actor_v1_history_embedder = MLPHistoryEmbedder(SE=SE)
 
     actor_v1 = Actor(
         K=3,
@@ -187,7 +187,7 @@ def rl_agent_training() -> None:
     )
     # TODO: actor_v1 (and critic) training
 
-    actor_v2_history_embedder = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
+    actor_v2_history_embedder = MLPHistoryEmbedder(SE=SE)
 
     actor_v2 = Actor(
         K=2,
@@ -198,7 +198,7 @@ def rl_agent_training() -> None:
     )
     # TODO: actor_v2 (and critic) training
 
-    save_module(module=actor_v1_history_embedder, name=HISTORY_EMBEDDER_V1)
+    save_module(module=actor_v1_history_embedder, name=MLP_HISTORY_EMBEDDER_V1)
     save_module(module=actor_v1, name=ACTOR_V1)
-    save_module(module=actor_v2_history_embedder, name=HISTORY_EMBEDDER_V2)
+    save_module(module=actor_v2_history_embedder, name=MLP_HISTORY_EMBEDDER_V2)
     save_module(module=actor_v2, name=ACTOR_V2)

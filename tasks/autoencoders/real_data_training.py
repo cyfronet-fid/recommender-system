@@ -4,20 +4,35 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 from definitions import LOG_DIR
-from recommender.engine.datasets.autoencoders import get_autoencoder_dataset_name, AUTOENCODERS, \
-    create_autoencoder_datasets
+from recommender.engine.datasets.autoencoders import (
+    get_autoencoder_dataset_name,
+    AUTOENCODERS,
+    create_autoencoder_datasets,
+)
 from recommender.engine.models.autoencoders import (
     create_autoencoder_model,
     USERS_AUTOENCODER,
-    SERVICES_AUTOENCODER, precalc_embedded_tensors,
+    SERVICES_AUTOENCODER,
+    precalc_embedded_tensors,
 )
-from recommender.engine.preprocessing import USERS, SERVICES, precalc_users_and_service_tensors
+from recommender.engine.preprocessing import (
+    USERS,
+    SERVICES,
+    precalc_users_and_service_tensors,
+)
 from recommender.engine.training.autoencoders import (
     train_autoencoder,
     autoencoder_loss_function,
     evaluate_autoencoder,
 )
-from recommender.engine.utils import load_last_dataset, TRAIN, VALID, TEST, save_module, save_dataset
+from recommender.engine.utils import (
+    load_last_dataset,
+    TRAIN,
+    VALID,
+    TEST,
+    save_module,
+    save_dataset,
+)
 from recommender.models import User, Service
 
 from dotenv import load_dotenv
@@ -52,10 +67,7 @@ if __name__ == "__main__":
     for collection_name in (USERS, SERVICES):
         print(f"Creating {collection_name} autoencoder datasets...")
         datasets = create_autoencoder_datasets(
-            collection_name,
-            train_ds_size=1.0,
-            valid_ds_size=0.0,
-            device=device
+            collection_name, train_ds_size=1.0, valid_ds_size=0.0, device=device
         )
         print(f"{collection_name} autoencoder datasets created successfully!")
 
@@ -141,8 +153,6 @@ if __name__ == "__main__":
     print(f"User Autoencoder testing loss: {loss}")
 
     save_module(trained_user_autoencoder_model, name=USERS_AUTOENCODER)
-
-
 
     # SERVICE AUTOENCODER
     service_autoencoder_train_ds = load_last_dataset(

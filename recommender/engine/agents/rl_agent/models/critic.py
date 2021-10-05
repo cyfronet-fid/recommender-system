@@ -11,8 +11,8 @@ from recommender.errors import MissingComponentError, NoHistoryEmbedderForK
 from recommender.engine.utils import load_last_module, NoSavedModuleError
 from recommender.engine.agents.rl_agent.models.history_embedder import (
     HistoryEmbedder,
-    HISTORY_EMBEDDER_V1,
-    HISTORY_EMBEDDER_V2,
+    MLP_HISTORY_EMBEDDER_V1,
+    MLP_HISTORY_EMBEDDER_V2,
 )
 
 
@@ -40,7 +40,7 @@ class Critic(torch.nn.Module):
         layers += list(
             chain.from_iterable(
                 [
-                    [Linear(n_size, next_n_size), ReLU()] # BatchNorm1d(next_n_size)
+                    [Linear(n_size, next_n_size), ReLU()]  # BatchNorm1d(next_n_size)
                     for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
                 ]
             )
@@ -89,9 +89,9 @@ class Critic(torch.nn.Module):
     def _load_models(self):
         try:
             if self.K == 3:
-                history_embedder_name = HISTORY_EMBEDDER_V1
+                history_embedder_name = MLP_HISTORY_EMBEDDER_V1
             elif self.K == 2:
-                history_embedder_name = HISTORY_EMBEDDER_V2
+                history_embedder_name = MLP_HISTORY_EMBEDDER_V2
             else:
                 raise NoHistoryEmbedderForK
             self.history_embedder = self.history_embedder or load_last_module(
