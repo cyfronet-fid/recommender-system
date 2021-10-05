@@ -21,4 +21,3 @@ def test_embedded_tensors_exist(mongo):
     users[1].save()
 
     assert embedded_tensors_exist(users) is False
-

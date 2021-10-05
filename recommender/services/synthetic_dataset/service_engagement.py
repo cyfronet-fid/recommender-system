@@ -5,17 +5,54 @@ from typing import List
 import numpy as np
 import torch
 import pandas as pd
-from torch.utils.tensorboard import SummaryWriter
 
-from definitions import LOG_DIR
-from recommender.engine.agents.rl_agent.utils import get_service_indices, cfr
+from recommender.engine.agents.rl_agent.utils import get_service_indices
 from recommender.models import User, Service
 
 
-def _dist_score(x):
-    """Returns score for a given euclidean distance, between 0 and 1.
+def _distance_metric(cluster: torch.Tensor, point: torch.Tensor) -> float:
+    """Computes euclidean distance between the cluster centroid and
+     a given point and the converts it to a score, between 0 and 1, assuming the cluster and the point are
+     normalized in every dimension, between 0 and 0.5.
     The lesser the distance the better the score"""
-    return -x + 1
+    centroid = cluster.mean(dim=0).unsqueeze(0)
+    point = point.unsqueeze(0)
+    dist = torch.cdist(centroid, point).item()
+    return -dist + 1
+
+
+def _overlap_metric(x: int) -> float:
+    """Returns measure of overlapping niches.
+    Uses a sigmoid function that is shifted to the right"""
+    return 1 / (1 + np.exp(-(x - 1)))
+
+
+def _compute_distance_score(
+    engaged_services_history: List[Service],
+    service: Service,
+    normalized_embedded_services: torch.Tensor,
+    index_id_map: pd.DataFrame,
+):
+
+    engaged_service_ids = [s.id for s in engaged_services_history]
+    embedded_engaged_services = normalized_embedded_services[
+        get_service_indices(index_id_map, engaged_service_ids)
+    ]
+    embedded_service = normalized_embedded_services[
+        get_service_indices(index_id_map, [service.id])
+    ][0]
+    distance_score = _distance_metric(embedded_engaged_services, embedded_service)
+    return distance_score
+
+
+def _compute_overlap_score(user: User, service: Service):
+    common_categories = set(user.categories) & set(service.categories)
+    common_scientific_domains = set(user.scientific_domains) & set(
+        service.scientific_domains
+    )
+    common_len = len(common_categories) + len(common_scientific_domains)
+    overlap_score = _overlap_metric(common_len)
+    return overlap_score
 
 
 def approx_service_engagement(
@@ -26,13 +63,13 @@ def approx_service_engagement(
     index_id_map: pd.DataFrame,
 ) -> float:
     """
-    Approximates user's interest in the given service, based on common users
-    and services categories and scientific_domains and
-    distance from the centroid of user's engaged services
-    embeddings and given service embedding.
+    Approximates user's interest in the given service, based on overlapping users'
+    and services' categories and scientific_domains, and the
+    distance from the centroid of user's services_history
+    embeddings and a given service embedding.
 
     Args:
-        user: user that we are trying to approximate engagement for
+        user: user that we are trying to approximate the engagement for
         service: service for which we are trying to approximate user's engagement
         engaged_services_history: list of user-engaged services
             to include in centroid distance score
@@ -44,36 +81,15 @@ def approx_service_engagement(
         user_engagement: user's interest in the given service
     """
 
-    common_cat_no = len(set(user.categories) & set(service.categories))
-    common_sd_no = len(set(user.scientific_domains) & set(service.scientific_domains))
-
-    x = common_cat_no + common_sd_no
-
-    # Sigmoid function over threshold
-    if x == 0:
-        common_measure = 0
-    else:
-        common_measure = 1 / (1 + np.exp(-(x - 1)))
-
-    # return common_measure
+    overlap_score = _compute_overlap_score(user, service)
 
     if len(engaged_services_history) == 0:
-        return common_measure
+        return overlap_score
 
-    engaged_service_ids = [s.id for s in engaged_services_history]
+    distance_score = _compute_distance_score(
+        engaged_services_history, service, normalized_embedded_services, index_id_map
+    )
 
-    embedded_engaged_services = normalized_embedded_services[
-        get_service_indices(index_id_map, engaged_service_ids)
-    ]
-    embedded_service = normalized_embedded_services[
-        get_service_indices(index_id_map, [service.id])
-    ]
-
-    engaged_services_centroid = embedded_engaged_services.mean(dim=0)
-    dist = torch.cdist(embedded_service, engaged_services_centroid.view(1, -1)).view(-1)
-
-    engaged_services_score = _dist_score(dist.item())
-
-    user_engagement = np.array([common_measure, engaged_services_score]).mean()
+    user_engagement = np.array([overlap_score, distance_score]).mean()
 
     return user_engagement
