@@ -12,8 +12,9 @@ from recommender.models import User, Service
 
 def _distance_metric(cluster: torch.Tensor, point: torch.Tensor) -> float:
     """Computes euclidean distance between the cluster centroid and
-     a given point and the converts it to a score, between 0 and 1, assuming the cluster and the point are
-     normalized in every dimension, between 0 and 0.5.
+    a given point and the converts it to a score, between 0 and 1,
+    assuming the cluster and the point are normalized
+    in every dimension, between 0 and 0.5.
     The lesser the distance the better the score"""
     centroid = cluster.mean(dim=0).unsqueeze(0)
     point = point.unsqueeze(0)

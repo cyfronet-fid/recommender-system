@@ -120,7 +120,8 @@ def use_service_embedder(
     Args:
         services: List of services.
         embedder: Embeder model.
-        use_precalc_embeddings: determine if precalculated embeddings from database should be used.
+        use_precalc_embeddings: determine if precalculated
+            embeddings from database should be used.
 
     Returns:
         embedded_services: embedded services.
@@ -185,7 +186,8 @@ def use_user_embedder(
     Args:
         users: List of MongoEngine User objects.
         user_embedder: User Embedder model.
-        use_precalc_embeddings: determine if precalculated embeddings from database should be used.
+        use_precalc_embeddings: determine
+            if precalculated embeddings from database should be used.
 
     Returns:
         embedded_user_tensor: Embedded user tensors

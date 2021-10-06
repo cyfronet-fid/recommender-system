@@ -1,4 +1,6 @@
-# pylint: disable=missing-class-docstring
+# pylint: disable=invalid-name
+
+"""This module defines the history embedder classes"""
 from itertools import chain
 from abc import ABC, abstractmethod
 
@@ -18,7 +20,6 @@ class HistoryEmbedder(torch.nn.Module, ABC):
     @abstractmethod
     def forward(self, service_history: torch.Tensor) -> torch.Tensor:
         """Reduces the temporal dimension of the service history"""
-        pass
 
 
 class LSTMHistoryEmbedder(HistoryEmbedder):

@@ -1,7 +1,10 @@
+# pylint: disable=invalid-name, missing-module-docstring
+
 import torch
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
+from mongoengine import connect, disconnect
 
 from definitions import LOG_DIR
 from recommender.engine.datasets.autoencoders import (
@@ -28,19 +31,12 @@ from recommender.engine.training.autoencoders import (
 from recommender.engine.utils import (
     load_last_dataset,
     TRAIN,
-    VALID,
-    TEST,
     save_module,
     save_dataset,
 )
 from recommender.models import User, Service
 
-from dotenv import load_dotenv
-
 from recommender.services.synthetic_dataset.users import synthesize_users
-
-load_dotenv()
-from mongoengine import connect, disconnect
 
 from settings import DevelopmentConfig, get_device
 
@@ -77,9 +73,8 @@ if __name__ == "__main__":
 
     device = "cpu"
     writer = SummaryWriter(log_dir=LOG_DIR)
-    # writer = None
 
-    UOH = len(User.objects[0].tensor)  # synthetic=True
+    UOH = len(User.objects[0].tensor)
     SOH = len(Service.objects.first().tensor)
 
     UE = 32
@@ -89,24 +84,12 @@ if __name__ == "__main__":
     user_autoencoder_train_ds = load_last_dataset(
         get_autoencoder_dataset_name(USERS, TRAIN)
     )
-    # user_autoencoder_valid_ds = load_last_dataset(
-    #     get_autoencoder_dataset_name(USERS, VALID)
-    # )
-    # user_autoencoder_test_ds = load_last_dataset(
-    #     get_autoencoder_dataset_name(USERS, TEST)
-    # )
 
     USER_AE_BATCH_SIZE = 128
 
     user_autoencoder_train_ds_dl = DataLoader(
         user_autoencoder_train_ds, batch_size=USER_AE_BATCH_SIZE, shuffle=True
     )
-    # user_autoencoder_valid_ds_dl = DataLoader(
-    #     user_autoencoder_valid_ds, batch_size=USER_AE_BATCH_SIZE, shuffle=True
-    # )
-    # user_autoencoder_test_ds_dl = DataLoader(
-    #     user_autoencoder_test_ds, batch_size=USER_AE_BATCH_SIZE, shuffle=True
-    # )
 
     USER_FEATURES_DIM = len(User.objects[0].tensor)
     USER_EMBEDDING_DIM = 32
@@ -131,7 +114,6 @@ if __name__ == "__main__":
         loss_function=autoencoder_loss_function,
         epochs=EPOCHS,
         train_ds_dl=user_autoencoder_train_ds_dl,
-        # valid_ds_dl=user_autoencoder_valid_ds_dl,
         writer=writer,
         save_period=10,
         verbose=True,
@@ -140,7 +122,6 @@ if __name__ == "__main__":
 
     loss = evaluate_autoencoder(
         trained_user_autoencoder_model,
-        # user_autoencoder_test_ds_dl,
         user_autoencoder_train_ds_dl,
         autoencoder_loss_function,
         device,
@@ -153,24 +134,12 @@ if __name__ == "__main__":
     service_autoencoder_train_ds = load_last_dataset(
         get_autoencoder_dataset_name(SERVICES, TRAIN)
     )
-    # service_autoencoder_valid_ds = load_last_dataset(
-    #     get_autoencoder_dataset_name(SERVICES, VALID)
-    # )
-    # service_autoencoder_test_ds = load_last_dataset(
-    #     get_autoencoder_dataset_name(SERVICES, TEST)
-    # )
 
     SERVICE_AE_BATCH_SIZE = 128
 
     service_autoencoder_train_ds_dl = DataLoader(
         service_autoencoder_train_ds, batch_size=SERVICE_AE_BATCH_SIZE, shuffle=True
     )
-    # service_autoencoder_valid_ds_dl = DataLoader(
-    #     service_autoencoder_valid_ds, batch_size=SERVICE_AE_BATCH_SIZE, shuffle=True
-    # )
-    # service_autoencoder_test_ds_dl = DataLoader(
-    #     service_autoencoder_test_ds, batch_size=SERVICE_AE_BATCH_SIZE, shuffle=True
-    # )
 
     SERVICE_FEATURES_DIM = len(Service.objects[0].tensor)
     SERVICE_EMBEDDING_DIM = 64
@@ -195,7 +164,6 @@ if __name__ == "__main__":
         loss_function=autoencoder_loss_function,
         epochs=EPOCHS,
         train_ds_dl=service_autoencoder_train_ds_dl,
-        # valid_ds_dl=service_autoencoder_valid_ds_dl,
         writer=writer,
         save_period=10,
         verbose=True,
@@ -204,7 +172,6 @@ if __name__ == "__main__":
 
     loss = evaluate_autoencoder(
         trained_service_autoencoder_model,
-        # service_autoencoder_test_ds_dl,
         service_autoencoder_train_ds_dl,
         autoencoder_loss_function,
         device,

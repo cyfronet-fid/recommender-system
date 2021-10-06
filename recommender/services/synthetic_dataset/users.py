@@ -72,10 +72,7 @@ def _synthesize_user(
     cluster: str,
     category_clusters: Dict[str, List],
     scientific_domain_clusters: Dict[str, List],
-    niche_range: Tuple[int, int] = (
-        5,
-        7,
-    ),  # TODO: should be (1, 2) if we want to have cartesian product working
+    niche_range: Tuple[int, int] = (5, 7),
 ) -> User:
     """Synthesizes a single user using the category/scientific_domain
     mapping to each cluster"""

@@ -1,3 +1,5 @@
+# pylint: disable-all
+
 import itertools
 import pickle
 from copy import deepcopy, copy
