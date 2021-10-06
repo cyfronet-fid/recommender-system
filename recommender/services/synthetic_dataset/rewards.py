@@ -5,6 +5,13 @@ from typing import List
 import numpy as np
 import pandas as pd
 
+from enum import Enum, auto
+
+
+class RewardGeneration(Enum):
+    SIMPLE = auto()
+    COMPLEX = auto()
+
 
 # NOTE: that rewards are listed in increasing interest order
 REWARDS = ["exit", "simple_transition", "mild_interest", "interest", "order"]
@@ -33,10 +40,14 @@ def synthesize_reward(
     max_depth: int = 10,
     current_depth: int = 0,
     source: str = "/services",
+    mode: RewardGeneration = RewardGeneration.COMPLEX,
+    simple_mode_threshold: float = 0.5,
 ) -> List[str]:
     """
     Synthesizes reward using service_engagement factor.
-    It recursively wanders around the transition graph,
+    If mode is "simple" - the synthesized reward is either ["order"] or [] depending on the
+    specified threshold. In the "complex" mode case,
+    it recursively explores the transition graph,
     and chooses appropriate rewards based on engagement
     and binomial distribution of engagement over rewards.
 
@@ -47,10 +58,17 @@ def synthesize_reward(
         max_depth: max depth of the recursive stack
         current_depth: current depth of the stack, should always be 0 on the first call
         source: starting page, should always equal to /services on the first call
+        mode: either "complex" or "simple"
+        simple_mode_threshold - specifies above which value the synthesized reward should be "order"
 
     Returns:
         reward list: list of symbolic rewards given for a given graph walk
     """
+
+    assert 0.0 <= simple_mode_threshold <= 1.0
+
+    if mode == RewardGeneration.SIMPLE:
+        return ["order"] if engagement > simple_mode_threshold else []
 
     if current_depth >= max_depth:
         return []
