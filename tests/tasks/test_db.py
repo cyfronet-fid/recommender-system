@@ -8,6 +8,8 @@ from tests.factories.marketplace import UserFactory
 from tests.factories.user_action import UserActionFactory
 from tests.helpers import mongo_model_to_json
 
+FIELDS_NOT_INCLUDED_IN_MP = ("dataframe", "tensor", "embedded_tensor", "synthetic")
+
 
 def test_handle_db_dump(mongo, mp_dump_data):
     UserFactory.create_batch(5)  # Creates all of the MP dump components in the DB
@@ -25,7 +27,7 @@ def test_handle_db_dump(mongo, mp_dump_data):
             {
                 field: value
                 for field, value in mongo_model_to_json(x).items()
-                if field not in ("dataframe", "tensor", "synthetic")
+                if field not in FIELDS_NOT_INCLUDED_IN_MP
             }
             for x in v
         ]
