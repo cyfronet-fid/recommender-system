@@ -1,3 +1,5 @@
+# pylint: disable-all
+
 import numpy as np
 from mongoengine import connect
 from ray import tune

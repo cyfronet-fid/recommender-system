@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, missing-module-docstring, too-many-locals
+# pylint: disable=no-member, invalid-name, missing-module-docstring, too-many-locals, too-many-arguments
 import random
 from typing import List, Dict, Tuple
 
@@ -14,7 +14,10 @@ from recommender.engine.models.autoencoders import create_embedder, SERVICES_AUT
 from recommender.engine.utils import load_last_module
 from recommender.models import Service, State, SearchData, Sars, User
 from recommender.services.fts import retrieve_services_for_recommendation
-from recommender.services.synthetic_dataset.rewards import synthesize_reward, RewardGeneration
+from recommender.services.synthetic_dataset.rewards import (
+    synthesize_reward,
+    RewardGeneration,
+)
 from recommender.services.synthetic_dataset.service_engagement import (
     approx_service_engagement,
 )
@@ -93,9 +96,10 @@ def generate_dataset(
             (as well as SARSes generated for each user)
         reward_generation_mode: either "complex" or "simple". Specifies if
             the simulated reward should be "complex" (drawn from the binomial
-            distribution + simulating user MP transitions) or "simple" (high reward above a threshold -
-            see "simple_reward_threshold" parameter)
-        simple_reward_threshold: defines the threshold above which the simulated reward is high
+            distribution + simulating user MP transitions) or "simple"
+            (high reward above a threshold - see "simple_reward_threshold" parameter)
+        simple_reward_threshold: defines the threshold above which
+            the simulated reward is high
         cluster_distributions: defines the distribution of user clusters
 
     Returns:

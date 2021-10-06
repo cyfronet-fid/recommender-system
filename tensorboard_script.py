@@ -1,3 +1,5 @@
+# pylint: disable=missing-module-docstring
+
 import os
 
 from definitions import LOG_DIR

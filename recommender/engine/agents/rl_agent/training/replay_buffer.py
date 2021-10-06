@@ -143,8 +143,7 @@ class ReplayBuffer:
     def __len__(self):
         if self.buffer:
             return self.buffer[REWARD].shape[0]
-        else:
-            return 0
+        return 0
 
     def _load_components(self):
         self.state_encoder = self.state_encoder or StateEncoder()

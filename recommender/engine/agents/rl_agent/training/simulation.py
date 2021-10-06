@@ -1,3 +1,4 @@
+# pylint: disable-all
 import string
 import random
 

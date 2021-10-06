@@ -1,4 +1,4 @@
-# pylint: disable=too-many-instance-attributes, no-self-use, invalid-name
+# pylint: disable-all
 
 """Module containing SyntheticMP gym ENV"""
 import os

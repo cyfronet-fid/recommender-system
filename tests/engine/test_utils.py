@@ -9,7 +9,7 @@ from tests.factories.marketplace import ServiceFactory
 from recommender.engine.agents.rl_agent.utils import (
     get_service_indices,
     embedded_tensors_exist,
-    create_itemspace
+    create_itemspace,
 )
 from tests.factories.marketplace import UserFactory
 
@@ -69,4 +69,3 @@ def test_embedded_tensors_exist(mongo):
     users[1].save()
 
     assert embedded_tensors_exist(users) is False
-

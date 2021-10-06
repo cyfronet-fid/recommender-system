@@ -9,7 +9,8 @@ from recommender.engine.agents.rl_agent.reward_mapping import (
 from recommender.services.synthetic_dataset.rewards import (
     synthesize_reward,
     _get_closest_reward,
-    _draw_reward, RewardGeneration,
+    _draw_reward,
+    RewardGeneration,
 )
 
 
@@ -124,15 +125,22 @@ def test_construct_rewards(transitions_df):
 
 def test_proper_simple_initialization(transitions_df):
     with pytest.raises(AssertionError):
-        synthesize_reward(transitions_df, 0.0, mode=RewardGeneration.SIMPLE, simple_mode_threshold=1.2)
         synthesize_reward(
-            transitions_df, 0.0, mode=RewardGeneration.SIMPLE, simple_mode_threshold=-0.1
+            transitions_df, 0.0, mode=RewardGeneration.SIMPLE, simple_mode_threshold=1.2
+        )
+        synthesize_reward(
+            transitions_df,
+            0.0,
+            mode=RewardGeneration.SIMPLE,
+            simple_mode_threshold=-0.1,
         )
 
 
 def test_synthesize_simple_reward(transitions_df):
     assert (
-        synthesize_reward(transitions_df, 0.2, mode=RewardGeneration.SIMPLE, simple_mode_threshold=0.5)
+        synthesize_reward(
+            transitions_df, 0.2, mode=RewardGeneration.SIMPLE, simple_mode_threshold=0.5
+        )
         == []
     )
     assert synthesize_reward(

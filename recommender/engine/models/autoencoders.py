@@ -12,7 +12,6 @@ from recommender.engine.preprocessing import USERS, SERVICES
 from recommender.engine.utils import load_last_module
 from recommender.models import User, Service
 
-import torch.nn.functional as F
 
 SERVICES_AUTOENCODER = "Services Auto-Encoder mMdel"
 USERS_AUTOENCODER = "Users Auto-Encoder Model"
@@ -137,7 +136,7 @@ def precalc_embedded_tensors(collection_name):
 
     embedded_tensors_batch = normalize(embedded_tensors_batch)
 
-    for id, embedded_tensor in tqdm(zip(ids, embedded_tensors_batch), total=len(ids)):
-        obj = Collection.objects(id=id).first()
+    for id_, embedded_tensor in tqdm(zip(ids, embedded_tensors_batch), total=len(ids)):
+        obj = Collection.objects(id=id_).first()
         obj.embedded_tensor = embedded_tensor.tolist()
         obj.save()

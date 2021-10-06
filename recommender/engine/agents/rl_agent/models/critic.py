@@ -1,11 +1,11 @@
-# pylint: disable=invalid-name, too-many-arguments, no-member, fixme
+# pylint: disable=invalid-name, too-many-arguments, no-member
 
 """Critic Model implementation"""
 from itertools import chain
 from typing import Tuple, Optional
 
 import torch
-from torch.nn import Linear, ReLU, Sequential, BatchNorm1d
+from torch.nn import Linear, ReLU, Sequential
 
 from recommender.errors import MissingComponentError, NoHistoryEmbedderForK
 from recommender.engine.utils import load_last_module, NoSavedModuleError

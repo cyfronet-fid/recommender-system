@@ -94,7 +94,7 @@ class Actor(nn.Module):
         x = self.network(x)
 
         weights = x.reshape(-1, self.K, self.SE)
-        weights = torch.tanh(weights)  # TODO: normalization??? what normalization???
+        weights = torch.tanh(weights)
         return weights
 
     def _load_models(self):

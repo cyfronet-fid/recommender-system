@@ -1,10 +1,12 @@
-# pylint: disable=invalid-name, no-member
+# pylint: disable=invalid-name, no-member, missing-function-docstring, global-variable-undefined
 
 """Project Utilities"""
 
 import json
 import os
 import random
+import functools
+from time import time
 from datetime import datetime
 from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
@@ -18,9 +20,6 @@ from recommender.models import User
 from recommender.models import Service
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
 from settings import DevelopmentConfig, ProductionConfig
-
-import functools
-from time import time
 
 
 def _son_to_dict(son_obj: SON) -> dict:
