@@ -1,6 +1,7 @@
 # pylint: disable-all
 
 import pandas as pd
+import pytest
 
 from recommender.engine.agents.rl_agent.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
@@ -8,8 +9,13 @@ from recommender.engine.agents.rl_agent.reward_mapping import (
 from recommender.services.synthetic_dataset.rewards import (
     synthesize_reward,
     _get_closest_reward,
-    _draw_reward,
+    _draw_reward, RewardGeneration,
 )
+
+
+@pytest.fixture()
+def transitions_df():
+    return pd.read_csv(TRANSITION_REWARDS_CSV_PATH, index_col="source")
 
 
 def test__get_closest_reward():
@@ -70,8 +76,7 @@ def test__draw_reward():
     assert le_exit_ratio > 0.8
 
 
-def test_construct_rewards():
-    transitions_df = pd.read_csv(TRANSITION_REWARDS_CSV_PATH, index_col="source")
+def test_construct_rewards(transitions_df):
     repetitions = 1000
 
     high_engagement_buffer = []
@@ -115,3 +120,21 @@ def test_construct_rewards():
 
     assert le_orders_percent < 0.2
     assert le_empty_percent > 0.8
+
+
+def test_proper_simple_initialization(transitions_df):
+    with pytest.raises(AssertionError):
+        synthesize_reward(transitions_df, 0.0, mode=RewardGeneration.SIMPLE, simple_mode_threshold=1.2)
+        synthesize_reward(
+            transitions_df, 0.0, mode=RewardGeneration.SIMPLE, simple_mode_threshold=-0.1
+        )
+
+
+def test_synthesize_simple_reward(transitions_df):
+    assert (
+        synthesize_reward(transitions_df, 0.2, mode=RewardGeneration.SIMPLE, simple_mode_threshold=0.5)
+        == []
+    )
+    assert synthesize_reward(
+        transitions_df, 0.7, mode=RewardGeneration.SIMPLE, simple_mode_threshold=0.5
+    ) == ["order"]
