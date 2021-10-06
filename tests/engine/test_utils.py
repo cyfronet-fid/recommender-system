@@ -4,12 +4,14 @@ import pandas as pd
 import pytest
 import torch
 
-from recommender.engine.agents.rl_agent.utils import (
-    get_service_indices,
-    create_itemspace,
-)
 from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_embedder
 from tests.factories.marketplace import ServiceFactory
+from recommender.engine.agents.rl_agent.utils import (
+    get_service_indices,
+    embedded_tensors_exist,
+    create_itemspace
+)
+from tests.factories.marketplace import UserFactory
 
 
 @pytest.fixture
@@ -50,3 +52,21 @@ def test_create_itemspace(services, proper_parameters):
     assert index_id_map.size == len(services)
     assert (index_id_map.id.values == np.array([2, 4, 6, 8])).all()
     assert (index_id_map.index.values == np.array([0, 1, 2, 3])).all()
+
+
+def test_embedded_tensors_exist(mongo):
+    UE = 32
+    users = UserFactory.create_batch(3)
+    assert embedded_tensors_exist(users) is False
+
+    for user in users:
+        user.embedded_tensor = torch.rand(UE).tolist()
+        user.save()
+
+    assert embedded_tensors_exist(users) is True
+
+    users[1].embedded_tensor = []
+    users[1].save()
+
+    assert embedded_tensors_exist(users) is False
+

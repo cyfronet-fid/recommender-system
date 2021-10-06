@@ -98,15 +98,16 @@ def create_embedder(autoencoder):
 
     return embedder
 
+
 def normalize(matrix: torch.Tensor) -> torch.Tensor:
     """Gets matrix that can be decomposed into row vectors and divide each
-     dimension of these vectors by max value in this dimension (column)
+    dimension of these vectors by max value in this dimension (column)
 
-     Args:
-         matrix: input matrix of shape: [vectors_num, dimensions_num]
-     Returns:
-         normalised_matrix: normalised matrix of the same shape as input.
-     """
+    Args:
+        matrix: input matrix of shape: [vectors_num, dimensions_num]
+    Returns:
+        normalised_matrix: normalised matrix of the same shape as input.
+    """
 
     dimensions_maxes = torch.max(torch.abs(matrix), 0).values
     normalised_matrix = matrix / dimensions_maxes
