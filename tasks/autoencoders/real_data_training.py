@@ -42,12 +42,7 @@ from recommender.services.synthetic_dataset.users import synthesize_users
 load_dotenv()
 from mongoengine import connect, disconnect
 
-
-# TODO: purge this creepy shit:
-try:
-    from settings import DevelopmentConfig, get_device
-except:
-    from settings import DevelopmentConfig, get_device
+from settings import DevelopmentConfig, get_device
 
 if __name__ == "__main__":
     disconnect()
