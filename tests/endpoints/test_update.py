@@ -18,6 +18,3 @@ def test_update_endpoint(client, mp_dump_data, mocker):
     handle_db_dump_s.assert_called_once_with(mp_dump_data)
     assert execute_training_s.called
     assert response.status_code == 204
-
-
-
