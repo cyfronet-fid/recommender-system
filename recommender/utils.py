@@ -205,13 +205,14 @@ def load_examples() -> Dict:
     return examples
 
 
-WRITER = SummaryWriter(log_dir=LOG_DIR)
-
-
 def timeit(func):
     if "performance_measurements" not in globals():
         global performance_measurements
         performance_measurements = dict()
+
+    if "writer" not in globals():
+        global writer
+        writer = SummaryWriter(log_dir=LOG_DIR)
 
     @functools.wraps(func)
     def newfunc(*args, **kwargs):
@@ -227,8 +228,8 @@ def timeit(func):
             performance_measurements[key] = [elapsed]
 
         step = len(performance_measurements[key])
-        WRITER.add_scalars("Performance", {key: elapsed}, step)
-        WRITER.flush()
+        writer.add_scalars("Performance", {key: elapsed}, step)
+        writer.flush()
 
         return ret_val
 
