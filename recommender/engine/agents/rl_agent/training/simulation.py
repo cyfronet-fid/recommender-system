@@ -10,17 +10,11 @@ from recommender.engine.agents.rl_agent.training.td3_agent import TD3Agent
 load_dotenv()
 from mongoengine import connect, disconnect
 
-
-# TODO: purge this creepy shit:
-try:
-    from settings import DevelopmentConfig
-except:
-    from settings import DevelopmentConfig
+from settings import DevelopmentConfig
 
 from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import trange, tqdm
 
-from recommender.engine.agents.rl_agent.training.ddpg_agent import DDPGAgent
 from recommender.models import User, Service
 from recommender.services.synthetic_dataset.env import SyntheticMP
 
