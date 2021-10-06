@@ -61,11 +61,11 @@ def test_proper_initialization(
     service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
     service_selector = ServiceSelector(service_embedder)
 
-    assert service_selector.itemspace_size == len(services)
     assert service_selector.index_id_map.index.values.tolist() == list(
         range(len(services))
     )
     assert service_selector.index_id_map.id.values.tolist() == list([2, 4, 6, 8])
+    assert service_selector.itemspace.shape == torch.Size([len(services), SE])
     mock_torch_module_call.assert_called_once()
 
 
