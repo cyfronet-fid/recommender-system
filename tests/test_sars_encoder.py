@@ -7,12 +7,6 @@ from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
     RewardEncoder,
 )
 
-# TODO: I think we don't need history embedders here
-# from recommender.engine.agents.rl_agent.models.tmp import (
-#     HistoryEmbedder,
-#     HISTORY_EMBEDDER_V1,
-#     HISTORY_EMBEDDER_V2,
-# )
 from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
     SearchDataEncoder,
 )
@@ -81,15 +75,6 @@ def test_sars_encoder(mongo):
     service_auto_encoder = ServiceAutoEncoder(features_dim=SOH, embedding_dim=SE)
     service_embedder = create_embedder(service_auto_encoder)
     save_module(module=service_auto_encoder, name=SERVICES_AUTOENCODER)
-
-    # TODO: I think we don't need history embedders here
-    # # HistoryEmbedder v1
-    # history_embedder_v1 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
-    # save_module(module=history_embedder_v1, name=HISTORY_EMBEDDER_V1)
-    #
-    # # HistoryEmbedder v2
-    # history_embedder_v2 = HistoryEmbedder(SE=SE, num_layers=3, dropout=0.5)
-    # save_module(module=history_embedder_v2, name=HISTORY_EMBEDDER_V2)
 
     # StateEncoder
     state_encoder = StateEncoder(
