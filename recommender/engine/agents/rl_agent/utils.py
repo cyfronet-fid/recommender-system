@@ -93,6 +93,22 @@ def create_itemspace(embedder: torch.nn.Module) -> Tuple[torch.Tensor, pd.DataFr
     return service_embedded_tensors, index_id_map
 
 
+def embedded_tensors_exist(objects: Union[Iterable, QuerySet]):
+    """Check if embedded tensors exists
+
+    Args:
+        objects: list of users or services
+
+    Return:
+        True if embedded tensors of all objects exists, otherwise False
+    """
+    objects = list(objects)
+    first_len = len(objects[0].embedded_tensor)
+    if first_len == 0:
+        return False
+    return all(len(obj.embedded_tensor) == first_len for obj in objects)
+
+
 def use_service_embedder(
     services: Union[Iterable, QuerySet],
     embedder: torch.nn.Module,
@@ -111,7 +127,7 @@ def use_service_embedder(
         index_id_map: index to id mapping.
     """
 
-    if use_precalc_embeddings:
+    if use_precalc_embeddings and embedded_tensors_exist(services):
         embedded_services = torch.Tensor([s.embedded_tensor for s in services])
     else:
         one_hot_service_tensors = torch.Tensor([s.tensor for s in services])
@@ -167,7 +183,6 @@ def create_state(user: User, search_data: SearchData) -> State:
 
     return state
 
-
 def use_user_embedder(
     users: List[User], user_embedder: torch.nn.Module, use_precalc_embeddings=True
 ) -> torch.Tensor:
@@ -181,7 +196,7 @@ def use_user_embedder(
         embedded_user_tensor: Embedded user tensors
     """
 
-    if use_precalc_embeddings:
+    if use_precalc_embeddings and embedded_tensors_exist(users):
         embedded_user_tensors_batch = torch.Tensor([u.embedded_tensor for u in users])
     else:
         user_tensors_batch = torch.Tensor([user.tensor for user in users])
