@@ -42,9 +42,6 @@ from recommender.engine.agents.rl_agent.reward_mapping import (
 from recommender.engine.utils import load_last_module
 from recommender.engine.models.autoencoders import create_embedder, SERVICES_AUTOENCODER
 from recommender.services.synthetic_dataset.users import _filter_relevant
-from recommender.utils import printable, timeit
-
-WRITER = SummaryWriter(log_dir=LOG_DIR)
 
 
 class NoSyntheticUsers(Exception):
@@ -284,13 +281,6 @@ class SyntheticMP(gym.Env):
             f"{i}": engagement
             for i, engagement in enumerate(service_engagements.values())
         }
-        WRITER.add_scalars(f"STEP/Services engagement", d, self.counter)
-        WRITER.add_scalar(
-            f"STEP/history len of user {self.current_user_idx}",
-            len(self.current_engaged_services),
-            self.counter,
-        )
-        WRITER.flush()
 
         rewards_dict = {
             s: synthesize_reward(
