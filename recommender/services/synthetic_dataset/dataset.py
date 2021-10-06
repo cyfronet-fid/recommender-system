@@ -14,7 +14,7 @@ from recommender.engine.models.autoencoders import create_embedder, SERVICES_AUT
 from recommender.engine.utils import load_last_module
 from recommender.models import Service, State, SearchData, Sars, User
 from recommender.services.fts import retrieve_services_for_recommendation
-from recommender.services.synthetic_dataset.rewards import synthesize_reward
+from recommender.services.synthetic_dataset.rewards import synthesize_reward, RewardGeneration
 from recommender.services.synthetic_dataset.service_engagement import (
     approx_service_engagement,
 )
@@ -64,6 +64,8 @@ def generate_dataset(
     user_samples: int,
     K: int = 3,
     interactions_range: Tuple[int, int] = (3, 10),
+    reward_generation_mode: RewardGeneration = RewardGeneration.COMPLEX,
+    simple_reward_threshold: int = 0.5,
     cluster_distributions: Tuple[(float,) * 7] = (
         0.12,
         0.2,
@@ -89,6 +91,11 @@ def generate_dataset(
         K: number of recommended services in a single recommendation
         interactions_range: range of recommendations
             (as well as SARSes generated for each user)
+        reward_generation_mode: either "complex" or "simple". Specifies if
+            the simulated reward should be "complex" (drawn from the binomial
+            distribution + simulating user MP transitions) or "simple" (high reward above a threshold -
+            see "simple_reward_threshold" parameter)
+        simple_reward_threshold: defines the threshold above which the simulated reward is high
         cluster_distributions: defines the distribution of user clusters
 
     Returns:
@@ -140,7 +147,12 @@ def generate_dataset(
             }
 
             rewards_dict = {
-                s: synthesize_reward(transition_rewards_df, engagement)
+                s: synthesize_reward(
+                    transition_rewards_df,
+                    engagement,
+                    mode=reward_generation_mode,
+                    simple_mode_threshold=simple_reward_threshold,
+                )
                 for s, engagement in service_engagements.items()
             }
 
