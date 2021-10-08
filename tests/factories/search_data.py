@@ -1,6 +1,6 @@
 # pylint: disable-all
 
-from factory import SubFactory, LazyFunction
+from factory import LazyFunction
 from factory.mongoengine import MongoEngineFactory
 from factory.random import reseed_random, random
 from faker import Factory as FakerFactory

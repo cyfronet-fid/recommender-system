@@ -21,5 +21,6 @@ class Recommendation(Document):
     visit_id = UUIDField()
     page_id = StringField()
     panel_id = StringField()
+    engine_version = StringField()
     services = ListField(ReferenceField(Service))
     search_data = ReferenceField(SearchData)
