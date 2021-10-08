@@ -73,7 +73,8 @@ class Critic(torch.nn.Module):
                   - I is the itemspace (services) size
 
         Returns:
-            action_value: Batch of action values - tensor of shape [batch_size, 1]
+            action_value: Batch of action values - tensor of shape
+             [batch_size, 1]
         """
         user, services_history, mask = state
 

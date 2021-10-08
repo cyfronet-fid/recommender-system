@@ -1,6 +1,13 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring
 
-from mongoengine import ListField, ReferenceField, BinaryField, FloatField, BooleanField
+from mongoengine import (
+    ListField,
+    ReferenceField,
+    BinaryField,
+    FloatField,
+    BooleanField,
+    IntField,
+)
 
 from .category import Category
 from .marketplace_document import MarketplaceDocument
@@ -14,5 +21,5 @@ class User(MarketplaceDocument):
     accessed_services = ListField(ReferenceField(Service))
     synthetic = BooleanField(default=False)
     dataframe = BinaryField(blank=True)
-    tensor = ListField(FloatField(), blank=True)
-    embedded_tensor = ListField(FloatField(), blank=True)
+    one_hot_tensor = ListField(IntField(), blank=True)
+    dense_tensor = ListField(FloatField(), blank=True)

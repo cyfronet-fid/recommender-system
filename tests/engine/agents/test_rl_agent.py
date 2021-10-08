@@ -41,10 +41,10 @@ def test_rl_agent_call(mongo):
 
     precalc_users_and_service_tensors()
 
-    UOH = len(User.objects[0].tensor)
+    UOH = len(User.objects[0].one_hot_tensor)
     UE = 32
 
-    SOH = len(Service.objects[0].tensor)
+    SOH = len(Service.objects[0].one_hot_tensor)
     SE = 64
 
     user_autoencoder = UserAutoEncoder(features_dim=UOH, embedding_dim=UE)

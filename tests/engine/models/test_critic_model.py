@@ -37,10 +37,10 @@ def test_critic(mongo):
     action_v2 = Service.objects[:2]
 
     # Constants
-    UOH = len(User.objects.first().tensor)
+    UOH = len(User.objects.first().one_hot_tensor)
     UE = 32
 
-    SOH = len(Service.objects.first().tensor)
+    SOH = len(Service.objects.first().one_hot_tensor)
     SE = 64
 
     I = len(Service.objects)

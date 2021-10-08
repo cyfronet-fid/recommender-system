@@ -79,12 +79,16 @@ class Actor(nn.Module):
 
         Args:
             state:
-                user: Embedded user content tensor of shape [batch_size, UE]
-                services_history: Services history tensor of shape [batch_size, N, SE]
-                search_data_mask: Batch of search data masks of shape [batch_size, I]
+                user: Embedded user content tensor of shape
+                 [batch_size, UE]
+                services_history: Services history tensor of shape
+                 [batch_size, N, SE]
+                search_data_mask: Batch of search data masks of shape
+                 [batch_size, I]
 
         Returns:
-            weights: Weights tensor used for choosing action from the itemspace.
+            weights: Weights tensor used for choosing action from the
+             itemspace.
         """
 
         user, services_history, mask = state

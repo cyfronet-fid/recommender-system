@@ -51,3 +51,18 @@ class InsufficientRecommendationSpace(RecommendationEngineError):
 class MissingDependency(RecommendationEngineError):
     def message(self):  # pragma: no cover
         return "One or more of pipeline dependencies are missing."
+
+
+class DifferentTypeObjectsInCollectionError(RecommendationEngineError):
+    def message(self):
+        return "All objects should be users or all objects should be services"
+
+
+class MissingOneHotTensorError(RecommendationEngineError):
+    def message(self):
+        return "One or more objects don't have one hot tensor"
+
+
+class MissingDenseTensorError(RecommendationEngineError):
+    def message(self):
+        return "One or more objects don't have dense tensor needed to"

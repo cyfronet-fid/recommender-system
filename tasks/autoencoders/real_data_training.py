@@ -73,9 +73,10 @@ if __name__ == "__main__":
 
     device = "cpu"
     writer = SummaryWriter(log_dir=LOG_DIR)
+    # writer = None
 
-    UOH = len(User.objects[0].tensor)
-    SOH = len(Service.objects.first().tensor)
+    UOH = len(User.objects[0].one_hot_tensor)  # synthetic=True
+    SOH = len(Service.objects.first().one_hot_tensor)
 
     UE = 32
     SE = 64
@@ -91,7 +92,7 @@ if __name__ == "__main__":
         user_autoencoder_train_ds, batch_size=USER_AE_BATCH_SIZE, shuffle=True
     )
 
-    USER_FEATURES_DIM = len(User.objects[0].tensor)
+    USER_FEATURES_DIM = len(User.objects[0].one_hot_tensor)
     USER_EMBEDDING_DIM = 32
 
     user_autoencoder_model = create_autoencoder_model(
@@ -141,7 +142,7 @@ if __name__ == "__main__":
         service_autoencoder_train_ds, batch_size=SERVICE_AE_BATCH_SIZE, shuffle=True
     )
 
-    SERVICE_FEATURES_DIM = len(Service.objects[0].tensor)
+    SERVICE_FEATURES_DIM = len(Service.objects[0].one_hot_tensor)
     SERVICE_EMBEDDING_DIM = 64
 
     service_autoencoder_model = create_autoencoder_model(

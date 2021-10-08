@@ -78,8 +78,8 @@ if __name__ == "__main__":
     MAX_DEPTH = 1
     env = SyntheticMP(N=20, advanced_search_data=False, max_depth=MAX_DEPTH)
 
-    UE = len(User.objects.first().embedded_tensor)
-    SE = len(Service.objects.first().embedded_tensor)
+    UE = len(User.objects.first().dense_tensor)
+    SE = len(Service.objects.first().dense_tensor)
     I = len(Service.objects)
 
     training_agent = TD3Agent(

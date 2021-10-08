@@ -1,6 +1,13 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring
 
-from mongoengine import StringField, ReferenceField, ListField, BinaryField, FloatField
+from mongoengine import (
+    StringField,
+    ReferenceField,
+    ListField,
+    BinaryField,
+    FloatField,
+    IntField,
+)
 
 from .access_mode import AccessMode
 from .access_type import AccessType
@@ -34,8 +41,8 @@ class Service(MarketplaceDocument):
     related_services = ListField(ReferenceField("Service"))
     required_services = ListField(ReferenceField("Service"))
     dataframe = BinaryField(blank=True)
-    tensor = ListField(FloatField(), blank=True)
-    embedded_tensor = ListField(FloatField(), blank=True)
+    one_hot_tensor = ListField(IntField(), blank=True)
+    dense_tensor = ListField(FloatField(), blank=True)
     status = StringField()
 
     meta = {

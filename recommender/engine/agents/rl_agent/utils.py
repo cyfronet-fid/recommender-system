@@ -80,7 +80,7 @@ def generate_tree(user_action: UserAction) -> Digraph:
     return _generate_tree(user_action, graph)
 
 
-def create_index_id_map(services: Union[Iterable, QuerySet]):
+def create_index_id_map(services: Union[Iterable, QuerySet]) -> pd.DataFrame:
     return pd.DataFrame([s.id for s in services], columns=["id"])
 
 
@@ -93,7 +93,7 @@ def create_itemspace(embedder: torch.nn.Module) -> Tuple[torch.Tensor, pd.DataFr
     return service_embedded_tensors, index_id_map
 
 
-def embedded_tensors_exist(objects: Union[Iterable, QuerySet]):
+def dense_tensors_exist(objects: Union[Iterable, QuerySet]):
     """Check if embedded tensors exists
 
     Args:
@@ -103,10 +103,25 @@ def embedded_tensors_exist(objects: Union[Iterable, QuerySet]):
         True if embedded tensors of all objects exists, otherwise False
     """
     objects = list(objects)
-    first_len = len(objects[0].embedded_tensor)
+    first_len = len(objects[0].dense_tensor)
     if first_len == 0:
         return False
-    return all(len(obj.embedded_tensor) == first_len for obj in objects)
+    return all(len(obj.dense_tensor) == first_len for obj in objects)
+
+
+def one_hot_tensors_exist(objects: Union[Iterable, QuerySet]):
+    """Check if one hot tensors exists
+    Args:
+        objects: list of users or services
+
+    Return:
+        True if one hot tensors of all objects exists, otherwise False
+    """
+    objects = list(objects)
+    first_len = len(objects[0].one_hot_tensor)
+    if first_len == 0:
+        return False
+    return all(len(obj.one_hot_tensor) == first_len for obj in objects)
 
 
 def use_service_embedder(
@@ -128,10 +143,10 @@ def use_service_embedder(
         index_id_map: index to id mapping.
     """
 
-    if use_precalc_embeddings and embedded_tensors_exist(services):
-        embedded_services = torch.Tensor([s.embedded_tensor for s in services])
+    if use_precalc_embeddings and dense_tensors_exist(services):
+        embedded_services = torch.Tensor([s.dense_tensor for s in services])
     else:
-        one_hot_service_tensors = torch.Tensor([s.tensor for s in services])
+        one_hot_service_tensors = torch.Tensor([s.one_hot_tensor for s in services])
 
         with torch.no_grad():
             embedded_services = embedder(one_hot_service_tensors)
@@ -193,10 +208,10 @@ def use_user_embedder(
         embedded_user_tensor: Embedded user tensors
     """
 
-    if use_precalc_embeddings and embedded_tensors_exist(users):
-        embedded_user_tensors_batch = torch.Tensor([u.embedded_tensor for u in users])
+    if use_precalc_embeddings and dense_tensors_exist(users):
+        embedded_user_tensors_batch = torch.Tensor([u.dense_tensor for u in users])
     else:
-        user_tensors_batch = torch.Tensor([user.tensor for user in users])
+        user_tensors_batch = torch.Tensor([user.one_hot_tensor for user in users])
 
         with torch.no_grad():
             embedded_user_tensors_batch = user_embedder(user_tensors_batch)

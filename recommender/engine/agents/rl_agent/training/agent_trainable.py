@@ -30,8 +30,8 @@ class AgentTrainable(tune.Trainable):
             N=SERVICES_HISTORY_MAX_LEN, advanced_search_data=False, max_depth=MAX_DEPTH
         )
 
-        UE = len(User.objects.first().embedded_tensor)
-        SE = len(Service.objects.first().embedded_tensor)
+        UE = len(User.objects.first().dense_tensor)
+        SE = len(Service.objects.first().dense_tensor)
         I = len(Service.objects)
 
         self.agent = TD3Agent(

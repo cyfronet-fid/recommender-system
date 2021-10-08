@@ -47,13 +47,13 @@ class RewardEncoder:
     def __call__(self, raw_rewards: List[List[List[str]]]) -> torch.Tensor:
         """
         Encode list of rewards (each of them is a list of reward ids) into
-         scalar tensor.
+         scalar.
 
         Args:
             raw_rewards: Batch of lists of lists of reward ids.
 
         Returns:
-            reward: Scalar tensor of the total reward.
+            reward: Total reward as a scalar.
         """
 
         encoded_rewards = []

@@ -80,7 +80,7 @@ def test_precalculate_tensors(mongo):
     users = UserFactory.create_batch(3)
 
     for user in User.objects:
-        assert user.tensor == []
+        assert user.one_hot_tensor == []
 
     users_transformer = create_transformer(USERS)
     fitted_users_transformer = precalculate_tensors(users, users_transformer)
@@ -88,14 +88,14 @@ def test_precalculate_tensors(mongo):
     assert isinstance(fitted_users_transformer, ColumnTransformer)
 
     for user in User.objects:
-        assert len(user.tensor) > 0
+        assert len(user.one_hot_tensor) > 0
 
     # Services
     ServiceFactory.create_batch(3)
     services = Service.objects
 
     for service in Service.objects:
-        assert service.tensor == []
+        assert service.one_hot_tensor == []
 
     services_transformer = create_transformer(SERVICES)
     fitted_services_transformer = precalculate_tensors(services, services_transformer)
@@ -103,7 +103,7 @@ def test_precalculate_tensors(mongo):
     assert isinstance(fitted_services_transformer, ColumnTransformer)
 
     for service in Service.objects:
-        assert len(service.tensor) > 0
+        assert len(service.one_hot_tensor) > 0
 
 
 def test_precalc_users_and_service_tensors(mongo):
@@ -116,18 +116,18 @@ def test_precalc_users_and_service_tensors(mongo):
     )
 
     for user in User.objects:
-        assert user.tensor == []
+        assert user.one_hot_tensor == []
 
     for service in Service.objects:
-        assert service.tensor == []
+        assert service.one_hot_tensor == []
 
     precalc_users_and_service_tensors()
 
     for user in User.objects:
-        assert len(user.tensor) > 0
+        assert len(user.one_hot_tensor) > 0
 
     for service in Service.objects:
-        assert len(service.tensor) > 0
+        assert len(service.one_hot_tensor) > 0
 
 
 def test_user_and_services_to_tensors(mongo):
