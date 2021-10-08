@@ -25,6 +25,7 @@ class RecommendationFactory(MongoEngineFactory):
     visit_id = LazyFunction(lambda: faker.uuid4(cast_to=None))
     page_id = LazyFunction(lambda: "_".join(faker.words(nb=random.randint(2, 6))))
     panel_id = LazyFunction(lambda: random.choice(["v1", "v2"]))
+    engine_version = LazyFunction(lambda: random.choice(["pre_agent", "rl_agent"]))
     services = LazyFunction(lambda: ServiceFactory.create_batch(random.randint(2, 10)))
     search_data = SubFactory(SearchDataFactory)
 

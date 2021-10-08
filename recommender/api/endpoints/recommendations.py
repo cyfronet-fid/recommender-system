@@ -3,12 +3,12 @@
 """Recommendations endpoint definition"""
 import copy
 
-from dotenv import dotenv_values, find_dotenv
 from flask import request
 from flask_restx import Resource, Namespace
 
 from recommender.engine.agents.pre_agent.pre_agent import PRE_AGENT, PreAgent
 from recommender.engine.agents.rl_agent.rl_agent import RL_AGENT, RLAgent
+from recommender.engine.agents.base_agent import BaseAgent
 from recommender.errors import InsufficientRecommendationSpace
 from recommender.api.schemas.recommendation import (
     recommendation,
@@ -19,12 +19,21 @@ from recommender.services.deserializer import Deserializer
 api = Namespace("recommendations", "Endpoint used for getting recommendations")
 
 
-def load_agent():
-    agent_version = dotenv_values(find_dotenv()).get("AGENT_VERSION")
-    agents = {PRE_AGENT: PreAgent, RL_AGENT: RLAgent}
-    agent = agents.get(agent_version, PreAgent)()
+def load_engine(json_dict: dict) -> BaseAgent:
+    """
+    Load the engine based on 'engine_version' parameter from a query
 
-    return agent
+    Args:
+        json_dict: A body from Marketplace's query
+
+    Returns:
+        engine: An instance of pre_agent or rl_agent class
+    """
+    engine_version = json_dict["engine_version"]
+    engines = {PRE_AGENT: PreAgent, RL_AGENT: RLAgent}
+    engine = engines.get(engine_version, PreAgent)()
+
+    return engine
 
 
 @api.route("")
@@ -37,7 +46,7 @@ class Recommendation(Resource):
         """Returns list of ids of recommended scientific services"""
 
         json_dict = request.get_json()
-        agent = load_agent()
+        agent = load_engine(json_dict)
         try:
             services_ids = agent.call(json_dict)
 

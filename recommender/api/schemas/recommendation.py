@@ -86,6 +86,12 @@ recommendation_context = api.model(
             description="The unique identifier of the recommender panel on the page",
             example="v1",
         ),
+        "engine_version": fields.String(
+            required=False,  # TODO After changes on Marketplace side -> True
+            title="Engine version",
+            description="Version of the recommendation engine",
+            example="pre_agent",
+        ),
         "search_data": fields.Nested(search_data, required=True),
     },
 )
