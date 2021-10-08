@@ -78,7 +78,7 @@ def pre_agent_training():
         user_autoencoder_test_ds, batch_size=USER_AE_BATCH_SIZE, shuffle=True
     )
 
-    USER_FEATURES_DIM = len(User.objects[0].tensor)
+    USER_FEATURES_DIM = len(User.objects[0].one_hot_tensor)
     USER_EMBEDDING_DIM = 32
 
     user_autoencoder_model = create_autoencoder_model(
@@ -141,7 +141,7 @@ def pre_agent_training():
         service_autoencoder_test_ds, batch_size=SERVICE_AE_BATCH_SIZE, shuffle=True
     )
 
-    SERVICE_FEATURES_DIM = len(Service.objects[0].tensor)
+    SERVICE_FEATURES_DIM = len(Service.objects[0].one_hot_tensor)
     SERVICE_EMBEDDING_DIM = 64
 
     service_autoencoder_model = create_autoencoder_model(

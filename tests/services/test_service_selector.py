@@ -22,10 +22,10 @@ def services(mongo, proper_parameters):
     FEATURES_DIM = proper_parameters[0]
 
     return [
-        ServiceFactory(id=2, tensor=torch.randint(2, (FEATURES_DIM,))),
-        ServiceFactory(id=8, tensor=torch.randint(2, (FEATURES_DIM,))),
-        ServiceFactory(id=4, tensor=torch.randint(2, (FEATURES_DIM,))),
-        ServiceFactory(id=6, tensor=torch.randint(2, (FEATURES_DIM,))),
+        ServiceFactory(id=2, one_hot_tensor=torch.randint(2, (FEATURES_DIM,))),
+        ServiceFactory(id=8, one_hot_tensor=torch.randint(2, (FEATURES_DIM,))),
+        ServiceFactory(id=4, one_hot_tensor=torch.randint(2, (FEATURES_DIM,))),
+        ServiceFactory(id=6, one_hot_tensor=torch.randint(2, (FEATURES_DIM,))),
     ]
 
 

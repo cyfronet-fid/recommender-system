@@ -30,10 +30,10 @@ def test_execute_pre_agent_preprocessing(mongo):
     )
 
     for user in User.objects:
-        assert user.tensor == []
+        assert user.one_hot_tensor == []
 
     for service in Service.objects:
-        assert service.tensor == []
+        assert service.one_hot_tensor == []
 
     with pytest.raises(NoSavedDatasetError):
         load_last_dataset(get_autoencoder_dataset_name(SERVICES, TRAIN))
@@ -47,10 +47,10 @@ def test_execute_pre_agent_preprocessing(mongo):
     execute_pre_agent_preprocessing.delay()
 
     for user in User.objects:
-        assert len(user.tensor) > 0
+        assert len(user.one_hot_tensor) > 0
 
     for service in Service.objects:
-        assert len(service.tensor) > 0
+        assert len(service.one_hot_tensor) > 0
 
     assert isinstance(
         load_last_dataset(get_autoencoder_dataset_name(SERVICES, TRAIN)), Subset

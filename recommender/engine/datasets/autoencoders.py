@@ -42,7 +42,7 @@ def create_autoencoder_datasets(
     else:
         raise ValueError
 
-    ds_tensor = torch.stack([torch.tensor(obj.tensor) for obj in collection])
+    ds_tensor = torch.stack([torch.tensor(obj.one_hot_tensor) for obj in collection])
     ds_tensor = ds_tensor.to(device)
     dataset = torch.utils.data.TensorDataset(ds_tensor)
 

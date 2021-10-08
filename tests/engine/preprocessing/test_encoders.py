@@ -49,8 +49,8 @@ def test_state_encoder(mongo):
         for j in range(len(services_histories[i])):
             services_histories[i][j].reload()
 
-    UOH = len(User.objects[0].tensor)
-    SOH = len(Service.objects[0].tensor)
+    UOH = len(User.objects[0].one_hot_tensor)
+    SOH = len(Service.objects[0].one_hot_tensor)
 
     # prepare state encoder
     user_embedder = create_embedder(UserAutoEncoder(features_dim=UOH, embedding_dim=UE))
@@ -86,7 +86,7 @@ def test_state_encoder(mongo):
     for i in range(len(services_histories)):
         for j in range(len(services_histories[i])):
             original_oh_tensor = torch.Tensor(
-                services_histories[i][j].tensor
+                services_histories[i][j].one_hot_tensor
             ).unsqueeze(0)
             original_embedding = service_embedder(original_oh_tensor).squeeze(0)
             tested_embedding = service_histories_batch[i][j]

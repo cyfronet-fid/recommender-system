@@ -102,7 +102,9 @@ def _get_empty_user() -> User:
 
     user = User.objects(id=-1).first()
     if user is None:
-        user = User(id=-1, tensor=torch.zeros(User.objects.first().tensor.shape))
+        user = User(
+            id=-1, tensor=torch.zeros(User.objects.first().one_hot_tensor.shape)
+        )
 
     return user
 

@@ -8,7 +8,7 @@ from tests.factories.marketplace import UserFactory
 from tests.factories.user_action import UserActionFactory
 from tests.helpers import mongo_model_to_json
 
-FIELDS_NOT_INCLUDED_IN_MP = ("dataframe", "tensor", "embedded_tensor", "synthetic")
+FIELDS_NOT_INCLUDED_IN_MP = ("dataframe", "one_hot_tensor", "dense_tensor", "synthetic")
 
 
 def test_handle_db_dump(mongo, mp_dump_data):

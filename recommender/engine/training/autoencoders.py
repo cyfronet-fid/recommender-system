@@ -16,7 +16,7 @@ def evaluate_autoencoder(model, dataloader, loss_function, device):
     model.eval()
     with torch.no_grad():
         for batch in dataloader:
-            features = batch[0].to(device)
+            features = batch[0].float().to(device)
             preds = model(features).to(device)
             loss = loss_function(features, preds)
         return loss.item()
@@ -55,7 +55,7 @@ def train_autoencoder(
             for batch in tepoch:
                 tepoch.set_description(f"[Epoch {epoch}]")
 
-                features = batch[0].to(device)
+                features = batch[0].float().to(device)
                 reconstructions = model(features).to(device)
                 loss = loss_function(reconstructions, features)
                 loss.backward()

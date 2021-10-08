@@ -47,7 +47,7 @@ class StateEncoder:
          and embedders as follows:
             - state.user
                 -> one_hot_tensor
-                 --(user_embedder)--> users_tensor
+                 --(user_embedder)--> users_dense_tensor
             - state.services_history
                 -> services_one_hot_tensors
                 --(service_embedder)--> services_dense_tensors

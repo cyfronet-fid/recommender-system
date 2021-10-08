@@ -8,7 +8,7 @@ from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_em
 from tests.factories.marketplace import ServiceFactory
 from recommender.engine.agents.rl_agent.utils import (
     get_service_indices,
-    embedded_tensors_exist,
+    dense_tensors_exist,
     create_itemspace,
 )
 from tests.factories.marketplace import UserFactory
@@ -25,10 +25,10 @@ def proper_parameters():
 def services(mongo, proper_parameters):
     SOH, _ = proper_parameters
     return [
-        ServiceFactory(id=2, tensor=torch.randint(2, (SOH,))),
-        ServiceFactory(id=8, tensor=torch.randint(2, (SOH,))),
-        ServiceFactory(id=4, tensor=torch.randint(2, (SOH,))),
-        ServiceFactory(id=6, tensor=torch.randint(2, (SOH,))),
+        ServiceFactory(id=2, one_hot_tensor=torch.randint(2, (SOH,))),
+        ServiceFactory(id=8, one_hot_tensor=torch.randint(2, (SOH,))),
+        ServiceFactory(id=4, one_hot_tensor=torch.randint(2, (SOH,))),
+        ServiceFactory(id=6, one_hot_tensor=torch.randint(2, (SOH,))),
     ]
 
 
@@ -54,18 +54,18 @@ def test_create_itemspace(services, proper_parameters):
     assert (index_id_map.index.values == np.array([0, 1, 2, 3])).all()
 
 
-def test_embedded_tensors_exist(mongo):
+def test_dense_tensors_exist(mongo):
     UE = 32
     users = UserFactory.create_batch(3)
-    assert embedded_tensors_exist(users) is False
+    assert dense_tensors_exist(users) is False
 
     for user in users:
-        user.embedded_tensor = torch.rand(UE).tolist()
+        user.dense_tensor = torch.rand(UE).tolist()
         user.save()
 
-    assert embedded_tensors_exist(users) is True
+    assert dense_tensors_exist(users) is True
 
-    users[1].embedded_tensor = []
+    users[1].dense_tensor = []
     users[1].save()
 
-    assert embedded_tensors_exist(users) is False
+    assert dense_tensors_exist(users) is False

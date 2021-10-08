@@ -77,11 +77,11 @@ def set_data(datasets, user, services, split_type, class_tensor):
 
     for service in services[split_type]:
         datasets[split_type][USERS].append(
-            torch.unsqueeze(torch.Tensor(user.tensor), dim=0)
+            torch.unsqueeze(torch.Tensor(user.one_hot_tensor), dim=0)
         )
         datasets[split_type][USERS_IDS].append(user.id)
         datasets[split_type][SERVICES].append(
-            torch.unsqueeze(torch.Tensor(service.tensor), dim=0)
+            torch.unsqueeze(torch.Tensor(service.one_hot_tensor), dim=0)
         )
         datasets[split_type][SERVICES_IDS].append(service.id)
         datasets[split_type][LABELS].append(torch.unsqueeze(class_tensor, dim=0))

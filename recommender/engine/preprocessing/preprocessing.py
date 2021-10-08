@@ -116,7 +116,7 @@ def object_to_df(object, save_df=False):
 
 
 def df_to_tensor(df, transformer, fit=False):
-    """Transform Pandas dataframe into Pytorch tensor using Scikit-learn
+    """Transform Pandas dataframe into Pytorch one_hot_tensor using Scikit-learn
     transformer.
     """
 
@@ -150,7 +150,7 @@ def precalculate_tensors(objects, transformer, fit=True, save=True):
     tensors, transformer = df_to_tensor(df=objects_df, transformer=transformer, fit=fit)
 
     for i in trange(len(objects), desc=f"Saving {name} tensors..."):
-        objects[i].tensor = tensors[i].tolist()
+        objects[i].one_hot_tensor = tensors[i].tolist()
         objects[i].save()
 
     if fit and save:  # fit here for backwards compatibility
@@ -176,19 +176,19 @@ def user_and_service_to_tensors(user, service):
     PyTorch tensors ready for inference.
     """
 
-    if not (user.tensor and service.tensor):
+    if not (user.one_hot_tensor and service.one_hot_tensor):
         raise NoPrecalculatedTensorsError(
-            "Given user or service has no precalculated tensor"
+            "Given user or service has no precalculated one_hot_tensor"
         )
 
     users_ids = torch.tensor([user.id])
 
-    user_tensor = torch.Tensor(user.tensor)
+    user_tensor = torch.Tensor(user.one_hot_tensor)
     users_tensor = torch.unsqueeze(user_tensor, 0)
 
     services_ids = torch.tensor([service.id])
 
-    service_tensor = torch.tensor(service.tensor)
+    service_tensor = torch.tensor(service.one_hot_tensor)
     services_tensor = torch.unsqueeze(service_tensor, 0)
 
     return users_ids, users_tensor, services_ids, services_tensor
@@ -200,13 +200,16 @@ def user_and_services_to_tensors(user, services):
     and compose them into tensors ready for inference.
     """
 
-    if not user.tensor:
-        raise NoPrecalculatedTensorsError("Given user has no precalculated tensor")
+    if not user.one_hot_tensor:
+        raise NoPrecalculatedTensorsError(
+            "Given user has no precalculated one_hot_tensor"
+        )
 
     for service in services:
-        if not service.tensor:
+        if not service.one_hot_tensor:
             raise NoPrecalculatedTensorsError(
-                "One or more of given services has/have no precalculated tensor(s)"
+                "One or more of given services has/have no precalculated"
+                " one_hot_tensor(s)"
             )
 
     services_ids = []
@@ -214,7 +217,7 @@ def user_and_services_to_tensors(user, services):
     services = list(services)
     for service in services:
         services_ids.append(service.id)
-        service_tensor = torch.unsqueeze(torch.Tensor(service.tensor), dim=0)
+        service_tensor = torch.unsqueeze(torch.Tensor(service.one_hot_tensor), dim=0)
         services_tensors.append(service_tensor)
 
     services_ids = torch.tensor(services_ids)
@@ -222,7 +225,7 @@ def user_and_services_to_tensors(user, services):
 
     n = services_tensor.shape[0]
     users_ids = torch.full([n], user.id)
-    user_tensor = torch.Tensor(user.tensor)
+    user_tensor = torch.Tensor(user.one_hot_tensor)
     users_tensor = torch.unsqueeze(user_tensor, dim=0).repeat(n, 1)
 
     return users_ids, users_tensor, services_ids, services_tensor

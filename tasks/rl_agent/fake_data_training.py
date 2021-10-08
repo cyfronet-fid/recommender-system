@@ -50,10 +50,10 @@ if __name__ == "__main__":
     user_transformer = load_last_transformer(USERS)
     service_transformer = load_last_transformer(SERVICES)
 
-    UOH = len(User.objects[0].tensor)
+    UOH = len(User.objects[0].one_hot_tensor)
     UE = 32
 
-    SOH = len(Service.objects[0].tensor)
+    SOH = len(Service.objects[0].one_hot_tensor)
     SE = 64
 
     I = len(Service.objects)
