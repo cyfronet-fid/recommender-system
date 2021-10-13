@@ -9,7 +9,7 @@ class RecommendationEngineError(Exception):
 
 class InvalidRecommendationPanelIDError(RecommendationEngineError):
     def message(self):  # pragma: no cover
-        return "Invalid recommendation panel id error"
+        return "Invalid recommendation panel id error."
 
 
 class NoActorForK(RecommendationEngineError):
@@ -41,8 +41,13 @@ class MissingComponentError(RecommendationEngineError):
 
 
 class InsufficientRecommendationSpace(RecommendationEngineError):
-    def message(self):
+    def message(self):  # pragma: no cover
         return (
             "The required number of services to recommend exceed the"
-            " matching services space size"
+            " matching services space size."
         )
+
+
+class MissingDependency(RecommendationEngineError):
+    def message(self):  # pragma: no cover
+        return "One or more of pipeline dependencies are missing."

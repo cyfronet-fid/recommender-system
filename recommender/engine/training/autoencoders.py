@@ -1,5 +1,5 @@
 # pylint: disable=missing-function-docstring, no-member, too-many-arguments, too-many-locals
-# pylint: disable=not-callable
+# pylint: disable=not-callable, too-many-branches
 
 """Functions for autoencoders training and evaluation"""
 
