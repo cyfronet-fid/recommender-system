@@ -1,5 +1,6 @@
 # pylint: disable=missing-module-docstring, no-member, too-few-public-methods
 # pylint: disable=no-name-in-module, invalid-name, too-many-locals
+# pylint: disable=too-many-branches
 
 """Implementation of the State Encoder"""
 from typing import Tuple, Optional, List
