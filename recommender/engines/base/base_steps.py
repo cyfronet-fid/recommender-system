@@ -4,57 +4,60 @@
 """Abstract pipeline steps"""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Any
 
 
 class BaseStep(ABC):
-    def __init__(self, config: Dict[str, object]):
-        self.config = config
+    def __init__(self, pipeline_config: Dict[str, Any]):
+        self.pipeline_config = pipeline_config
+        self.config = None
 
     @abstractmethod
-    def __call__(self, data=None) -> Tuple[object, dict]:
+    def __call__(self, data=None) -> Tuple[Any, Dict]:
         pass
+
+    def resolve_constant(self, name, default=None):
+        """step's config overrides pipeline config
+        pipeline config overrides default"""
+
+        return self.config.get(name, self.pipeline_config.get(name, default))
 
 
 class DataExtractionStep(BaseStep, ABC):
-    def __init__(self, config):
-        super().__init__(config)
-        pass
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
+        self.config = self.pipeline_config[DataExtractionStep.__name__]
 
 
 class DataValidationStep(BaseStep, ABC):
     def __init__(self, config):
         super().__init__(config)
-        pass
+        self.config = self.pipeline_config[DataValidationStep.__name__]
 
 
 class DataPreparationStep(BaseStep, ABC):
     def __init__(self, config):
         super().__init__(config)
-        pass
+        self.config = self.pipeline_config[DataPreparationStep.__name__]
 
 
-class ModelTrainingStep(BaseStep):
+class ModelTrainingStep(BaseStep, ABC):
     def __init__(self, config):
         super().__init__(config)
-        pass
+        self.config = self.pipeline_config[ModelTrainingStep.__name__]
 
     @abstractmethod
-    def save(self):
-        pass
+    def save(self) -> None:
+        """Save trained model"""
 
 
 class ModelEvaluationStep(BaseStep, ABC):
     def __init__(self, config):
         super().__init__(config)
-        pass
+        self.config = self.pipeline_config[ModelEvaluationStep.__name__]
 
 
-class ModelValidationStep(BaseStep):
+class ModelValidationStep(BaseStep, ABC):
     def __init__(self, config):
         super().__init__(config)
-        pass
-
-    @abstractmethod
-    def __call__(self, data=None) -> Tuple[object, object]:
-        pass
+        self.config = self.pipeline_config[ModelValidationStep.__name__]

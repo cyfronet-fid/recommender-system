@@ -1,7 +1,4 @@
-# pylint: disable=redefined-builtin, no-member, redefined-outer-name,
-# pylint: disable=too-many-arguments, too-many-locals, invalid-name
-# pylint: disable=unused-variable, too-many-statements
-# pylint: disable=fixme, line-too-long
+# pylint: disable-all
 
 """Training and evaluation related functions"""
 

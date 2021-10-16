@@ -200,16 +200,14 @@ def user_and_services_to_tensors(user, services):
     and compose them into tensors ready for inference.
     """
 
-    if not user.one_hot_tensor:
-        raise NoPrecalculatedTensorsError(
-            "Given user has no precalculated one_hot_tensor"
-        )
+    if not user.dense_tensor:
+        raise NoPrecalculatedTensorsError("Given user has no precalculated dense")
 
     for service in services:
-        if not service.one_hot_tensor:
+        if not service.dense_tensor:
             raise NoPrecalculatedTensorsError(
                 "One or more of given services has/have no precalculated"
-                " one_hot_tensor(s)"
+                " dense tensor(s)"
             )
 
     services_ids = []
@@ -217,7 +215,7 @@ def user_and_services_to_tensors(user, services):
     services = list(services)
     for service in services:
         services_ids.append(service.id)
-        service_tensor = torch.unsqueeze(torch.Tensor(service.one_hot_tensor), dim=0)
+        service_tensor = torch.unsqueeze(torch.Tensor(service.dense_tensor), dim=0)
         services_tensors.append(service_tensor)
 
     services_ids = torch.tensor(services_ids)
@@ -225,7 +223,7 @@ def user_and_services_to_tensors(user, services):
 
     n = services_tensor.shape[0]
     users_ids = torch.full([n], user.id)
-    user_tensor = torch.Tensor(user.one_hot_tensor)
+    user_tensor = torch.Tensor(user.dense_tensor)
     users_tensor = torch.unsqueeze(user_tensor, dim=0).repeat(n, 1)
 
     return users_ids, users_tensor, services_ids, services_tensor

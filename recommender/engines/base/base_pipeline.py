@@ -4,7 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict
-import time
+from datetime import datetime
 
 from recommender.engines.base.base_steps import (
     DataExtractionStep,
@@ -20,88 +20,80 @@ from recommender.models.step_metadata import StepMetadata, Status
 
 
 class BasePipeline(ABC):
-    """Abstract Pipeline class"""
+    """Abstract Pipeline"""
 
     def __init__(self, pipeline_config: dict):
         self.pipeline_config = pipeline_config
         self.metadata = self._create_metadata()
         self.steps: Dict[str, BaseStep] = {
-            DataExtractionStep.__name__: self._create_data_extraction_step(
-                pipeline_config[DataExtractionStep.__name__]
-            ),
-            DataValidationStep.__name__: self._create_data_validation_step(
-                pipeline_config[DataValidationStep.__name__]
-            ),
-            DataPreparationStep.__name__: self._create_data_preparation_step(
-                pipeline_config[DataPreparationStep.__name__]
-            ),
-            ModelTrainingStep.__name__: self._create_model_training_step(
-                pipeline_config[ModelTrainingStep.__name__]
-            ),
-            ModelEvaluationStep.__name__: self._create_model_evaluation_step(
-                pipeline_config[ModelEvaluationStep.__name__]
-            ),
-            ModelValidationStep.__name__: self._create_model_validation_step(
-                pipeline_config[ModelValidationStep.__name__]
-            ),
+            DataExtractionStep.__name__: self._create_data_extraction_step(),
+            DataValidationStep.__name__: self._create_data_validation_step(),
+            DataPreparationStep.__name__: self._create_data_preparation_step(),
+            ModelTrainingStep.__name__: self._create_model_training_step(),
+            ModelEvaluationStep.__name__: self._create_model_evaluation_step(),
+            ModelValidationStep.__name__: self._create_model_validation_step(),
         }
 
-    @abstractmethod
     def _create_metadata(self) -> PipelineMetadata:
         return PipelineMetadata(
             type=f"{self.__class__.__name__}",
         )
 
     @abstractmethod
-    def _check_dependencies(self) -> bool:
+    def _check_dependencies(self):
         """Raises MissingDependency if needed."""
 
     def __call__(self):
         self._check_dependencies()
 
-        self._update_metadata("start_time", time.time())
-        self.metadata.steps = [
-            StepMetadata(type=f"{step.__class__.__name__}", status=Status.NOT_COMPLETED)
-            for step in self.steps.values()
-        ]
+        self._update_metadata("start_time", datetime.utcnow())
+        self._update_metadata(
+            "steps",
+            [
+                StepMetadata(
+                    type=f"{step.__class__.__name__}", status=Status.NOT_COMPLETED
+                )
+                for step in self.steps.values()
+            ],
+        )
 
         data = None
         for step_metadata, step in zip(self.metadata.steps, self.steps.values()):
-            step_metadata.start_time = time.time()
+            step_metadata.start_time = datetime.utcnow()
             data, details = step(data)
             step_metadata.details = details
-            step_metadata.end_time = time.time()
+            step_metadata.end_time = datetime.utcnow()
             step_metadata.status = Status.COMPLETED
 
             self._update_metadata("steps", self.metadata.steps)
 
         self.steps[ModelTrainingStep.__name__].save()
-        self._update_metadata("end_time", time.time())
+        self._update_metadata("end_time", datetime.utcnow())
 
     def _update_metadata(self, attr, value):
         setattr(self.metadata, attr, value)
         self.metadata.save()
 
     @abstractmethod
-    def _create_data_extraction_step(self, step_config) -> DataExtractionStep:
+    def _create_data_extraction_step(self) -> DataExtractionStep:
         pass
 
     @abstractmethod
-    def _create_data_validation_step(self, step_config) -> DataExtractionStep:
+    def _create_data_validation_step(self) -> DataExtractionStep:
         pass
 
     @abstractmethod
-    def _create_data_preparation_step(self, step_config) -> DataExtractionStep:
+    def _create_data_preparation_step(self) -> DataExtractionStep:
         pass
 
     @abstractmethod
-    def _create_model_training_step(self, step_config) -> DataExtractionStep:
+    def _create_model_training_step(self) -> DataExtractionStep:
         pass
 
     @abstractmethod
-    def _create_model_evaluation_step(self, step_config) -> DataExtractionStep:
+    def _create_model_evaluation_step(self) -> DataExtractionStep:
         pass
 
     @abstractmethod
-    def _create_model_validation_step(self, step_config) -> DataExtractionStep:
+    def _create_model_validation_step(self) -> DataExtractionStep:
         pass
