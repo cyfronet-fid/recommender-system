@@ -10,11 +10,12 @@ from torch.nn import Module, Linear
 from recommender.engine.agents.pre_agent.models.content_mlp import ContentMLP
 from recommender.engine.agents.pre_agent.models.gmf import GMF
 from recommender.engine.agents.pre_agent.models.mlp import MLP
+from recommender.engines.persistent_mixin import Persistent
 
-NEURAL_CF = "Neural Colaborative Filtering Model"
+NEURAL_CF = "Neural Collaborative Filtering Model"
 
 
-class NeuralColaborativeFilteringModel(Module):
+class NeuralColaborativeFilteringModel(Module, Persistent):
     """Pytorch module containing neural network of the neural colaborative filtering model"""
 
     def __init__(
@@ -24,8 +25,8 @@ class NeuralColaborativeFilteringModel(Module):
         mf_embedding_dim,
         user_ids_embedding_dim,
         service_ids_embedding_dim,
-        user_embedder,
-        service_embedder,
+        user_emb_dim,
+        service_emb_dim,
         mlp_layers_spec,
         content_mlp_layers_spec,
     ):
@@ -40,7 +41,7 @@ class NeuralColaborativeFilteringModel(Module):
         )
 
         self.content_mlp = ContentMLP(
-            user_embedder, service_embedder, content_mlp_layers_spec
+            content_mlp_layers_spec, user_emb_dim, service_emb_dim
         )
 
         self.fc = Linear(
@@ -66,8 +67,8 @@ def create_nfc_model(
     mf_embedding_dim,
     user_ids_embedding_dim,
     service_ids_embedding_dim,
-    user_embedder,
-    service_embedder,
+    user_emb_dim,
+    service_emb_dim,
     mlp_layers_spec,
     content_mlp_layers_spec,
     writer=None,
@@ -82,8 +83,8 @@ def create_nfc_model(
         mf_embedding_dim=mf_embedding_dim,
         user_ids_embedding_dim=user_ids_embedding_dim,
         service_ids_embedding_dim=service_ids_embedding_dim,
-        user_embedder=user_embedder,
-        service_embedder=service_embedder,
+        user_emb_dim=user_emb_dim,
+        service_emb_dim=service_emb_dim,
         mlp_layers_spec=mlp_layers_spec,
         content_mlp_layers_spec=content_mlp_layers_spec,
     ).to(device)

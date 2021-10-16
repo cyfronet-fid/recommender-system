@@ -16,11 +16,12 @@ from recommender.engine.agents.rl_agent.utils import (
     create_index_id_map,
 )
 from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.persistent_mixin import Persistent
 from recommender.errors import MissingOneHotTensorError, MissingDenseTensorError
 from recommender.models import User, Service
 
 
-class Embedder:
+class Embedder(Persistent):
     """User or Services Embedder"""
 
     def __init__(self, autoencoder: AutoEncoder):
