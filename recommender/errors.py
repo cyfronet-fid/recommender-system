@@ -66,3 +66,8 @@ class MissingOneHotTensorError(RecommendationEngineError):
 class MissingDenseTensorError(RecommendationEngineError):
     def message(self):
         return "One or more objects don't have dense tensor needed to"
+
+
+class NoSavedMLComponentError(RecommendationEngineError):
+    def message(self):
+        return "No saved ML component"
