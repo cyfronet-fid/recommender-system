@@ -1,7 +1,7 @@
 # pylint: disable-all
 
 from tests.factories.marketplace import UserFactory
-from tests.factories.recommendation import RecommendationFactory
+from tests.factories.recommendation import RecommendationFactory, faker
 from tests.factories.user_action import UserActionFactory
 from recommender.services.sarses_generator import generate_sarses
 from recommender.models import Sars, UserAction
@@ -205,12 +205,84 @@ class TestSarsesGenerator:
             source__visit_id=root_user_action_2.target.visit_id,
         )
 
+        _next_recommendation = RecommendationFactory(v1=True, user=user)
+
         generate_sarses()
         sars = Sars.objects.first()
 
         clicked_before = user.accessed_services + ruas2services(
             root_actions_before_recommendation
         )
+        assert sars.state.services_history == clicked_before
+
+        clicked_after = [
+            root_user_action_1.source.root.service,
+            root_user_action_2.source.root.service,
+        ]
+        assert sars.action == recommendation.services
+
+        assert sars.reward == [
+            [ua_to_reward_id(root_user_action_1)],
+            [],
+            [
+                ua_to_reward_id(root_user_action_2),
+                ua_to_reward_id(non_root_user_action),
+            ],
+        ]
+        assert sars.next_state.services_history == clicked_before + clicked_after
+
+    def test_generate_sarses_anonymous(
+        self,
+        mongo,
+    ):
+        # At least one user in the DB assumption, needed for _get_empty_user()
+        UserFactory()
+
+        unique_id = faker.uuid4()
+
+        # Anonymous user's root actions taken before considered recommendation
+        root_actions_before_recommendation = [
+            UserActionFactory(
+                recommendation_root=True, not_logged=True, unique_id=unique_id
+            )
+            for _ in range(3)
+        ]
+
+        # Simple user journey
+        recommendation = RecommendationFactory(
+            v1=True, not_logged=True, unique_id=unique_id
+        )
+
+        root_user_action_1 = UserActionFactory(
+            recommendation_root=True,
+            not_logged=True,
+            unique_id=unique_id,
+            source__visit_id=recommendation.visit_id,
+            source__root__service=recommendation.services[0],
+        )
+
+        root_user_action_2 = UserActionFactory(
+            recommendation_root=True,
+            not_logged=True,
+            unique_id=unique_id,
+            source__visit_id=recommendation.visit_id,
+            source__root__service=recommendation.services[2],
+        )
+
+        non_root_user_action = UserActionFactory(
+            not_logged=True,
+            unique_id=unique_id,
+            source__visit_id=root_user_action_2.target.visit_id,
+        )
+
+        _next_recommendation = RecommendationFactory(
+            v1=True, not_logged=True, unique_id=unique_id
+        )
+
+        generate_sarses()
+        sars = Sars.objects.first()
+
+        clicked_before = ruas2services(root_actions_before_recommendation)
         assert sars.state.services_history == clicked_before
 
         clicked_after = [

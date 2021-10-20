@@ -23,7 +23,7 @@ from recommender.models import User, UserAction, Recommendation, State, Sars, Se
 from recommender.engine.agents.rl_agent.reward_mapping import ua_to_reward_id
 from recommender.services.services_history_generator import concat_histories
 
-RECOMMENDATION_PAGES_IDS = ("catalogue_services_list",)
+RECOMMENDATION_PAGES_IDS = ("catalogue_services_list",)  # TODO: check integrity
 
 
 def _tree_collapse(user_action):
@@ -76,37 +76,69 @@ def _get_clicked_services_and_reward(
 
 
 def _find_root_uas_before(root_uas, recommendation):
-    """Find all user's root actions that user took before
+    """Find all user's root actions that has been taken before
     current recommendation"""
 
-    if recommendation.user:
-        root_uas_before = root_uas(
-            user=recommendation.user, timestamp__lt=recommendation.timestamp
-        )
+    if recommendation.user is not None:
+        root_uas_for_user = root_uas(user=recommendation.user)
     else:
-        root_uas_before = root_uas(
-            unique_id=recommendation.unique_id,
-            timestamp__lt=recommendation.timestamp,
-        )
+        root_uas_for_user = root_uas(unique_id=recommendation.unique_id)
 
-    return root_uas_before.order_by("+timestamp")
+    root_uas_before = root_uas_for_user(
+        timestamp__lt=recommendation.timestamp
+    ).order_by("+timestamp")
+
+    return root_uas_before
 
 
 def _get_empty_user() -> User:
     """
     This function get empty user with id=-1 from the database or create one.
-    It fill its tensor with zeros to simulate tensor precalculation.
+    It fill its tensors with zeros to simulate tensor precalculation.
     It is used as a anonymous user and it has no categories or scientific
      domains.
     """
 
+    assert len(User.objects) >= 1  # Necessary assumption
+
+    true_user = User.objects.first()
+    oht_shape = len(true_user.one_hot_tensor)
+    dt_shape = len(true_user.dense_tensor)
+
     user = User.objects(id=-1).first()
     if user is None:
         user = User(
-            id=-1, tensor=torch.zeros(User.objects.first().one_hot_tensor.shape)
+            id=-1,
+            # Here is an assumption that anonymous user should be empty and
+            # therefore its tensors should be zeros.
+            # TODO: maybe Embedder should be used?
+            one_hot_tensor=torch.zeros(oht_shape),
+            dense_tensor=torch.zeros(dt_shape),
         )
 
     return user
+
+
+def _get_next_recommendation(recommendation):
+    """Given recommendation, this function determine if it's for logged or
+    anonymous user and then it find the first next recommendation (in the
+     chronological order) for this user.
+    """
+
+    if recommendation.user is not None:
+        recommendations_for_user = Recommendation.objects(user=recommendation.user)
+    else:
+        recommendations_for_user = Recommendation.objects(
+            unique_id=recommendation.unique_id
+        )
+
+    next_recommendation = (
+        recommendations_for_user(timestamp__gt=recommendation.timestamp)
+        .order_by("+timestamp")
+        .first()
+    )
+
+    return next_recommendation
 
 
 def generate_sarses():
@@ -138,10 +170,15 @@ def generate_sarses():
 
         # Create next state
         services_history_after = services_history_before + clicked_services_after
+
+        next_recommendation = _get_next_recommendation(recommendation)
+        if next_recommendation is None:
+            continue
+
         next_state = State(
             user=user,
             services_history=services_history_after,
-            search_data=recommendation.search_data,  # TODO: replace recommendation with "next recommendation"
+            search_data=next_recommendation.search_data,
         ).save()
 
         # Create SARS
