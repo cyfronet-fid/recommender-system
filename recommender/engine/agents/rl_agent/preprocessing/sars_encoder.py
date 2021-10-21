@@ -7,6 +7,7 @@ from typing import Dict, Union, List
 import torch
 
 from recommender.engine.agents.rl_agent.services2weights import Services2Weights
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.models import Sars
 from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
     RewardEncoder,
@@ -25,12 +26,10 @@ REWARD = "reward"
 class SarsEncoder:
     """SARS Encoder"""
 
-    def __init__(self, state_encoder=None, reward_encoder=None, services2weights=None):
-        self.state_encoder = state_encoder
-        self.reward_encoder = reward_encoder
-        self.services2weights = services2weights
-
-        self._load_components()
+    def __init__(self, user_embedder: Embedder, service_embedder: Embedder):
+        self.state_encoder = StateEncoder(user_embedder, service_embedder)
+        self.reward_encoder = RewardEncoder()
+        self.services2weights = Services2Weights(service_embedder)
 
     def __call__(
         self, SARSes: List[Sars]
@@ -78,8 +77,3 @@ class SarsEncoder:
         }
 
         return sarses_batch
-
-    def _load_components(self):
-        self.state_encoder = self.state_encoder or StateEncoder()
-        self.reward_encoder = self.reward_encoder or RewardEncoder()
-        self.services2weights = self.services2weights or Services2Weights()

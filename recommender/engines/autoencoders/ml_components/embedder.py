@@ -11,8 +11,6 @@ from mongoengine import QuerySet
 from tqdm.auto import tqdm
 
 from recommender.engine.agents.rl_agent.utils import (
-    one_hot_tensors_exist,
-    dense_tensors_exist,
     create_index_id_map,
 )
 from recommender.engine.models.autoencoders import AutoEncoder
@@ -27,6 +25,7 @@ class Embedder(Persistent):
     def __init__(self, autoencoder: AutoEncoder):
         self.disable_tqdm = True
         self.network = deepcopy(autoencoder.encoder)
+        # self.network.eval()
         self.one_hot_dim = self.network[0].in_features
         self.dense_dim = self.network[-1].out_features
 
@@ -36,8 +35,8 @@ class Embedder(Persistent):
     def __call__(
         self,
         objects: Union[Iterable[Union[User, Service]], QuerySet],
-        use_cache=True,
-        save_cache=True,
+        use_cache=False,
+        save_cache=False,
     ) -> (torch.Tensor, pd.DataFrame):
         """Embedd objects one hot tensors into dense tensors.
         Args:
@@ -56,7 +55,7 @@ class Embedder(Persistent):
 
         index_id_map = create_index_id_map(objects)
 
-        if dense_tensors_exist(objects):
+        if self.dense_tensors_exist(objects):
             if use_cache:
                 dense_tensors = [obj.dense_tensor for obj in objects]
                 dense_tensors_batch = torch.Tensor(dense_tensors)
@@ -65,7 +64,7 @@ class Embedder(Persistent):
             if use_cache:
                 raise MissingDenseTensorError
 
-        if not one_hot_tensors_exist(objects):
+        if not self.one_hot_tensors_exist(objects):
             raise MissingOneHotTensorError
 
         one_hot_tensors = [obj.one_hot_tensor for obj in objects]
@@ -83,3 +82,34 @@ class Embedder(Persistent):
                 obj.save()
 
         return dense_tensors_batch, index_id_map
+
+    @staticmethod
+    def dense_tensors_exist(objects: Union[Iterable, QuerySet]):
+        """Check if embedded tensors exists
+
+        Args:
+            objects: list of users or services
+
+        Return:
+            True if embedded tensors of all objects exists, otherwise False
+        """
+        objects = list(objects)
+        first_len = len(objects[0].dense_tensor)
+        if first_len == 0:
+            return False
+        return all(len(obj.dense_tensor) == first_len for obj in objects)
+
+    @staticmethod
+    def one_hot_tensors_exist(objects: Union[Iterable, QuerySet]):
+        """Check if one hot tensors exists
+        Args:
+            objects: list of users or services
+
+        Return:
+            True if one hot tensors of all objects exists, otherwise False
+        """
+        objects = list(objects)
+        first_len = len(objects[0].one_hot_tensor)
+        if first_len == 0:
+            return False
+        return all(len(obj.one_hot_tensor) == first_len for obj in objects)

@@ -56,7 +56,7 @@ def encoder(mongo, services):
 
 
 def test_search_data_encoder_init(encoder, services, users):
-    assert encoder.itemspace_size == len(services)
+    assert encoder.I == len(services)
     assert encoder.forbidden_service_indices == [0, 5]
 
 

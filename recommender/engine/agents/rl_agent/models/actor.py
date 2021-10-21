@@ -1,22 +1,14 @@
 # pylint: disable=missing-module-docstring, invalid-name, too-many-arguments, no-member
 
-from typing import Tuple, Optional
+from typing import Tuple
 from itertools import chain
 
 import torch
 from torch import nn
 from torch.nn import BatchNorm1d
 
-from recommender.engine.utils import load_last_module, NoSavedModuleError
-from recommender.errors import (
-    MissingComponentError,
-    NoHistoryEmbedderForK,
-)
-from recommender.engine.agents.rl_agent.models.history_embedder import (
-    HistoryEmbedder,
-    MLP_HISTORY_EMBEDDER_V1,
-    MLP_HISTORY_EMBEDDER_V2,
-)
+
+from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
 
 ACTOR_V1 = "actor_v1"
 ACTOR_V2 = "actor_v2"
@@ -31,7 +23,7 @@ class Actor(nn.Module):
         SE: int,
         UE: int,
         I: int,
-        history_embedder: Optional[HistoryEmbedder] = None,
+        history_embedder: HistoryEmbedder,
         layer_sizes: Tuple[int] = (256, 512, 256),
     ):
         """
@@ -49,8 +41,6 @@ class Actor(nn.Module):
         self.SE = SE
 
         self.history_embedder = history_embedder
-
-        self._load_models()
 
         layers = [
             nn.Linear(UE + SE + I, layer_sizes[0]),
@@ -100,18 +90,3 @@ class Actor(nn.Module):
         weights = x.reshape(-1, self.K, self.SE)
         weights = torch.tanh(weights)
         return weights
-
-    def _load_models(self):
-        try:
-            if self.K == 3:
-                history_embedder_name = MLP_HISTORY_EMBEDDER_V1
-            elif self.K == 2:
-                history_embedder_name = MLP_HISTORY_EMBEDDER_V2
-            else:
-                raise NoHistoryEmbedderForK
-            self.history_embedder = self.history_embedder or load_last_module(
-                history_embedder_name
-            )
-
-        except NoSavedModuleError as no_saved_module:
-            raise MissingComponentError from no_saved_module

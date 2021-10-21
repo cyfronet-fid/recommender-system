@@ -5,12 +5,10 @@
 from typing import Tuple, Iterable, Union, List
 
 import pandas as pd
-import torch
-import torch.nn
 from graphviz import Digraph
 from mongoengine import QuerySet
 
-from recommender.models import State, SearchData, User, Service
+from recommender.models import State, SearchData, User
 from recommender.models import UserAction
 from recommender.services.services_history_generator import generate_services_history
 
@@ -84,78 +82,6 @@ def create_index_id_map(services: Union[Iterable, QuerySet]) -> pd.DataFrame:
     return pd.DataFrame([s.id for s in services], columns=["id"])
 
 
-def create_itemspace(embedder: torch.nn.Module) -> Tuple[torch.Tensor, pd.DataFrame]:
-    all_services = list(Service.objects.order_by("id"))
-    service_embedded_tensors, index_id_map = use_service_embedder(
-        all_services, embedder
-    )
-
-    return service_embedded_tensors, index_id_map
-
-
-def dense_tensors_exist(objects: Union[Iterable, QuerySet]):
-    """Check if embedded tensors exists
-
-    Args:
-        objects: list of users or services
-
-    Return:
-        True if embedded tensors of all objects exists, otherwise False
-    """
-    objects = list(objects)
-    first_len = len(objects[0].dense_tensor)
-    if first_len == 0:
-        return False
-    return all(len(obj.dense_tensor) == first_len for obj in objects)
-
-
-def one_hot_tensors_exist(objects: Union[Iterable, QuerySet]):
-    """Check if one hot tensors exists
-    Args:
-        objects: list of users or services
-
-    Return:
-        True if one hot tensors of all objects exists, otherwise False
-    """
-    objects = list(objects)
-    first_len = len(objects[0].one_hot_tensor)
-    if first_len == 0:
-        return False
-    return all(len(obj.one_hot_tensor) == first_len for obj in objects)
-
-
-def use_service_embedder(
-    services: Union[Iterable, QuerySet],
-    embedder: torch.nn.Module,
-    use_precalc_embeddings=True,
-) -> Tuple[torch.Tensor, pd.DataFrame]:
-    """
-    Embed list of services with provided embedder.
-
-    Args:
-        services: List of services.
-        embedder: Embeder model.
-        use_precalc_embeddings: determine if precalculated
-            embeddings from database should be used.
-
-    Returns:
-        embedded_services: embedded services.
-        index_id_map: index to id mapping.
-    """
-
-    if use_precalc_embeddings and dense_tensors_exist(services):
-        embedded_services = torch.Tensor([s.dense_tensor for s in services])
-    else:
-        one_hot_service_tensors = torch.Tensor([s.one_hot_tensor for s in services])
-
-        with torch.no_grad():
-            embedded_services = embedder(one_hot_service_tensors)
-
-    index_id_map = create_index_id_map(services)
-
-    return embedded_services, index_id_map
-
-
 def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]:
     """Given a mapping between indices in the embedding and
     database ids returns indices of services with given ids."""
@@ -192,28 +118,3 @@ def create_state(user: User, search_data: SearchData) -> State:
     )
 
     return state
-
-
-def use_user_embedder(
-    users: List[User], user_embedder: torch.nn.Module, use_precalc_embeddings=True
-) -> torch.Tensor:
-    """
-    Args:
-        users: List of MongoEngine User objects.
-        user_embedder: User Embedder model.
-        use_precalc_embeddings: determine
-            if precalculated embeddings from database should be used.
-
-    Returns:
-        embedded_user_tensor: Embedded user tensors
-    """
-
-    if use_precalc_embeddings and dense_tensors_exist(users):
-        embedded_user_tensors_batch = torch.Tensor([u.dense_tensor for u in users])
-    else:
-        user_tensors_batch = torch.Tensor([user.one_hot_tensor for user in users])
-
-        with torch.no_grad():
-            embedded_user_tensors_batch = user_embedder(user_tensors_batch)
-
-    return embedded_user_tensors_batch

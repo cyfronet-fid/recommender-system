@@ -1,36 +1,29 @@
 # pylint: disable=missing-module-docstring, invalid-name, no-member, too-few-public-methods, no-self-use
 
-from typing import Optional, Tuple
+from typing import Tuple
 
 import torch
 import torch.nn.functional as F
-from torch import nn
 
-from recommender.engine.agents.rl_agent.utils import create_itemspace
-from recommender.engine.models.autoencoders import SERVICES_AUTOENCODER, create_embedder
-from recommender.engine.utils import load_last_module, NoSavedModuleError
-from recommender.errors import InsufficientRecommendationSpace, MissingComponentError
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.errors import InsufficientRecommendationSpace
+from recommender.models import Service
 
 
 class ServiceSelector:
     """Responsible for strategy and selection of services to
     recommend, given output of the Actor"""
 
-    def __init__(self, service_embedder: Optional[nn.Module] = None) -> None:
+    def __init__(self, service_embedder: Embedder) -> None:
         """
         Args:
             service_embedder: encoder part of the Service AutoEncoder
         """
-
-        self.service_embedder = service_embedder
-
-        self._load_components()
-
-        self.itemspace, self.index_id_map = create_itemspace(self.service_embedder)
+        all_services = list(Service.objects.order_by("id"))
+        self.itemspace, self.index_id_map = service_embedder(all_services)
 
     def __call__(
         self,
-        K: int,
         weights: torch.Tensor,
         mask: torch.Tensor,
     ) -> Tuple[int]:
@@ -39,7 +32,6 @@ class ServiceSelector:
          recommendation and returns them
 
         Args:
-            K: number of recommended services
             weights: Weights returned by an actor model, tensor of shape [K, SE], where:
                 - K is the number of services required for the recommendation
                 - SE is a service content tensor embedding dim
@@ -47,6 +39,8 @@ class ServiceSelector:
         Returns:
             The tuple of recommended services ids
         """
+
+        K = weights.shape[0]
 
         if (mask > 0).sum() < K:
             raise InsufficientRecommendationSpace
@@ -68,13 +62,3 @@ class ServiceSelector:
             indices += [next(filter(lambda x: x not in indices, top_K_indices[k]))]
 
         return indices
-
-    def _load_components(self):
-        try:
-            self.service_embedder = self.service_embedder or create_embedder(
-                load_last_module(SERVICES_AUTOENCODER)
-            )
-        except NoSavedModuleError as no_saved_module:
-            raise MissingComponentError from no_saved_module
-
-        self.service_embedder.eval()

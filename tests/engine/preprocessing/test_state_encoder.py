@@ -2,18 +2,12 @@
 
 import torch
 
-from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
-    SearchDataEncoder,
-)
-from recommender.models import User, Service
+from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,
 )
-from recommender.engine.models.autoencoders import (
-    create_embedder,
-    ServiceAutoEncoder,
-    UserAutoEncoder,
-)
+from recommender.models import User, Service
 from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 
 from tests.factories.marketplace import ServiceFactory
@@ -55,20 +49,16 @@ def test_state_encoder(mongo):
     SOH = len(Service.objects[0].one_hot_tensor)
 
     # prepare state encoder
-    user_embedder = create_embedder(UserAutoEncoder(features_dim=UOH, embedding_dim=UE))
-    user_embedder.eval()
-
-    service_embedder = create_embedder(
-        ServiceAutoEncoder(features_dim=SOH, embedding_dim=SE)
-    )
-    service_embedder.eval()
-
-    search_data_encoder = SearchDataEncoder()
+    user_autoencoder = AutoEncoder(features_dim=UOH, embedding_dim=UE)
+    user_autoencoder.eval()
+    service_autoencoder = AutoEncoder(features_dim=SOH, embedding_dim=SE)
+    service_autoencoder.eval()
+    user_embedder = Embedder(user_autoencoder)
+    service_embedder = Embedder(service_autoencoder)
 
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_data_encoder=search_data_encoder,
     )
 
     encoded_state = state_encoder(states)
@@ -90,7 +80,9 @@ def test_state_encoder(mongo):
             original_oh_tensor = torch.Tensor(
                 services_histories[i][j].one_hot_tensor
             ).unsqueeze(0)
-            original_embedding = service_embedder(original_oh_tensor).squeeze(0)
+            original_embedding = service_autoencoder.encoder(
+                original_oh_tensor
+            ).squeeze(0)
             tested_embedding = service_histories_batch[i][j]
             assert all(
                 torch.isclose(

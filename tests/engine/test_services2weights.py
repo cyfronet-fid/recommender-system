@@ -1,11 +1,12 @@
 # pylint: disable-all
-
+import pandas as pd
 import pytest
 import torch
 
 from recommender.engine.agents.rl_agent.services2weights import Services2Weights
 from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
-from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_embedder
+from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from tests.factories.marketplace import ServiceFactory
 
 
@@ -31,12 +32,19 @@ def service_embeddings():
     )
 
 
-def test_services2weights(mocker, services, service_embeddings):
+@pytest.fixture
+def index_id_map(services):
+    return pd.DataFrame([2, 4, 6, 8], columns=["id"])
+
+
+def test_services2weights(mocker, services, service_embeddings, index_id_map):
     # Values of SE and Service OH len don't matter here
     # as we are mocking the service embedder output anyway
-    service_embedder = create_embedder(ServiceAutoEncoder(64, 4))
-    mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_torch_module_call.return_value = service_embeddings
+    service_embedder = Embedder(AutoEncoder(64, 4))
+    mock_embedder_call = mocker.patch(
+        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+    )
+    mock_embedder_call.return_value = (service_embeddings, index_id_map)
 
     services2weights = Services2Weights(service_embedder)
     service_selector = ServiceSelector(service_embedder)
@@ -49,7 +57,6 @@ def test_services2weights(mocker, services, service_embeddings):
         for recommended_ids, weights in zip(recommended_ids_list, weights_batch):
             assert (
                 service_selector(
-                    K=len(recommended_ids),
                     weights=weights,
                     mask=torch.ones(len(services)),
                 )

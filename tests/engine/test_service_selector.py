@@ -1,10 +1,11 @@
 # pylint: disable-all
-
+import pandas as pd
 import pytest
 import torch
 
 from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
-from recommender.engine.models.autoencoders import ServiceAutoEncoder, create_embedder
+from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.errors import InsufficientRecommendationSpace
 from tests.factories.marketplace import ServiceFactory
 
@@ -41,6 +42,11 @@ def service_embeddings():
     )
 
 
+@pytest.fixture
+def index_id_map(services):
+    return pd.DataFrame([2, 4, 6, 8], columns=["id"])
+
+
 @pytest.fixture()
 def weights():
     return torch.Tensor(
@@ -52,13 +58,15 @@ def weights():
 
 
 def test_proper_initialization(
-    mongo, mocker, proper_parameters, services, service_embeddings
+    mongo, mocker, proper_parameters, services, service_embeddings, index_id_map
 ):
-    mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_torch_module_call.return_value = service_embeddings
+    mock_embedder_call = mocker.patch(
+        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+    )
+    mock_embedder_call.return_value = (service_embeddings, index_id_map)
 
     FEATURES_DIM, _, SE = proper_parameters
-    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    service_embedder = Embedder(AutoEncoder(FEATURES_DIM, SE))
     service_selector = ServiceSelector(service_embedder)
 
     assert service_selector.itemspace.shape == torch.Size([len(services), SE])
@@ -66,36 +74,52 @@ def test_proper_initialization(
         range(len(services))
     )
     assert service_selector.index_id_map.id.values.tolist() == list([2, 4, 6, 8])
-    mock_torch_module_call.assert_called_once()
+    mock_embedder_call.assert_called_once()
 
 
 def test_call_with_matching_services(
-    mongo, mocker, proper_parameters, services, service_embeddings, weights
+    mongo,
+    mocker,
+    proper_parameters,
+    services,
+    service_embeddings,
+    weights,
+    index_id_map,
 ):
-    mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_torch_module_call.return_value = service_embeddings
+    mock_embedder_call = mocker.patch(
+        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+    )
+    mock_embedder_call.return_value = (service_embeddings, index_id_map)
 
     FEATURES_DIM, K, SE = proper_parameters
-    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    service_embedder = Embedder(AutoEncoder(FEATURES_DIM, SE))
     service_selector = ServiceSelector(service_embedder)
 
-    assert service_selector(K, weights, mask=torch.ones(len(services))) == [4, 6]
-    assert service_selector(K, weights, mask=torch.Tensor([1, 1, 0, 1])) == [4, 2]
-    assert service_selector(K, weights, mask=torch.Tensor([1, 0, 0, 1])) == [2, 8]
-    assert service_selector(K, weights, mask=torch.Tensor([0, 0, 1, 1])) == [6, 8]
-    assert service_selector(K, weights, mask=torch.Tensor([0, 1, 0, 1])) == [4, 8]
+    assert service_selector(weights, mask=torch.ones(len(services))) == [4, 6]
+    assert service_selector(weights, mask=torch.Tensor([1, 1, 0, 1])) == [4, 2]
+    assert service_selector(weights, mask=torch.Tensor([1, 0, 0, 1])) == [2, 8]
+    assert service_selector(weights, mask=torch.Tensor([0, 0, 1, 1])) == [6, 8]
+    assert service_selector(weights, mask=torch.Tensor([0, 1, 0, 1])) == [4, 8]
 
 
 def test_raise_insufficient_recommendation_space(
-    mongo, mocker, proper_parameters, services, weights, service_embeddings
+    mongo,
+    mocker,
+    proper_parameters,
+    services,
+    weights,
+    service_embeddings,
+    index_id_map,
 ):
-    mock_torch_module_call = mocker.patch("torch.nn.Module.__call__")
-    mock_torch_module_call.return_value = service_embeddings
+    mock_embedder_call = mocker.patch(
+        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+    )
+    mock_embedder_call.return_value = (service_embeddings, index_id_map)
 
     FEATURES_DIM, K, SE = proper_parameters
-    service_embedder = create_embedder(ServiceAutoEncoder(FEATURES_DIM, SE))
+    service_embedder = Embedder(AutoEncoder(FEATURES_DIM, SE))
     service_selector = ServiceSelector(service_embedder)
 
     with pytest.raises(InsufficientRecommendationSpace):
-        service_selector(K, weights, mask=torch.zeros(len(services)))
-        service_selector(K, weights, mask=torch.Tensor([0, 0, 0, 1]))
+        service_selector(weights, mask=torch.zeros(len(services)))
+        service_selector(weights, mask=torch.Tensor([0, 0, 0, 1]))
