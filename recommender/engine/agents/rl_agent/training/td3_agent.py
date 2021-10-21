@@ -8,16 +8,16 @@ import torch
 from torch.nn import MSELoss, DataParallel
 from torch.optim import Adam
 
-from recommender.engine.agents.rl_agent.models.actor import Actor
-from recommender.engine.agents.rl_agent.models.critic import Critic
-from recommender.engine.agents.rl_agent.models.history_embedder import (
+from recommender.engines.rl.ml_components.actor import Actor
+from recommender.engines.rl.ml_components.critic import Critic
+from recommender.engines.rl.ml_components.history_embedder import (
     MLPHistoryEmbedder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
+from recommender.engines.rl.ml_components.reward_encoder import (
     RewardEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
-from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
+from recommender.engines.rl.ml_components.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.service_selector import ServiceSelector
 from recommender.engine.agents.rl_agent.training.replay_buffer import ReplayBuffer
 from recommender.errors import InsufficientRecommendationSpace
 from recommender.models import State, Service

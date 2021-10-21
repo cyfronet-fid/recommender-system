@@ -5,12 +5,13 @@ from itertools import chain
 from typing import Tuple
 
 import torch
-from torch.nn import Linear, ReLU, Sequential
+from torch.nn import Linear, ReLU, Sequential, BatchNorm1d
 
-from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
+from recommender.engines.persistent_mixin import Persistent
+from recommender.engines.rl.ml_components.history_embedder import HistoryEmbedder
 
 
-class Critic(torch.nn.Module):
+class Critic(torch.nn.Module, Persistent):
     """Critic Model"""
 
     def __init__(
@@ -28,11 +29,15 @@ class Critic(torch.nn.Module):
 
         self.history_embedder = history_embedder
 
-        layers = [Linear(UE + SE + I + K * SE, layer_sizes[0]), ReLU()]
+        layers = [
+            Linear(UE + SE + I + K * SE, layer_sizes[0]),
+            ReLU(),
+            BatchNorm1d(layer_sizes[0]),
+        ]
         layers += list(
             chain.from_iterable(
                 [
-                    [Linear(n_size, next_n_size), ReLU()]  # BatchNorm1d(next_n_size)
+                    [Linear(n_size, next_n_size), ReLU(), BatchNorm1d(next_n_size)]
                     for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
                 ]
             )

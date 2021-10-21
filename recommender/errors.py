@@ -122,6 +122,11 @@ class PerformanceTooLowError(RecommendationEngineError):
         )
 
 
+class MeanRewardTooLowError(RecommendationEngineError):
+    def message(self):
+        return "Mean reward is too low, compared to adopted metric"
+
+
 class InferenceTooSlowError(RecommendationEngineError):
     def message(self):
         return "Inference time of the trained model is too long"
@@ -138,3 +143,8 @@ class InvalidObject(Exception):
 
 class NoSavedTransformerError(Exception):
     pass
+
+
+class DataSetTooSmallError(Exception):
+    def message(self):  # pragma: no cover
+        return "Not enough SARSes to train the RL agent"

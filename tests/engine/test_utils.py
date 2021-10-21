@@ -1,11 +1,10 @@
 # pylint: disable-all
-import numpy as np
 import pandas as pd
 import pytest
 import torch
 
 from tests.factories.marketplace import ServiceFactory
-from recommender.engine.agents.rl_agent.utils import (
+from recommender.engines.rl.utils import (
     get_service_indices,
 )
 

@@ -14,13 +14,26 @@ class ServiceSelector:
     """Responsible for strategy and selection of services to
     recommend, given output of the Actor"""
 
-    def __init__(self, service_embedder: Embedder) -> None:
+    def __init__(
+        self,
+        service_embedder: Embedder,
+        use_cached_embeddings: bool = True,
+        save_cached_embeddings: bool = False,
+    ) -> None:
         """
         Args:
-            service_embedder: encoder part of the Service AutoEncoder
+            service_embedder: Embedder of the services
+            use_cached_embeddings: Flag, describing if we should use cached services'
+                and users' embeddings
+            save_cached_embeddings: Flag, describing if we should
+                cache computed services' and users' embeddings
         """
         all_services = list(Service.objects.order_by("id"))
-        self.itemspace, self.index_id_map = service_embedder(all_services)
+        self.itemspace, self.index_id_map = service_embedder(
+            all_services,
+            use_cache=use_cached_embeddings,
+            save_cache=save_cached_embeddings,
+        )
 
     def __call__(
         self,
@@ -45,7 +58,7 @@ class ServiceSelector:
         if (mask > 0).sum() < K:
             raise InsufficientRecommendationSpace
 
-        engagement_values = F.softmax(weights @ self.itemspace.T)
+        engagement_values = F.softmax(weights @ self.itemspace.T, dim=1)
 
         recommended_indices = self._choose_recommended_indices(
             engagement_values, mask, K

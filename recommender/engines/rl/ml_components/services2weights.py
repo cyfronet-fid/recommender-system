@@ -3,7 +3,7 @@ from typing import List
 
 import torch
 
-from recommender.engine.agents.rl_agent.utils import (
+from recommender.engines.rl.utils import (
     get_service_indices,
 )
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
@@ -16,9 +16,18 @@ class Services2Weights:
     full weight matrix (of shape [K, SE] as returned by actor. It works on batches.
     It should be used when creating a dataset for RL agent"""
 
-    def __init__(self, service_embedder: Embedder):
+    def __init__(
+        self,
+        service_embedder: Embedder,
+        use_cached_embeddings=True,
+        save_cached_embeddings=False,
+    ):
         all_services = list(Service.objects.order_by("id"))
-        self.itemspace, self.index_id_map = service_embedder(all_services)
+        self.itemspace, self.index_id_map = service_embedder(
+            all_services,
+            use_cache=use_cached_embeddings,
+            save_cache=save_cached_embeddings,
+        )
         self.itemspace_inverse = self.itemspace.pinverse().T
         self.I = self.itemspace.shape[0]
 

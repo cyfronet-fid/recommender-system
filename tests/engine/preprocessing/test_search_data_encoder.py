@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
+from recommender.engines.rl.ml_components.search_data_encoder import (
     SearchDataEncoder,
 )
 from recommender.models import SearchData

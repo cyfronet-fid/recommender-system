@@ -6,19 +6,22 @@ import numpy as np
 import torch
 import pandas as pd
 
-from recommender.engine.agents.rl_agent.utils import get_service_indices
+from recommender.engines.rl.utils import get_service_indices
 from recommender.models import User, Service
 
 
 def _distance_metric(cluster: torch.Tensor, point: torch.Tensor) -> float:
     """Computes euclidean distance between the cluster centroid and
     a given point and the converts it to a score, between 0 and 1,
-    assuming the cluster and the point are normalized
-    in every dimension, between 0 and 0.5.
+    assuming the cluster and the point are normalized_tensors, with norm at max 1.0.
     The lesser the distance the better the score"""
-    centroid = cluster.mean(dim=0).unsqueeze(0)
-    point = point.unsqueeze(0)
-    dist = torch.cdist(centroid, point).item()
+    centroid = cluster.mean(dim=0)
+    dist = (point - centroid).norm()
+    # Scale the distance by 2, because the furthest
+    # the points can be while normalized is 2.0
+    dist /= 2
+    # Map the distance so that the closer the points are,
+    # the better the score
     return -dist + 1
 
 
@@ -74,7 +77,7 @@ def approx_service_engagement(
         service: service for which we are trying to approximate user's engagement
         engaged_services_history: list of user-engaged services
             to include in centroid distance score
-        normalized_embedded_services: normalized service embeddings
+        normalized_embedded_services: normalized_tensors service embeddings
         index_id_map: map that tells us which embedding indices
             are related to which db_ids
 
@@ -91,6 +94,6 @@ def approx_service_engagement(
         engaged_services_history, service, normalized_embedded_services, index_id_map
     )
 
-    user_engagement = np.array([overlap_score, distance_score]).mean()
+    user_engagement = float(np.mean([overlap_score, distance_score]))
 
     return user_engagement

@@ -2,14 +2,14 @@
 
 import torch
 
-from recommender.engine.agents.rl_agent.services2weights import Services2Weights
-from recommender.engine.agents.rl_agent.models.critic import Critic
-from recommender.engine.agents.rl_agent.models.history_embedder import (
+from recommender.engines.rl.ml_components.services2weights import Services2Weights
+from recommender.engines.rl.ml_components.critic import Critic
+from recommender.engines.rl.ml_components.history_embedder import (
     MLPHistoryEmbedder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 from recommender.engine.models.autoencoders import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.rl.ml_components.state_encoder import StateEncoder
 from recommender.models import User
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,
@@ -54,6 +54,7 @@ def test_critic(mongo):
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
+        use_cached_embeddings=False,
     )
 
     # critic
@@ -70,7 +71,9 @@ def test_critic(mongo):
     critics_v2 = (critic_v2_in_ram,)
     critics = critics_v1 + critics_v2
 
-    services2weights = Services2Weights(service_embedder=service_embedder)
+    services2weights = Services2Weights(
+        service_embedder=service_embedder, use_cached_embeddings=False
+    )
 
     batch_size = 64
     state_tensors_batch = state_encoder([state] * batch_size)

@@ -2,8 +2,8 @@
 
 import torch
 
-from recommender.engine.agents.rl_agent.models.actor import Actor
-from recommender.engine.agents.rl_agent.models.history_embedder import (
+from recommender.engines.rl.ml_components.actor import Actor
+from recommender.engines.rl.ml_components.history_embedder import (
     MLPHistoryEmbedder,
 )
 

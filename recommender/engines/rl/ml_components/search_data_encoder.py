@@ -3,7 +3,7 @@ from typing import List
 
 import torch
 
-from recommender.engine.agents.rl_agent.utils import (
+from recommender.engines.rl.utils import (
     create_index_id_map,
     get_service_indices,
 )

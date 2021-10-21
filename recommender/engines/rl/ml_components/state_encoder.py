@@ -8,7 +8,7 @@ from typing import Tuple, List
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
+from recommender.engines.rl.ml_components.search_data_encoder import (
     SearchDataEncoder,
 )
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
@@ -23,9 +23,13 @@ class StateEncoder:
         self,
         user_embedder: Embedder,
         service_embedder: Embedder,
+        use_cached_embeddings: bool = True,
+        save_cached_embeddings: bool = False,
     ):
         self.user_embedder = user_embedder
         self.service_embedder = service_embedder
+        self.use_cached_embeddings = use_cached_embeddings
+        self.save_cached_embeddings = save_cached_embeddings
         self.search_data_encoder = SearchDataEncoder()
 
     def __call__(self, states: List[State]) -> Tuple[(torch.Tensor,) * 3]:
@@ -70,7 +74,11 @@ class StateEncoder:
         services_histories = [state.services_history for state in states]
         search_data_list = [state.search_data for state in states]
         with torch.no_grad():
-            users_batch, _ = self.user_embedder(users)
+            users_batch, _ = self.user_embedder(
+                users,
+                use_cache=self.use_cached_embeddings,
+                save_cache=self.save_cached_embeddings,
+            )
             service_histories_batch = self._create_service_histories_batch(
                 services_histories
             )
@@ -115,7 +123,11 @@ class StateEncoder:
                 start_end_indices.append(None)
 
         if services:
-            service_tensors, _ = self.service_embedder(services)
+            service_tensors, _ = self.service_embedder(
+                services,
+                use_cache=self.use_cached_embeddings,
+                save_cache=self.save_cached_embeddings,
+            )
 
         sequences = []
         for state_idx in range(states_number):

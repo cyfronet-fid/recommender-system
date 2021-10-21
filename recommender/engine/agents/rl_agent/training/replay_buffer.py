@@ -8,11 +8,11 @@ from typing import Union
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
-from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
+from recommender.engines.rl.ml_components.reward_encoder import (
     RewardEncoder,
 )
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
-from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
+from recommender.engines.rl.ml_components.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.sars_encoder import (
     STATE,
     USER,
     SERVICES_HISTORY,

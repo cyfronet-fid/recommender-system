@@ -2,14 +2,14 @@
 
 import torch
 
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 from recommender.engine.models.autoencoders import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,
 )
+from recommender.engines.rl.ml_components.state_encoder import StateEncoder
 from recommender.models import User, Service
-from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
+from recommender.engines.rl.ml_components.sars_encoder import (
     SarsEncoder,
     STATE,
     USER,
@@ -66,10 +66,13 @@ def test_sars_encoder(mongo):
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
+        use_cached_embeddings=False,
     )
 
     sars_encoder = SarsEncoder(
-        user_embedder=user_embedder, service_embedder=service_embedder
+        user_embedder=user_embedder,
+        service_embedder=service_embedder,
+        use_cached_embeddings=False,
     )
 
     for K, SARSes_K in zip((2, 3), (SARSes_K_2, SARSes_K_3)):
