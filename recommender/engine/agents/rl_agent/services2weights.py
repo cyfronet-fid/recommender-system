@@ -5,11 +5,9 @@ import torch
 
 from recommender.engine.agents.rl_agent.utils import (
     get_service_indices,
-    create_itemspace,
 )
-from recommender.engine.models.autoencoders import create_embedder, SERVICES_AUTOENCODER
-from recommender.engine.utils import load_last_module, NoSavedModuleError
-from recommender.errors import MissingComponentError
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.models import Service
 
 
 class Services2Weights:
@@ -18,14 +16,11 @@ class Services2Weights:
     full weight matrix (of shape [K, SE] as returned by actor. It works on batches.
     It should be used when creating a dataset for RL agent"""
 
-    def __init__(self, service_embedder=None):
-        self.service_embedder = service_embedder
-
-        self._load_components()
-
-        self.itemspace, self.index_id_map = create_itemspace(self.service_embedder)
+    def __init__(self, service_embedder: Embedder):
+        all_services = list(Service.objects.order_by("id"))
+        self.itemspace, self.index_id_map = service_embedder(all_services)
         self.itemspace_inverse = self.itemspace.pinverse().T
-        self.itemspace_size = self.itemspace.shape[0]
+        self.I = self.itemspace.shape[0]
 
     def __call__(self, recommended_id_batch: List[List[int]]) -> torch.Tensor:
         """
@@ -42,7 +37,7 @@ class Services2Weights:
                 self.index_id_map, recommended_ids
             )
             K = len(recommended_indices)
-            scoring_matrix = torch.rand(K, self.itemspace_size)
+            scoring_matrix = torch.rand(K, self.I)
 
             for k, chosen_index in enumerate(recommended_indices):
                 scoring_matrix[k][chosen_index] = 1.0
@@ -53,13 +48,3 @@ class Services2Weights:
         decoded_weights_batch = torch.stack(decoded_weights_batch, dim=0)
 
         return decoded_weights_batch
-
-    def _load_components(self):
-        try:
-            self.service_embedder = self.service_embedder or create_embedder(
-                load_last_module(SERVICES_AUTOENCODER)
-            )
-        except NoSavedModuleError as no_saved_module:
-            raise MissingComponentError from no_saved_module
-
-        self.service_embedder.eval()

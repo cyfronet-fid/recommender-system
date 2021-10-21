@@ -8,7 +8,7 @@ import torch
 from mongoengine import QuerySet
 from tqdm.auto import tqdm
 
-from recommender.engine.agents.rl_agent.utils import dense_tensors_exist
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.errors import (
     DifferentTypeObjectsInCollectionError,
     MissingDenseTensorError,
@@ -50,7 +50,7 @@ class Normalizer:
         if not all(isinstance(obj, objects[0].__class__) for obj in objects):
             raise DifferentTypeObjectsInCollectionError
 
-        if not dense_tensors_exist(objects):
+        if not Embedder.dense_tensors_exist(objects):
             raise MissingDenseTensorError
 
         dense_tensors = [obj.dense_tensor for obj in objects]

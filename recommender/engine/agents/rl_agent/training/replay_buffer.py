@@ -4,7 +4,7 @@
 """Replay Buffer implementation"""
 import random
 from collections import deque
-from typing import Optional, Union
+from typing import Union
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
@@ -21,6 +21,7 @@ from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (
     NEXT_STATE,
     MASK,
 )
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 
 DONE = "done"
 
@@ -32,12 +33,13 @@ class ReplayBuffer:
         self,
         batch_size: int,
         max_size: Union[int, float],
-        state_encoder: Optional[StateEncoder] = None,
-        reward_encoder: Optional[RewardEncoder] = None,
+        user_embedder: Embedder,
+        service_embedder: Embedder,
     ) -> None:
-        self.state_encoder = state_encoder
-        self.reward_encoder = reward_encoder
-        self._load_components()
+        self.state_encoder = StateEncoder(
+            user_embedder=user_embedder, service_embedder=service_embedder
+        )
+        self.reward_encoder = RewardEncoder()
 
         self.batch_size = batch_size
         self._max_size = int(max_size)
@@ -144,7 +146,3 @@ class ReplayBuffer:
         if self.buffer:
             return self.buffer[REWARD].shape[0]
         return 0
-
-    def _load_components(self):
-        self.state_encoder = self.state_encoder or StateEncoder()
-        self.reward_encoder = self.reward_encoder or RewardEncoder()

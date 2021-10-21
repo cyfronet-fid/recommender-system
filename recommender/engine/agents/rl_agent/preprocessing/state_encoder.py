@@ -3,7 +3,7 @@
 # pylint: disable=too-many-branches
 
 """Implementation of the State Encoder"""
-from typing import Tuple, Optional, List
+from typing import Tuple, List
 
 import torch
 from torch.nn.utils.rnn import pad_sequence
@@ -11,18 +11,8 @@ from torch.nn.utils.rnn import pad_sequence
 from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
     SearchDataEncoder,
 )
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.models import Service
-from recommender.errors import MissingComponentError
-from recommender.engine.agents.rl_agent.utils import (
-    use_service_embedder,
-    use_user_embedder,
-)
-from recommender.engine.models.autoencoders import (
-    USERS_AUTOENCODER,
-    SERVICES_AUTOENCODER,
-    create_embedder,
-)
-from recommender.engine.utils import load_last_module, NoSavedModuleError
 from recommender.models import State
 
 
@@ -31,15 +21,12 @@ class StateEncoder:
 
     def __init__(
         self,
-        user_embedder: Optional[torch.nn.Module] = None,
-        service_embedder: Optional[torch.nn.Module] = None,
-        search_data_encoder: SearchDataEncoder = None,
+        user_embedder: Embedder,
+        service_embedder: Embedder,
     ):
         self.user_embedder = user_embedder
         self.service_embedder = service_embedder
-        self.search_data_encoder = search_data_encoder
-
-        self._load_components()
+        self.search_data_encoder = SearchDataEncoder()
 
     def __call__(self, states: List[State]) -> Tuple[(torch.Tensor,) * 3]:
         """
@@ -83,7 +70,7 @@ class StateEncoder:
         services_histories = [state.services_history for state in states]
         search_data_list = [state.search_data for state in states]
         with torch.no_grad():
-            users_batch = use_user_embedder(users, self.user_embedder)
+            users_batch, _ = self.user_embedder(users)
             service_histories_batch = self._create_service_histories_batch(
                 services_histories
             )
@@ -92,22 +79,6 @@ class StateEncoder:
         encoded_states = users_batch, service_histories_batch, search_data_masks_batch
 
         return encoded_states
-
-    def _load_components(self):
-        try:
-            self.user_embedder = self.user_embedder or create_embedder(
-                load_last_module(USERS_AUTOENCODER)
-            )
-            self.service_embedder = self.service_embedder or create_embedder(
-                load_last_module(SERVICES_AUTOENCODER)
-            )
-        except NoSavedModuleError as no_saved_module:
-            raise MissingComponentError from no_saved_module
-
-        self.user_embedder.eval()
-        self.service_embedder.eval()
-
-        self.search_data_encoder = self.search_data_encoder or SearchDataEncoder()
 
     def _create_service_histories_batch(
         self, services_histories: List[List[Service]]
@@ -144,7 +115,7 @@ class StateEncoder:
                 start_end_indices.append(None)
 
         if services:
-            service_tensors, _ = use_service_embedder(services, self.service_embedder)
+            service_tensors, _ = self.service_embedder(services)
 
         sequences = []
         for state_idx in range(states_number):
@@ -156,7 +127,7 @@ class StateEncoder:
                 sequences.append(services_history_tensor)
             else:
                 N = 1
-                SE = self.service_embedder[-1].out_features
+                SE = self.service_embedder.dense_dim
                 services_history_tensor = torch.zeros((N, SE))
                 sequences.append(services_history_tensor)
 

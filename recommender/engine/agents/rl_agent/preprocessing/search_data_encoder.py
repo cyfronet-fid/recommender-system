@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, no-member, too-few-public-methods
+# pylint: disable=missing-module-docstring, no-member, too-few-public-methods, invalid-name
 from typing import List
 
 import torch
@@ -17,7 +17,7 @@ class SearchDataEncoder:
 
     def __init__(self):
         all_services = list(Service.objects.order_by("id"))
-        self.itemspace_size = len(all_services)
+        self.I = len(all_services)
         self.index_id_map = create_index_id_map(all_services)
 
         forbidden_services = retrieve_forbidden_services()
@@ -32,7 +32,7 @@ class SearchDataEncoder:
         assert len(users) == len(search_data)
         batch_size = len(users)
 
-        mask = torch.zeros(batch_size, self.itemspace_size)
+        mask = torch.zeros(batch_size, self.I)
 
         for i in range(batch_size):
             filtered_services = filter_services(search_data[i])

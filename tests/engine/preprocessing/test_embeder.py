@@ -6,7 +6,7 @@ import torch
 from recommender.engine.models.autoencoders import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.errors import MissingDenseTensorError, MissingOneHotTensorError
-from tests.factories.marketplace import ServiceFactory
+from tests.factories.marketplace import ServiceFactory, UserFactory
 
 
 @pytest.fixture
@@ -83,3 +83,20 @@ def test_embedder(mongo, services):
     dense_matrix = embedder.network(one_hot_matrix)
     assert valid_dense_matrix.shape == dense_matrix.shape
     assert torch.all(torch.isclose(valid_dense_matrix, dense_matrix)).item()
+
+
+def test_dense_tensors_exist(mongo):
+    UE = 32
+    users = UserFactory.create_batch(3)
+    assert Embedder.dense_tensors_exist(users) is False
+
+    for user in users:
+        user.dense_tensor = torch.rand(UE).tolist()
+        user.save()
+
+    assert Embedder.dense_tensors_exist(users) is True
+
+    users[1].dense_tensor = []
+    users[1].save()
+
+    assert Embedder.dense_tensors_exist(users) is False

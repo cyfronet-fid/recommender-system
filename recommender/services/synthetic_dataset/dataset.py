@@ -9,9 +9,7 @@ import torch
 from recommender.engine.agents.rl_agent.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
 )
-from recommender.engine.agents.rl_agent.utils import use_service_embedder
-from recommender.engine.models.autoencoders import create_embedder, SERVICES_AUTOENCODER
-from recommender.engine.utils import load_last_module
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.models import Service, State, SearchData, Sars, User
 from recommender.services.fts import retrieve_services_for_recommendation
 from recommender.services.synthetic_dataset.rewards import (
@@ -65,6 +63,7 @@ def _get_relevant_search_data(user, ordered_services, k):
 
 def generate_dataset(
     user_samples: int,
+    service_embedder: Embedder,
     K: int = 3,
     interactions_range: Tuple[int, int] = (3, 10),
     reward_generation_mode: RewardGeneration = RewardGeneration.COMPLEX,
@@ -110,10 +109,8 @@ def generate_dataset(
         user_samples, cluster_distributions=cluster_distributions
     )
 
-    service_embedded_tensors, index_id_map = use_service_embedder(
-        Service.objects.order_by("id"),
-        create_embedder(load_last_module(SERVICES_AUTOENCODER)),
-    )
+    all_services = Service.objects.order_by("id")
+    service_embedded_tensors, index_id_map = service_embedder(all_services)
 
     normalized_services = _normalize_embedded_services(service_embedded_tensors)
     transition_rewards_df = pd.read_csv(TRANSITION_REWARDS_CSV_PATH, index_col="source")

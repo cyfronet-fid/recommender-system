@@ -2,18 +2,12 @@
 
 """Critic Model implementation"""
 from itertools import chain
-from typing import Tuple, Optional
+from typing import Tuple
 
 import torch
 from torch.nn import Linear, ReLU, Sequential
 
-from recommender.errors import MissingComponentError, NoHistoryEmbedderForK
-from recommender.engine.utils import load_last_module, NoSavedModuleError
-from recommender.engine.agents.rl_agent.models.history_embedder import (
-    HistoryEmbedder,
-    MLP_HISTORY_EMBEDDER_V1,
-    MLP_HISTORY_EMBEDDER_V2,
-)
+from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
 
 
 class Critic(torch.nn.Module):
@@ -25,7 +19,7 @@ class Critic(torch.nn.Module):
         SE: int,
         UE: int,
         I: int,
-        history_embedder: Optional[HistoryEmbedder] = None,
+        history_embedder: HistoryEmbedder,
         layer_sizes: Tuple[int] = (256, 512, 256),
     ):
         super().__init__()
@@ -33,8 +27,6 @@ class Critic(torch.nn.Module):
         self.SE = SE
 
         self.history_embedder = history_embedder
-
-        self._load_models()
 
         layers = [Linear(UE + SE + I + K * SE, layer_sizes[0]), ReLU()]
         layers += list(
@@ -86,18 +78,3 @@ class Critic(torch.nn.Module):
         action_value = self.network(network_input)
 
         return action_value
-
-    def _load_models(self):
-        try:
-            if self.K == 3:
-                history_embedder_name = MLP_HISTORY_EMBEDDER_V1
-            elif self.K == 2:
-                history_embedder_name = MLP_HISTORY_EMBEDDER_V2
-            else:
-                raise NoHistoryEmbedderForK
-            self.history_embedder = self.history_embedder or load_last_module(
-                history_embedder_name
-            )
-
-        except NoSavedModuleError as no_saved_module:
-            raise MissingComponentError from no_saved_module

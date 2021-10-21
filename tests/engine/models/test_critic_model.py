@@ -6,21 +6,10 @@ from recommender.engine.agents.rl_agent.services2weights import Services2Weights
 from recommender.engine.agents.rl_agent.models.critic import Critic
 from recommender.engine.agents.rl_agent.models.history_embedder import (
     MLPHistoryEmbedder,
-    MLP_HISTORY_EMBEDDER_V1,
-    MLP_HISTORY_EMBEDDER_V2,
-)
-from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import (
-    SearchDataEncoder,
 )
 from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
-from recommender.engine.models.autoencoders import (
-    UserAutoEncoder,
-    create_embedder,
-    USERS_AUTOENCODER,
-    ServiceAutoEncoder,
-    SERVICES_AUTOENCODER,
-)
-from recommender.engine.utils import save_module
+from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.models import User
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,
@@ -48,31 +37,23 @@ def test_critic(mongo):
     I = len(Service.objects)
 
     # User Embedder
-    user_auto_encoder = UserAutoEncoder(features_dim=UOH, embedding_dim=UE)
-    user_embedder = create_embedder(user_auto_encoder)
-    save_module(module=user_auto_encoder, name=USERS_AUTOENCODER)
+    user_autoencoder = AutoEncoder(features_dim=UOH, embedding_dim=UE)
+    user_embedder = Embedder(user_autoencoder)
 
     # Service Embedder
-    service_auto_encoder = ServiceAutoEncoder(features_dim=SOH, embedding_dim=SE)
-    service_embedder = create_embedder(service_auto_encoder)
-    save_module(module=service_auto_encoder, name=SERVICES_AUTOENCODER)
+    service_autoencoder = AutoEncoder(features_dim=SOH, embedding_dim=SE)
+    service_embedder = Embedder(service_autoencoder)
 
     # HistoryEmbedder v1
     history_embedder_v1 = MLPHistoryEmbedder(SE=SE)
-    save_module(module=history_embedder_v1, name=MLP_HISTORY_EMBEDDER_V1)
 
     # HistoryEmbedder v2
     history_embedder_v2 = MLPHistoryEmbedder(SE=SE)
-    save_module(module=history_embedder_v2, name=MLP_HISTORY_EMBEDDER_V2)
-
-    # Search data encoder
-    search_data_encoder = SearchDataEncoder()
 
     # State encoder
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
-        search_data_encoder=search_data_encoder,
     )
 
     # critic
@@ -80,16 +61,13 @@ def test_critic(mongo):
         K=3, SE=SE, UE=UE, I=I, history_embedder=history_embedder_v1
     )
 
-    critic_v1_from_db = Critic(K=3, SE=SE, UE=UE, I=I)
-
     critic_v2_in_ram = Critic(
         K=2, SE=SE, UE=UE, I=I, history_embedder=history_embedder_v2
     )
 
-    critic_v2_from_db = Critic(K=2, SE=SE, UE=UE, I=I)
-
-    critics_v1 = (critic_v1_in_ram, critic_v1_from_db)
-    critics_v2 = (critic_v2_in_ram, critic_v2_from_db)
+    # TODO: refactor
+    critics_v1 = (critic_v1_in_ram,)
+    critics_v2 = (critic_v2_in_ram,)
     critics = critics_v1 + critics_v2
 
     services2weights = Services2Weights(service_embedder=service_embedder)
