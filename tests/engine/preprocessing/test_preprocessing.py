@@ -4,27 +4,21 @@ import torch
 from pandas import DataFrame
 from sklearn.compose import ColumnTransformer
 
-from recommender.engine.preprocessing import (
+from recommender.engines.autoencoders.training.data_extraction_step import (
     USERS,
     SERVICES,
-    precalculate_tensors,
-    precalc_users_and_service_tensors,
 )
-from recommender.engine.preprocessing.preprocessing import (
-    NoPrecalculatedTensorsError,
-    user_and_services_to_tensors,
-    user_and_service_to_tensors,
-    InvalidObject,
-    df_to_tensor,
-    service_to_df,
-    object_to_df,
-    user_to_df,
-)
+from recommender.errors import InvalidObject
 
-from recommender.engine.preprocessing.transformers import (
+from recommender.engines.autoencoders.training.data_preparation_step import (
     create_services_transformer,
     create_transformer,
-    create_users_transformer,
+    service_to_df,
+    user_to_df,
+    object_to_df,
+    df_to_tensor,
+    precalculate_tensors,
+    precalc_users_and_service_tensors,
 )
 from recommender.models import User, Service
 from tests.factories.populate_database import populate_users_and_services
@@ -83,7 +77,7 @@ def test_precalculate_tensors(mongo):
         assert user.one_hot_tensor == []
 
     users_transformer = create_transformer(USERS)
-    fitted_users_transformer = precalculate_tensors(users, users_transformer)
+    tensors, fitted_users_transformer = precalculate_tensors(users, users_transformer)
 
     assert isinstance(fitted_users_transformer, ColumnTransformer)
 
@@ -98,7 +92,9 @@ def test_precalculate_tensors(mongo):
         assert service.one_hot_tensor == []
 
     services_transformer = create_transformer(SERVICES)
-    fitted_services_transformer = precalculate_tensors(services, services_transformer)
+    tensor, fitted_services_transformer = precalculate_tensors(
+        services, services_transformer
+    )
 
     assert isinstance(fitted_services_transformer, ColumnTransformer)
 

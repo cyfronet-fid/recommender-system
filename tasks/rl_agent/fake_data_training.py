@@ -25,12 +25,15 @@ from recommender.engine.models.autoencoders import (
 )
 from recommender.engine.utils import save_module
 from recommender.models import User, Service
-from recommender.engine.preprocessing import (
-    precalc_users_and_service_tensors,
-    load_last_transformer,
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    USERS,
     SERVICES,
 )
-from recommender.engine.preprocessing import USERS, save_transformer
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    save_transformer,
+    load_last_transformer,
+    precalc_users_and_service_tensors,
+)
 from tests.factories.populate_database import populate_users_and_services
 
 

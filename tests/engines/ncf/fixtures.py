@@ -7,9 +7,15 @@ from torch.optim import Adam
 from torch.utils.tensorboard import SummaryWriter
 
 from definitions import LOG_DIR
-from recommender.engine.models.autoencoders import AutoEncoder
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
-from recommender.engine.preprocessing.embedder import Embedder
+from recommender.engines.autoencoders.ml_components.autoencoder import (
+    AutoEncoder,
+    USER_AE_MODEL,
+    SERVICE_AE_MODEL,
+)
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.base.base_steps import (
     DataExtractionStep,
     DataValidationStep,
@@ -107,10 +113,6 @@ def pipeline_config():
 def mock_autoencoders_pipeline_exec(pipeline_config):
     precalc_users_and_service_tensors()
 
-    # TODO: import below constants from autoencoders/embedders:
-    USER = "user"
-    SERVICE = "service"
-
     USER_ONE_HOT_DIM = len(User.objects.first().one_hot_tensor)
 
     user_autoencoder_mock = AutoEncoder(USER_ONE_HOT_DIM, pipeline_config[UE])
@@ -121,8 +123,8 @@ def mock_autoencoders_pipeline_exec(pipeline_config):
     service_autoencoder_mock = AutoEncoder(SERVICE_ONE_HOT_DIM, pipeline_config[SE])
     service_embedder = Embedder(service_autoencoder_mock)
 
-    user_embedder.save(USER)
-    service_embedder.save(SERVICE)
+    user_embedder.save(USER_AE_MODEL)
+    service_embedder.save(SERVICE_AE_MODEL)
 
 
 @pytest.fixture
@@ -132,12 +134,8 @@ def mock_ncf_pipeline_exec(pipeline_config, mock_autoencoders_pipeline_exec):
     users_max_id = User.objects.order_by("-id").first().id
     services_max_id = Service.objects.order_by("-id").first().id
 
-    # TODO: import below constants from autoencoders/embedders:
-    USER = "user"
-    SERVICE = "service"
-
-    Embedder.load(USER)(User.objects, use_cache=False, save_cache=True)
-    Embedder.load(SERVICE)(Service.objects, use_cache=False, save_cache=True)
+    Embedder.load(USER_AE_MODEL)(User.objects, use_cache=False, save_cache=True)
+    Embedder.load(SERVICE_AE_MODEL)(Service.objects, use_cache=False, save_cache=True)
 
     model = NeuralCollaborativeFilteringModel(
         users_max_id=users_max_id,

@@ -9,12 +9,12 @@ import pandas as pd
 from inflection import underscore, pluralize
 
 from definitions import ROOT_DIR
-from recommender.engine.preprocessing import (
-    USERS,
+from recommender.engines.autoencoders.training.data_preparation_step import (
     create_transformer,
     precalculate_tensors,
     save_transformer,
 )
+from recommender.engines.autoencoders.training.data_extraction_step import USERS
 from recommender.models import User, Service, Category, ScientificDomain
 
 SYNTHETIC_USERS = "synthetic_users"
@@ -135,7 +135,7 @@ def synthesize_users(
         )
 
     transformer = create_transformer(USERS)
-    transformer = precalculate_tensors(users, transformer, save=False)
+    transformer = precalculate_tensors(users, transformer)
     save_transformer(transformer, SYNTHETIC_USERS)
 
     return users

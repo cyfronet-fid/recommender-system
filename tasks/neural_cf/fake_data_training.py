@@ -12,12 +12,14 @@ from recommender.engine.agents.pre_agent.datasets.all_datasets import create_dat
 from recommender.engine.agents.pre_agent.models import NEURAL_CF
 from recommender.engine.agents.pre_agent.training.common import pre_agent_training
 from recommender.engine.utils import save_module, load_last_module
-from recommender.engine.preprocessing import (
-    precalc_users_and_service_tensors,
-    load_last_transformer,
+from recommender.engines.autoencoders.training.data_extraction_step import (
     USERS,
     SERVICES,
+)
+from recommender.engines.autoencoders.training.data_preparation_step import (
     save_transformer,
+    load_last_transformer,
+    precalc_users_and_service_tensors,
 )
 from settings import TestingConfig, DevelopmentConfig
 from tests.factories.populate_database import populate_users_and_services

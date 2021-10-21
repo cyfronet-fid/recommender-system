@@ -22,7 +22,9 @@ from recommender.engine.models.autoencoders import (
 )
 from recommender.engine.utils import save_module
 from recommender.models import User
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
 from recommender.models import Service
 from tests.factories.search_data import SearchDataFactory
 from tests.factories.state import StateFactory

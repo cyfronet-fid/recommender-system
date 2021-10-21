@@ -1,22 +1,43 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
 # pylint: disable=redefined-builtin, no-member, not-callable
-
-"""Functions responsible for transforming Pandas dataframes
- to PyTorch tensors
-"""
+# pylint: disable=line-too-long, no-else-return, fixme
+"""Autoencoder Data Preparation Step."""
 import pickle
+from typing import Tuple, Optional
 
 import pandas as pd
 import torch
 from inflection import pluralize
+from sklearn.compose import make_column_transformer
+from sklearn.pipeline import make_pipeline
+from torch.utils.data import random_split
 from tqdm.auto import tqdm, trange
 
-from recommender.engine.preprocessing.common import USERS, SERVICES
-from recommender.engine.preprocessing.transformers import (
-    create_transformer,
-    save_transformer,
+from recommender.errors import (
+    NoSavedTransformerError,
+    NoPrecalculatedTensorsError,
+    InvalidObject,
 )
+from recommender.models import ScikitLearnTransformer
+
+from recommender.engines.autoencoders.ml_components.list_column_one_hot_encoder import (
+    ListColumnOneHotEncoder,
+)
+from recommender.engines.base.base_steps import DataPreparationStep
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    AUTOENCODERS,
+    USERS,
+    SERVICES,
+)
+from recommender.engines.constants import DEVICE
 from recommender.models import User, Service
+
+TRAIN = "training"
+VALID = "validation"
+TEST = "testing"
+TRAIN_DS_SIZE = "train_ds_size"
+VALID_DS_SIZE = "valid_ds_size"
+DATASETS = "datasets"
 
 SERVICE_COLUMNS = [
     "name",
@@ -34,8 +55,53 @@ SERVICE_COLUMNS = [
     "trls",
     "life_cycle_statuses",
 ]
-
 USER_COLUMNS = ["scientific_domains", "categories"]
+
+
+def create_users_transformer():
+    """Creates users transformer"""
+
+    transformer = make_column_transformer(
+        (make_pipeline(ListColumnOneHotEncoder()), ["scientific_domains", "categories"])
+    )
+
+    return transformer
+
+
+def create_services_transformer():
+    """Creates services transformer"""
+
+    transformer = make_column_transformer(
+        (
+            make_pipeline(ListColumnOneHotEncoder()),
+            [
+                "countries",
+                "categories",
+                "providers",
+                "resource_organisation",
+                "scientific_domains",
+                "platforms",
+                "target_users",
+                "access_modes",
+                "access_types",
+                "trls",
+                "life_cycle_statuses",
+            ],
+        )
+    )
+
+    return transformer
+
+
+def create_transformer(name):
+    """Creates new transformer of given name."""
+
+    if name == USERS:
+        return create_users_transformer()
+    elif name == SERVICES:
+        return create_services_transformer()
+
+    raise ValueError
 
 
 def service_to_df(service, save_df=False):
@@ -103,6 +169,7 @@ def user_to_df(user, save_df=False):
 
 
 def object_to_df(object, save_df=False):
+    """Transform object into Pandas dataframe"""
     collection_name = pluralize(object.__class__.__name__.lower())
 
     if collection_name == USERS:
@@ -130,7 +197,32 @@ def df_to_tensor(df, transformer, fit=False):
     return tensor, transformer
 
 
-def precalculate_tensors(objects, transformer, fit=True, save=True):
+def save_transformer(  # TODO Refactor saving and loading transformers tests
+    transformer, name: Optional[str] = None, description: Optional[str] = None
+):
+    """It saves transformer to database using pickle"""
+
+    ScikitLearnTransformer(
+        name=name, description=description, binary_transformer=pickle.dumps(transformer)
+    ).save()
+
+
+def load_last_transformer(name):  # TODO Refactor saving and loading transformers tests
+    """It loads transformer from database and unpickles it"""
+
+    last_transformer_model = (
+        ScikitLearnTransformer.objects(name=name).order_by("-id").first()
+    )
+
+    if last_transformer_model is None:
+        raise NoSavedTransformerError(f"No saved transformer with name {name}!")
+
+    transformer = pickle.loads(last_transformer_model.binary_transformer)
+
+    return transformer
+
+
+def precalculate_tensors(objects, transformer, fit=True):
     """Precalculate tensors for MongoEngine models"""
 
     objects = list(objects)
@@ -153,22 +245,33 @@ def precalculate_tensors(objects, transformer, fit=True, save=True):
         objects[i].one_hot_tensor = tensors[i].tolist()
         objects[i].save()
 
-    if fit and save:  # fit here for backwards compatibility
-        save_transformer(transformer, collection_name)
-
-    return transformer
+    return tensors, transformer
 
 
+# TODO Refactor precalc_users_and_service_tensors and data_prep_precalc_users_and_service_tensors
 def precalc_users_and_service_tensors():
     for model_class in (User, Service):
         name = pluralize(model_class.__name__).lower()
         t = create_transformer(name)
-        t = precalculate_tensors(model_class.objects, t)
-        save_transformer(t, name)
+        _, transformer = precalculate_tensors(model_class.objects, t)
+        save_transformer(transformer, name)
 
 
-class NoPrecalculatedTensorsError(Exception):
-    pass
+def data_prep_precalc_users_and_service_tensors(collections: dict):
+    """Precalculate users and services tensors"""
+    tensors = {USERS: {}, SERVICES: {}}
+
+    for name, data in collections.items():
+        t = create_transformer(name)
+        tensor, _ = precalculate_tensors(data, t)
+        if name == USERS:
+            tensors[USERS] = tensor
+        elif name == SERVICES:
+            tensors[SERVICES] = tensor
+        else:
+            raise ValueError
+
+    return tensors
 
 
 def user_and_service_to_tensors(user, service):
@@ -229,6 +332,57 @@ def user_and_services_to_tensors(user, services):
     return users_ids, users_tensor, services_ids, services_tensor
 
 
-class InvalidObject(Exception):
-    def message(self):  # pragma: no cover
-        return "Invalid object (should be 'User' or 'Service' instance)"
+def split_autoencoder_datasets(
+    collection,
+    train_ds_size=0.6,
+    valid_ds_size=0.2,
+    device: torch.device = torch.device("cpu"),
+):
+    """Split users/services autoencoder dataset into train/valid/test datasets"""
+
+    ds_tensor = collection.to(device)
+    dataset = torch.utils.data.TensorDataset(ds_tensor)
+
+    ds_size = len(dataset)
+    train_ds_size = int(train_ds_size * ds_size)
+    valid_ds_size = int(valid_ds_size * ds_size)
+    test_ds_size = int(ds_size - (train_ds_size + valid_ds_size))
+
+    train_ds, valid_ds, test_ds = random_split(
+        dataset, [train_ds_size, valid_ds_size, test_ds_size]
+    )
+
+    output = {TRAIN: train_ds, VALID: valid_ds, TEST: test_ds}
+
+    return output
+
+
+class AEDataPreparationStep(DataPreparationStep):
+    """Autoencoder data preparation step"""
+
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
+        self.device = self.resolve_constant(DEVICE, torch.device("cpu"))
+        self.train_ds_size = self.resolve_constant(TRAIN_DS_SIZE, 0.6)
+        self.valid_ds_size = self.resolve_constant(VALID_DS_SIZE, 0.2)
+
+    def __call__(self, data: dict = None) -> Tuple[object, dict]:
+        all_datasets = {AUTOENCODERS: {}}
+        raw_data = data[AUTOENCODERS]
+
+        tensors = data_prep_precalc_users_and_service_tensors(raw_data)
+
+        for collection_name, dataset in tensors.items():
+            splitted_ds = split_autoencoder_datasets(
+                dataset,
+                train_ds_size=self.train_ds_size,
+                valid_ds_size=self.valid_ds_size,
+                device=self.device,
+            )
+
+            all_datasets[AUTOENCODERS][collection_name] = splitted_ds
+
+        details = {}
+        data = all_datasets
+
+        return data, details

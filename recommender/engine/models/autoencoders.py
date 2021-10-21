@@ -8,7 +8,10 @@ import torch
 from torch.nn import Module, Sequential, Linear, BatchNorm1d, ReLU
 from tqdm.auto import tqdm
 
-from recommender.engine.preprocessing import USERS, SERVICES
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    USERS,
+    SERVICES,
+)
 from recommender.engine.utils import load_last_module
 from recommender.models import User, Service
 

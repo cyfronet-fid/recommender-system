@@ -104,9 +104,14 @@ class NoSavedMLComponentError(RecommendationEngineError):
         return "No saved ML component"
 
 
-class InferenceTooSlowError(RecommendationEngineError):
+class NoUsersOrServices(RecommendationEngineError):
     def message(self):
-        return "Inference time of the trained model is too long"
+        return "There are no Users or Services"
+
+
+class NoCategoriesScientificDomains(RecommendationEngineError):
+    def message(self):
+        return "Users or Services do not have any categories and scientific domains"
 
 
 class PerformanceTooLowError(RecommendationEngineError):
@@ -115,3 +120,21 @@ class PerformanceTooLowError(RecommendationEngineError):
             "Inference performance of the trained model is too low"
             " regarding adopted metric"
         )
+
+
+class InferenceTooSlowError(RecommendationEngineError):
+    def message(self):
+        return "Inference time of the trained model is too long"
+
+
+class NoPrecalculatedTensorsError(Exception):
+    pass
+
+
+class InvalidObject(Exception):
+    def message(self):  # pragma: no cover
+        return "Invalid object (should be 'User' or 'Service' instance)"
+
+
+class NoSavedTransformerError(Exception):
+    pass

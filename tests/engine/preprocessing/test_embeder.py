@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from recommender.engine.models.autoencoders import AutoEncoder
-from recommender.engine.preprocessing.embedder import Embedder
+from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.errors import MissingDenseTensorError, MissingOneHotTensorError
 from tests.factories.marketplace import ServiceFactory
 

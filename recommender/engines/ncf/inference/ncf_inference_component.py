@@ -7,7 +7,9 @@ from typing import List
 
 import torch
 
-from recommender.engine.preprocessing import user_and_services_to_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    user_and_services_to_tensors,
+)
 from recommender.engines.base.base_inference_component import BaseInferenceComponent
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
     NeuralCollaborativeFilteringModel,

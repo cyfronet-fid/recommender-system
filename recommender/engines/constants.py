@@ -3,3 +3,4 @@
 DEVICE = "device"
 WRITER = "writer"
 VERBOSE = "verbose"
+LABELS = "labels"

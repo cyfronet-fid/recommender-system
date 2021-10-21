@@ -14,7 +14,7 @@ from recommender.engine.agents.pre_agent.models.neural_colaborative_filtering im
     NEURAL_CF,
     NeuralColaborativeFilteringModel,
 )
-from recommender.engine.preprocessing import (
+from recommender.engines.autoencoders.training.data_preparation_step import (
     user_and_services_to_tensors,
 )
 from recommender.models import User

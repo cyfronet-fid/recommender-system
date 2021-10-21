@@ -18,7 +18,9 @@ from recommender.engine.models.autoencoders import (
     ServiceAutoEncoder,
     SERVICES_AUTOENCODER,
 )
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
 from recommender.engine.utils import save_module
 from recommender.models import User, Service
 from recommender.engine.agents.rl_agent.preprocessing.sars_encoder import (

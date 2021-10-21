@@ -6,12 +6,17 @@
 import torch
 from torch.utils.data import random_split
 
-from recommender.engine.preprocessing import USERS, SERVICES
-from recommender.engine.utils import TRAIN, VALID, TEST
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    TRAIN,
+    VALID,
+    TEST,
+)
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    AUTOENCODERS,
+    USERS,
+    SERVICES,
+)
 from recommender.models import User, Service
-
-
-AUTOENCODERS = "autoencoders"
 
 
 def get_autoencoder_dataset_name(collection_name, split):

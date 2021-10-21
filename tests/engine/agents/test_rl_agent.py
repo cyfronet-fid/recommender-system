@@ -24,7 +24,9 @@ from recommender.engine.agents.rl_agent.models.history_embedder import (
     MLP_HISTORY_EMBEDDER_V1,
     MLP_HISTORY_EMBEDDER_V2,
 )
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
 from recommender.models import User
 from tests.factories.populate_database import populate_users_and_services
 from recommender.utils import gen_json_dict

@@ -40,7 +40,6 @@ class Embedder(Persistent):
         save_cache=True,
     ) -> (torch.Tensor, pd.DataFrame):
         """Embedd objects one hot tensors into dense tensors.
-
         Args:
             objects: Iterable of objects that have one_hot_tensor and
              dense_tensor fields
@@ -48,11 +47,9 @@ class Embedder(Persistent):
              returned in a batch
             save_cache: Flag deciding whether to save dense tensors into
              objects.
-
         Returns:
             dense_tensors_batch: Batch of objects' dense tensors.
             index_id_map: Pandas Dataframe with index to id mapping.
-
         """
 
         objects = list(objects)

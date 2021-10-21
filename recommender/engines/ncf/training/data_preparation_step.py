@@ -9,10 +9,14 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from recommender.engine.preprocessing.embedder import (
+from recommender.engines.autoencoders.ml_components.embedder import (
     Embedder,
-)  # TODO: import embedder from proper module
-from recommender.engine.preprocessing.normalizer import Normalizer
+)
+from recommender.engines.autoencoders.ml_components.autoencoder import (
+    USER_AE_MODEL,
+    SERVICE_AE_MODEL,
+)
+from recommender.engines.autoencoders.ml_components.normalizer import Normalizer
 from recommender.engines.base.base_steps import DataPreparationStep
 from recommender.engines.constants import DEVICE
 from recommender.engines.ncf.training.data_extraction_step import (
@@ -55,11 +59,9 @@ def embed(data: List[Dict[str, Dict]]) -> List[Dict[str, Dict]]:
         data: reloaded raw_data (with new tensors inside objects).
 
     """
-    user_embedder = Embedder.load(version="user")  # TODO: use constant from Embedders
+    user_embedder = Embedder.load(version=USER_AE_MODEL)
     user_embedder(User.objects, use_cache=False, save_cache=True)
-    services_embedder = Embedder.load(
-        version="service"
-    )  # TODO: use constant from Embedders
+    services_embedder = Embedder.load(version=SERVICE_AE_MODEL)
     services_embedder(Service.objects, use_cache=False, save_cache=True)
 
     for entry in data:

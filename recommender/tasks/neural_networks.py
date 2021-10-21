@@ -12,7 +12,9 @@ from recommender.engine.agents.rl_agent.rl_agent import RL_AGENT
 from recommender.engine.agents.rl_agent.training.common import rl_agent_training
 from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
 from recommender.engine.agents.pre_agent.training.common import pre_agent_training
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
 from recommender.extensions import celery
 
 
