@@ -9,7 +9,7 @@ from mongoengine import (
     EmbeddedDocumentField,
 )
 
-from recommender.models.step_metadata import StepMetadata
+from recommender.models.step_metadata import StepMetadata, Status
 
 
 class PipelineMetadata(Document):
@@ -19,4 +19,6 @@ class PipelineMetadata(Document):
     steps = ListField(EmbeddedDocumentField(StepMetadata))
 
     def status(self):
-        pass
+        if all(step.status == Status.COMPLETED for step in self.steps):
+            return Status.COMPLETED
+        return Status.NOT_COMPLETED
