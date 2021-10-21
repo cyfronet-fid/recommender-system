@@ -30,20 +30,20 @@ class DataExtractionStep(BaseStep, ABC):
 
 
 class DataValidationStep(BaseStep, ABC):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
         self.config = self.pipeline_config[DataValidationStep.__name__]
 
 
 class DataPreparationStep(BaseStep, ABC):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
         self.config = self.pipeline_config[DataPreparationStep.__name__]
 
 
-class ModelTrainingStep(BaseStep, ABC):
-    def __init__(self, config):
-        super().__init__(config)
+class ModelTrainingStep(BaseStep):
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
         self.config = self.pipeline_config[ModelTrainingStep.__name__]
 
     @abstractmethod
@@ -52,12 +52,12 @@ class ModelTrainingStep(BaseStep, ABC):
 
 
 class ModelEvaluationStep(BaseStep, ABC):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
         self.config = self.pipeline_config[ModelEvaluationStep.__name__]
 
 
 class ModelValidationStep(BaseStep, ABC):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, pipeline_config):
+        super().__init__(pipeline_config)
         self.config = self.pipeline_config[ModelValidationStep.__name__]

@@ -7,14 +7,14 @@ import torch
 from torch import nn
 from torch.nn import BatchNorm1d
 
-
-from recommender.engine.agents.rl_agent.models.history_embedder import HistoryEmbedder
+from recommender.engines.persistent_mixin import Persistent
+from recommender.engines.rl.ml_components.history_embedder import HistoryEmbedder
 
 ACTOR_V1 = "actor_v1"
 ACTOR_V2 = "actor_v2"
 
 
-class Actor(nn.Module):
+class Actor(nn.Module, Persistent):
     """Actor neural network representing a deterministic policy used by RLAgent"""
 
     def __init__(

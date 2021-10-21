@@ -8,11 +8,6 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-LSTM_HISTORY_EMBEDDER_V1 = "lstm history embedder v1"
-LSTM_HISTORY_EMBEDDER_V2 = "lstm history embedder v2"
-MLP_HISTORY_EMBEDDER_V1 = "mlp history embedder v1"
-MLP_HISTORY_EMBEDDER_V2 = "mlp history embedder v2"
-
 
 class HistoryEmbedder(torch.nn.Module, ABC):
     """History Embedder base class"""

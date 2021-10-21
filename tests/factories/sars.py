@@ -5,6 +5,7 @@ from factory.mongoengine import MongoEngineFactory
 from factory.random import reseed_random, random
 from faker import Factory as FakerFactory
 
+from recommender.engines.rl.ml_components.reward_encoder import RewardEncoder
 from recommender.models import Sars
 from .marketplace import ServiceFactory
 from .state import StateFactory
@@ -23,7 +24,7 @@ class SarsFactory(MongoEngineFactory):
     @lazy_attribute
     def reward(self):
         def _reward():
-            return "_".join(faker.words(nb=random.randint(2, 6)))
+            return random.choice(list(RewardEncoder.reward_mapping.keys()))
 
         def _rewards_list():
             return [_reward() for _ in range(random.randint(3, 10))]

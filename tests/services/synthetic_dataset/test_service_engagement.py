@@ -20,10 +20,10 @@ from tests.factories.marketplace.scientific_domain import ScientificDomainFactor
 def normalized_embedded_services():
     return torch.Tensor(
         [
-            [0.1253, 0.0696, 0.2228, -0.2785],  # id=2
-            [0.1114, -0.2089, 0.4178, 0.1393],  # id=4
-            [-0.0014, 0.0975, 0.2646, 0.1671],  # id=6
-            [0.0905, 0.0418, -0.2228, 0.0627],  # id=8
+            [0.1672, 0.1180, 0.5648],
+            [-0.4665, -0.2208, 0.0748],
+            [0.2713, -0.4302, -0.1070],
+            [0.4049, -0.8003, -0.4423],
         ]
     )
 
@@ -73,7 +73,7 @@ def test__distance_measure(normalized_embedded_services):
     cluster = normalized_embedded_services[1:]
     point = normalized_embedded_services[0]
     calculated_distance = _distance_metric(cluster, point)
-    desired_distance = 0.5779
+    desired_distance = 0.5272
     assert np.isclose(calculated_distance, desired_distance, atol=1e-4)
 
 
@@ -81,7 +81,7 @@ def test__compute_distance_score(services, normalized_embedded_services, index_i
     calculated_score = _compute_distance_score(
         services[:-1], services[-1], normalized_embedded_services, index_id_map
     )
-    desired_score = 0.4696
+    desired_score = 0.5143
     assert np.isclose(calculated_score, desired_score, atol=1e-4)
 
 
@@ -96,10 +96,10 @@ def test_approx_service_engagement(
 ):
     calculated_s6 = np.array(
         approx_service_engagement(
-            user, services[2], services[:2], normalized_embedded_services, index_id_map
+            user, services[0], services[1:], normalized_embedded_services, index_id_map
         )
     )
-    desired_s6 = 0.8171
+    desired_s6 = 0.7399
     assert np.isclose(calculated_s6, desired_s6, atol=1e-4)
 
     calculated_s8 = np.array(
@@ -111,5 +111,5 @@ def test_approx_service_engagement(
             index_id_map,
         )
     )
-    desired_s8 = 0.7111
+    desired_s8 = 0.7334
     assert np.isclose(calculated_s8, desired_s8, atol=1e-4)

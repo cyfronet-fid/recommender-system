@@ -6,13 +6,11 @@ from typing import Dict, Union, List
 
 import torch
 
-from recommender.engine.agents.rl_agent.services2weights import Services2Weights
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.rl.ml_components.reward_encoder import RewardEncoder
+from recommender.engines.rl.ml_components.services2weights import Services2Weights
+from recommender.engines.rl.ml_components.state_encoder import StateEncoder
 from recommender.models import Sars
-from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
-    RewardEncoder,
-)
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 
 STATE = "state"
 NEXT_STATE = "next_state"
@@ -26,10 +24,27 @@ REWARD = "reward"
 class SarsEncoder:
     """SARS Encoder"""
 
-    def __init__(self, user_embedder: Embedder, service_embedder: Embedder):
-        self.state_encoder = StateEncoder(user_embedder, service_embedder)
+    def __init__(
+        self,
+        user_embedder: Embedder,
+        service_embedder: Embedder,
+        use_cached_embeddings: bool = True,
+        save_cached_embeddings: bool = False,
+    ):
+        self.use_cached_embeddings = use_cached_embeddings
+        self.save_cached_embeddings = save_cached_embeddings
+        self.state_encoder = StateEncoder(
+            user_embedder,
+            service_embedder,
+            use_cached_embeddings=self.use_cached_embeddings,
+            save_cached_embeddings=self.save_cached_embeddings,
+        )
         self.reward_encoder = RewardEncoder()
-        self.services2weights = Services2Weights(service_embedder)
+        self.services2weights = Services2Weights(
+            service_embedder,
+            use_cached_embeddings=self.use_cached_embeddings,
+            save_cached_embeddings=self.save_cached_embeddings,
+        )
 
     def __call__(
         self, SARSes: List[Sars]

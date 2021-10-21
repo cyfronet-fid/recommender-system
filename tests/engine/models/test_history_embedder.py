@@ -2,7 +2,7 @@
 
 import torch
 
-from recommender.engine.agents.rl_agent.models.history_embedder import (
+from recommender.engines.rl.ml_components.history_embedder import (
     LSTMHistoryEmbedder,
     MLPHistoryEmbedder,
 )

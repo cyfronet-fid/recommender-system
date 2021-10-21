@@ -3,3 +3,4 @@
  """
 
 PANEL_ID_TO_K = {"v1": 3, "v2": 2}
+K_TO_PANEL_ID = {v: k for k, v in PANEL_ID_TO_K.items()}

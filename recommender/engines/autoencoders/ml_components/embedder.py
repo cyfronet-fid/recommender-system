@@ -1,4 +1,4 @@
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods, fixme
 
 """Embedder"""
 
@@ -10,7 +10,7 @@ import torch
 from mongoengine import QuerySet
 from tqdm.auto import tqdm
 
-from recommender.engine.agents.rl_agent.utils import (
+from recommender.engines.rl.utils import (
     create_index_id_map,
 )
 from recommender.engine.models.autoencoders import AutoEncoder
@@ -25,7 +25,7 @@ class Embedder(Persistent):
     def __init__(self, autoencoder: AutoEncoder):
         self.disable_tqdm = True
         self.network = deepcopy(autoencoder.encoder)
-        # self.network.eval()
+        # self.network.eval() # TODO: find out why this breaks the embedder test
         self.one_hot_dim = self.network[0].in_features
         self.dense_dim = self.network[-1].out_features
 
@@ -35,10 +35,11 @@ class Embedder(Persistent):
     def __call__(
         self,
         objects: Union[Iterable[Union[User, Service]], QuerySet],
-        use_cache=False,
-        save_cache=False,
+        use_cache: bool = True,
+        save_cache: bool = False,
     ) -> (torch.Tensor, pd.DataFrame):
-        """Embedd objects one hot tensors into dense tensors.
+        """Embed objects one hot tensors into dense tensors.
+
         Args:
             objects: Iterable of objects that have one_hot_tensor and
              dense_tensor fields
@@ -50,7 +51,6 @@ class Embedder(Persistent):
             dense_tensors_batch: Batch of objects' dense tensors.
             index_id_map: Pandas Dataframe with index to id mapping.
         """
-
         objects = list(objects)
 
         index_id_map = create_index_id_map(objects)

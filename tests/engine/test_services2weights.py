@@ -3,10 +3,10 @@ import pandas as pd
 import pytest
 import torch
 
-from recommender.engine.agents.rl_agent.services2weights import Services2Weights
-from recommender.engine.agents.rl_agent.service_selector import ServiceSelector
 from recommender.engine.models.autoencoders import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.rl.ml_components.service_selector import ServiceSelector
+from recommender.engines.rl.ml_components.services2weights import Services2Weights
 from tests.factories.marketplace import ServiceFactory
 
 

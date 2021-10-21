@@ -7,8 +7,8 @@ from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,
 )
+from recommender.engines.rl.ml_components.state_encoder import StateEncoder
 from recommender.models import User, Service
-from recommender.engine.agents.rl_agent.preprocessing.state_encoder import StateEncoder
 
 from tests.factories.marketplace import ServiceFactory
 from tests.factories.search_data import SearchDataFactory
@@ -59,6 +59,7 @@ def test_state_encoder(mongo):
     state_encoder = StateEncoder(
         user_embedder=user_embedder,
         service_embedder=service_embedder,
+        use_cached_embeddings=False,
     )
 
     encoded_state = state_encoder(states)

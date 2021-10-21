@@ -1,22 +1,32 @@
 # pylint: disable-all
-
 import torch
+import pytest
 
-from recommender.engine.agents.rl_agent.preprocessing.reward_encoder import (
+from recommender.engines.rl.ml_components.reward_encoder import (
     RewardEncoder,
 )
-from tests.factories.sars import SarsFactory
 
 
-def test_reward_encoder_proper_shape(mongo):
-    B = 3
-    SARSes_K_2 = SarsFactory.create_batch(B, K_2=True)
-    SARSes_K_3 = SarsFactory.create_batch(B, K_3=True)
+@pytest.fixture
+def proper_rewards():
+    raw_rewards = [
+        [
+            ["order", "interest"],
+            ["order", "mild_interest"],
+            ["simple_transition", "exit"],
+        ],
+        [
+            ["interest", "simple_transition"],
+            ["mild_interest", "exit", "simple_transition"],
+            ["exit"],
+        ],
+    ]
+    desired_output = torch.Tensor([0.8165, 0.4397])
+    return raw_rewards, desired_output
 
-    for SARSes in (SARSes_K_2, SARSes_K_3):
-        reward_encoder = RewardEncoder()
-        raw_rewards = [SARS.reward for SARS in SARSes]
-        rewards = reward_encoder(raw_rewards)
 
-        assert isinstance(rewards, torch.Tensor)
-        assert rewards.shape == torch.Size([B])
+def test_reward_encoder_proper_shape(proper_rewards):
+    raw_rewards, desired_output = proper_rewards
+    reward_encoder = RewardEncoder()
+    rewards = reward_encoder(raw_rewards)
+    assert torch.allclose(rewards, desired_output, atol=10e-4)
