@@ -8,7 +8,9 @@
 from mongoengine import connect
 
 from recommender.engine.agents.pre_agent.datasets.all_datasets import create_datasets
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
 from settings import DevelopmentConfig
 
 

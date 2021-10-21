@@ -3,9 +3,13 @@
 
 """Neural Collaborative Filtering Pipeline"""
 
-from recommender.engine.preprocessing.embedder import (
+from recommender.engines.autoencoders.ml_components.embedder import (
     Embedder,
-)  # TODO: import embedder from proper module
+)
+from recommender.engines.autoencoders.ml_components.autoencoder import (
+    USER_AE_MODEL,
+    SERVICE_AE_MODEL,
+)
 from recommender.engines.base.base_pipeline import BasePipeline
 from recommender.engines.ncf.training.data_extraction_step import (
     NCFDataExtractionStep,
@@ -34,9 +38,8 @@ class NCFPipeline(BasePipeline):
         super().__init__(pipeline_config)
 
     def _check_dependencies(self):
-        # TODO: replace below strings with constants from autoencoders:
-        Embedder.load(version="user")
-        Embedder.load(version="service")
+        Embedder.load(version=USER_AE_MODEL)
+        Embedder.load(version=SERVICE_AE_MODEL)
 
     def _create_data_extraction_step(self) -> NCFDataExtractionStep:
         return NCFDataExtractionStep(self.pipeline_config)

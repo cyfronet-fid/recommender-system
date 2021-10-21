@@ -30,7 +30,10 @@ from recommender.engine.training.autoencoders import (
 )
 from recommender.models import Service, User
 from recommender.engine.utils import save_module, load_last_dataset, TRAIN, VALID, TEST
-from recommender.engine.preprocessing import USERS, SERVICES
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    USERS,
+    SERVICES,
+)
 from settings import get_device
 
 

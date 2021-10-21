@@ -14,7 +14,11 @@ from tqdm.auto import tqdm
 from recommender.engine.utils import TRAIN, VALID, TEST
 from recommender.engine.agents.pre_agent.models import NEURAL_CF
 from recommender.engine.datasets.tensor_dict_dataset import TensorDictDataset
-from recommender.engine.preprocessing import USERS, SERVICES, LABELS
+from recommender.engines.constants import LABELS
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    USERS,
+    SERVICES,
+)
 from recommender.models import Service, User
 
 USERS_IDS = "users_ids"

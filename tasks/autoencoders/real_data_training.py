@@ -9,8 +9,12 @@ from mongoengine import connect, disconnect
 from definitions import LOG_DIR
 from recommender.engine.datasets.autoencoders import (
     get_autoencoder_dataset_name,
-    AUTOENCODERS,
     create_autoencoder_datasets,
+)
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    AUTOENCODERS,
+    USERS,
+    SERVICES,
 )
 from recommender.engine.models.autoencoders import (
     create_autoencoder_model,
@@ -18,9 +22,7 @@ from recommender.engine.models.autoencoders import (
     SERVICES_AUTOENCODER,
     precalc_embedded_tensors,
 )
-from recommender.engine.preprocessing import (
-    USERS,
-    SERVICES,
+from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,
 )
 from recommender.engine.training.autoencoders import (

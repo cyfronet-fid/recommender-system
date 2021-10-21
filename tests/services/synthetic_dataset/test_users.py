@@ -152,7 +152,6 @@ def test__synthesize_user_with_real_users_in_db(
 def test_synthesize_users(mongo):
     synthesize_users(100)
     assert len(User.objects) == 100
-
     assert User.objects.first().dataframe
     assert len(ScikitLearnTransformer.objects) == 1
     assert ScikitLearnTransformer.objects.first().name == SYNTHETIC_USERS

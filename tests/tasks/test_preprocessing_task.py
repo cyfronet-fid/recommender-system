@@ -5,7 +5,7 @@ from torch.utils.data import Subset
 from recommender.engine.datasets.autoencoders import (
     get_autoencoder_dataset_name,
 )
-from recommender.engine.preprocessing import SERVICES
+from recommender.engines.autoencoders.training.data_extraction_step import SERVICES
 from recommender.engine.utils import (
     NoSavedDatasetError,
     load_last_dataset,

@@ -8,13 +8,16 @@ import torch
 from recommender.engine.utils import save_dataset
 from recommender.engine.agents.pre_agent.models import NEURAL_CF
 from recommender.engine.datasets.autoencoders import (
-    AUTOENCODERS,
     create_autoencoder_datasets,
+)
+from recommender.engines.autoencoders.training.data_extraction_step import (
+    AUTOENCODERS,
+    USERS,
+    SERVICES,
 )
 from recommender.engine.agents.pre_agent.datasets.neural_collaborative_filtering import (
     create_ncf_datasets,
 )
-from recommender.engine.preprocessing import USERS, SERVICES
 from settings import get_device
 
 

@@ -6,7 +6,9 @@ from recommender.engine.agents.rl_agent.preprocessing.search_data_encoder import
     SearchDataEncoder,
 )
 from recommender.models import User, Service
-from recommender.engine.preprocessing import precalc_users_and_service_tensors
+from recommender.engines.autoencoders.training.data_preparation_step import (
+    precalc_users_and_service_tensors,
+)
 from recommender.engine.models.autoencoders import (
     create_embedder,
     ServiceAutoEncoder,

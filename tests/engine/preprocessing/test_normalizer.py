@@ -2,7 +2,7 @@
 import pytest
 import torch
 
-from recommender.engine.preprocessing.normalizer import Normalizer
+from recommender.engines.autoencoders.ml_components.normalizer import Normalizer
 from recommender.errors import (
     DifferentTypeObjectsInCollectionError,
     MissingDenseTensorError,
