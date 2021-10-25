@@ -14,13 +14,12 @@ from recommender.engines.ncf.ml_components.neural_collaborative_filtering import
 )
 from recommender.engines.ncf.training.data_preparation_step import (
     USERS_IDS,
-    USERS,
     SERVICES_IDS,
-    SERVICES,
     DATASETS,
     TRAIN,
     TEST,
 )
+from recommender.engines.ncf.training.data_extraction_step import USERS, SERVICES
 from recommender.engines.ncf.ml_components.tensor_dict_dataset import (
     TensorDictDataset,
 )

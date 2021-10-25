@@ -29,6 +29,9 @@ MEAN = "mean"
 
 STATISTICS = "statistics"
 
+USERS = "users"
+SERVICES = "services"
+
 
 def _get_not_ordered_services(ordered_services: Union[Iterable, QuerySet]) -> List:
     """Given ordered services find not ordered services.
@@ -125,6 +128,8 @@ class NCFDataExtractionStep(DataExtractionStep):
             RAW_DATA: raw_data,
             USERS_MAX_ID: users_max_id,
             SERVICES_MAX_ID: services_max_id,
+            USERS: User.objects,
+            SERVICES: Service.objects,
         }
 
         return data, details

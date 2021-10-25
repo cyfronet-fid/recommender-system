@@ -3,10 +3,11 @@
 """Neural Collaborative Filtering Data Preparation Step."""
 
 from copy import deepcopy
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Union
 
 import numpy as np
 import torch
+from mongoengine import QuerySet
 from torch import Tensor
 
 from recommender.engine.preprocessing.embedder import (
@@ -20,6 +21,8 @@ from recommender.engines.ncf.training.data_extraction_step import (
     ORDERED_SERVICES,
     NOT_ORDERED_SERVICES,
     RAW_DATA,
+    USERS,
+    SERVICES,
 )
 from recommender.engines.ncf.ml_components.tensor_dict_dataset import (
     TensorDictDataset,
@@ -36,33 +39,34 @@ TRAIN = "train"
 VALID = "valid"
 TEST = "test"
 
-USERS = "users"
 LABELS = "labels"
-SERVICES = "services"
 USERS_IDS = "users_ids"
 SERVICES_IDS = "services_ids"
 DATASETS = "datasets"
 EXAMPLE_NUMBERS = "example_numbers"
 
 
-def embed(data: List[Dict[str, Dict]]) -> List[Dict[str, Dict]]:
+def embed(
+    data: Dict[str, Union[List, int, QuerySet]]
+) -> Dict[str, Union[list, int, QuerySet]]:
     """Embed users and services in provided data using Embedders.
 
     Args:
-        data: raw data produced in NCFDataExtractionStep.__call__.
+        data: data produced in NCFDataExtractionStep.__call__.
 
     Returns:
-        data: reloaded raw_data (with new tensors inside objects).
+        data: reloaded data (with new tensors inside objects).
 
     """
+
     user_embedder = Embedder.load(version="user")  # TODO: use constant from Embedders
-    user_embedder(User.objects, use_cache=False, save_cache=True)
+    user_embedder(data[USERS], use_cache=False, save_cache=True)
     services_embedder = Embedder.load(
         version="service"
     )  # TODO: use constant from Embedders
-    services_embedder(Service.objects, use_cache=False, save_cache=True)
+    services_embedder(data[SERVICES], use_cache=False, save_cache=True)
 
-    for entry in data:
+    for entry in data[RAW_DATA]:
         entry[USER].reload()
         for kind in (ORDERED_SERVICES, NOT_ORDERED_SERVICES):
             for service in entry[kind]:
@@ -71,27 +75,28 @@ def embed(data: List[Dict[str, Dict]]) -> List[Dict[str, Dict]]:
     return data
 
 
-def normalise(data: List[Dict[str, Dict]]) -> List[Dict[str, Dict]]:
+def normalise(data: Dict[str, Union[list, int, QuerySet]]) -> List[Dict[str, Dict]]:
     """Normalise users and services in provided data using universal Normalizer.
 
     Args:
-        data: raw data produced in NCFDataExtractionStep.__call__.
+        data: data produced in NCFDataExtractionStep.__call__.
 
     Returns:
         data: reloaded raw_data (with new tensors inside objects).
     """
+    raw_data = data[RAW_DATA]
 
     normalizer = Normalizer()
-    normalizer(User.objects, save_cache=True)
-    normalizer(Service.objects, save_cache=True)
+    normalizer(data[USERS], save_cache=True)
+    normalizer(data[SERVICES], save_cache=True)
 
-    for entry in data:
+    for entry in raw_data:
         entry[USER].reload()
         for kind in (ORDERED_SERVICES, NOT_ORDERED_SERVICES):
             for service in entry[kind]:
                 service.reload()
 
-    return data
+    return raw_data
 
 
 def _split_services(
@@ -235,8 +240,7 @@ class NCFDataPreparationStep(DataPreparationStep):
         -> tensorization into pytorch dataset.
         """
 
-        raw_data = data[RAW_DATA]
-        embedded_data = embed(raw_data)
+        embedded_data = embed(data)
         normalised_data = normalise(embedded_data)
         tensors_dict = tensorize(
             normalised_data, self.train_ds_size, self.valid_ds_size

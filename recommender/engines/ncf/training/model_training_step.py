@@ -24,12 +24,12 @@ from recommender.engines.ncf.ml_components.neural_collaborative_filtering import
 from recommender.engines.ncf.training.data_extraction_step import (
     USERS_MAX_ID,
     SERVICES_MAX_ID,
+    USERS,
+    SERVICES,
 )
 from recommender.engines.ncf.training.data_preparation_step import (
     DATASETS,
-    USERS,
     USERS_IDS,
-    SERVICES,
     SERVICES_IDS,
     LABELS,
     TRAIN,
