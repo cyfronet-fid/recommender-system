@@ -7,13 +7,16 @@ from recommender.engines.base.base_steps import DataValidationStep
 from recommender.errors import DataSetTooSmallError, ImbalancedDatasetError
 from recommender.models import Sars
 
+MIN_EMPTY_TO_NON_EMPTY_RATIO = "min_empty_to_non_empty_ratio"
+MIN_SARSES = "min_sarses"
+
 
 class RLDataValidationStep(DataValidationStep):
     def __init__(self, pipeline_config):
         super().__init__(pipeline_config)
-        self.minimum_sarses = self.resolve_constant("minimum_sarses", 500)
+        self.minimum_sarses = self.resolve_constant(MIN_SARSES, 500)
         self.min_empty_to_non_empty_ratio = self.resolve_constant(
-            "min_empty_to_non_empty_ratio", float("inf")
+            MIN_EMPTY_TO_NON_EMPTY_RATIO, float("inf")
         )
 
     def _check_for_minimum_sarses(self, sarses):

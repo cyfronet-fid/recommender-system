@@ -5,7 +5,7 @@
 import os
 
 from flask import Flask
-
+import click
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -13,7 +13,10 @@ from sentry_sdk.integrations.redis import RedisIntegration
 
 from recommender.extensions import db, celery
 from recommender.api import api
+from recommender.models import User
 from settings import config_by_name
+
+from .commands import seed_faker, train_rl_pipeline, execute_pipelines
 
 
 def create_app():
@@ -29,7 +32,23 @@ def create_app():
     api.init_app(app)
     init_celery(app)
 
+    _register_commands(app)
+
     return app
+
+
+def _register_commands(app):
+    @app.cli.command("seed_faker")
+    def seed_faker_command():
+        seed_faker()
+
+    @app.cli.command("train_rl_pipeline")
+    def rl_pipeline_command():
+        train_rl_pipeline()
+
+    @app.cli.command("execute_pipelines")
+    def execute_pipelines_command():
+        execute_pipelines()
 
 
 def _register_extensions(app):

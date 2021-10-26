@@ -2,12 +2,7 @@
 
 from recommender.engines.ncf.training.pipeline import NCFPipeline
 
-# TODO: you don't have to import fixtures with pytest, it's done in some other way
-from ..fixtures import generate_data, pipeline_config, mock_autoencoders_pipeline_exec
 
-
-def test_ncf_pipeline(
-    mongo, generate_data, pipeline_config, mock_autoencoders_pipeline_exec
-):
-    ncf_pipeline = NCFPipeline(pipeline_config)
+def test_ncf_pipeline(mongo, generate_data, ncf_pipeline_config, embedding_exec):
+    ncf_pipeline = NCFPipeline(ncf_pipeline_config)
     ncf_pipeline()

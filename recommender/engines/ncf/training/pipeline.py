@@ -5,10 +5,8 @@
 
 from recommender.engines.autoencoders.ml_components.embedder import (
     Embedder,
-)
-from recommender.engines.autoencoders.ml_components.autoencoder import (
-    USER_AE_MODEL,
-    SERVICE_AE_MODEL,
+    USER_EMBEDDER,
+    SERVICE_EMBEDDER,
 )
 from recommender.engines.base.base_pipeline import BasePipeline
 from recommender.engines.ncf.training.data_extraction_step import (
@@ -38,8 +36,8 @@ class NCFPipeline(BasePipeline):
         super().__init__(pipeline_config)
 
     def _check_dependencies(self):
-        Embedder.load(version=USER_AE_MODEL)
-        Embedder.load(version=SERVICE_AE_MODEL)
+        Embedder.load(version=USER_EMBEDDER)
+        Embedder.load(version=SERVICE_EMBEDDER)
 
     def _create_data_extraction_step(self) -> NCFDataExtractionStep:
         return NCFDataExtractionStep(self.pipeline_config)

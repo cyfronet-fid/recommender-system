@@ -6,8 +6,7 @@ from flask import request
 from flask_restx import Resource, Namespace
 
 from recommender.api.schemas.database_dump import database_dump
-from recommender.tasks.db import handle_db_dump
-from recommender.tasks.neural_networks import execute_training
+from recommender.tasks import update
 
 api = Namespace("update", "Endpoint used for updating recommender")
 
@@ -20,6 +19,5 @@ class Update(Resource):
     @api.response(204, "Update triggered successfully")
     def post(self):
         data = request.get_json()
-        chain = handle_db_dump.s(data) | execute_training.s()
-        chain()
+        update.delay(data)
         return None, 204

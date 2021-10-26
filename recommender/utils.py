@@ -15,7 +15,7 @@ from mongoengine import Document, connect, disconnect
 from torch.utils.tensorboard import SummaryWriter
 
 from definitions import LOG_DIR
-from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
+from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.models import User
 from recommender.models import Service
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION

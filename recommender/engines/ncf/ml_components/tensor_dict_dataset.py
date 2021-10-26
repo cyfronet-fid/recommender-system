@@ -5,9 +5,7 @@
 from torch.utils.data.dataset import Dataset
 
 
-class TensorDictDataset(
-    Dataset
-):  # TODO: delete duplication of this class in the engine/
+class TensorDictDataset(Dataset):
     """Dataset wrapping named tensors as a dict."""
 
     def __init__(self, tensors_dict):

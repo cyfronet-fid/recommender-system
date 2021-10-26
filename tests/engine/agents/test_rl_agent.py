@@ -1,5 +1,4 @@
-# # pylint: disable-all
-#
+## pylint: disable-all
 # import pytest
 #
 # from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
@@ -18,7 +17,7 @@
 #     USERS_AUTOENCODER,
 #     SERVICES_AUTOENCODER,
 # )
-# from recommender.engine.agents.pre_agent.training.common import create_embedder
+# from recommender.engine.agents.pre_agent.old_rl_training.common import create_embedder
 # from recommender.engine.agents.rl_agent.models.history_embedder import (
 #     MLPHistoryEmbedder,
 #     MLP_HISTORY_EMBEDDER_V1,

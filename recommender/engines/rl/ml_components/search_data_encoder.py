@@ -9,7 +9,9 @@ from recommender.engines.rl.utils import (
 )
 from recommender.models import SearchData, User, Service
 from recommender.services.fts import retrieve_forbidden_services, filter_services
-from recommender.services.services_history_generator import get_ordered_services
+from recommender.engines.rl.ml_components.services_history_generator import (
+    get_ordered_services,
+)
 
 
 class SearchDataEncoder:

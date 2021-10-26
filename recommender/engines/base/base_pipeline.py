@@ -15,6 +15,7 @@ from recommender.engines.base.base_steps import (
     ModelValidationStep,
     BaseStep,
 )
+from recommender.engines.constants import VERBOSE
 from recommender.models.pipeline_metadata import PipelineMetadata
 from recommender.models.step_metadata import StepMetadata, Status
 
@@ -33,6 +34,7 @@ class BasePipeline(ABC):
             ModelEvaluationStep.__name__: self._create_model_evaluation_step(),
             ModelValidationStep.__name__: self._create_model_validation_step(),
         }
+        self.verbose = self.pipeline_config.get(VERBOSE, True)
 
     def _create_metadata(self) -> PipelineMetadata:
         return PipelineMetadata(
@@ -44,6 +46,7 @@ class BasePipeline(ABC):
         """Raises MissingDependency if needed."""
 
     def __call__(self):
+        print(f"Started {self.__class__.__name__}...")
         self._check_dependencies()
 
         self._update_metadata("start_time", datetime.utcnow())
@@ -59,16 +62,25 @@ class BasePipeline(ABC):
 
         data = None
         for step_metadata, step in zip(self.metadata.steps, self.steps.values()):
+            print(f"Started {step.__class__.__name__}...")
             step_metadata.start_time = datetime.utcnow()
+            self._update_metadata("steps", self.metadata.steps)
             data, details = step(data)
             step_metadata.details = details
             step_metadata.end_time = datetime.utcnow()
             step_metadata.status = Status.COMPLETED
 
+            if self.verbose:
+                print(details)
+
             self._update_metadata("steps", self.metadata.steps)
+
+            print(f"Finished {step.__class__.__name__}!")
 
         self.steps[ModelTrainingStep.__name__].save()
         self._update_metadata("end_time", datetime.utcnow())
+
+        print(f"Finished {self.__class__.__name__}!")
 
     def _update_metadata(self, attr, value):
         setattr(self.metadata, attr, value)

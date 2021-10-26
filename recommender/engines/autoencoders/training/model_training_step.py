@@ -1,5 +1,5 @@
 # pylint: disable=too-many-arguments, too-many-instance-attributes, too-many-locals
-# pylint: disable=not-callable
+# pylint: disable=not-callable, too-many-branches
 """Autoencoder Model Training Step."""
 
 import time
@@ -13,11 +13,7 @@ from torch.nn import CosineEmbeddingLoss
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 
-from recommender.engines.autoencoders.ml_components.autoencoder import (
-    AutoEncoder,
-    USER_AE_MODEL,
-    SERVICE_AE_MODEL,
-)
+from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.constants import WRITER, VERBOSE, DEVICE
 from recommender.engines.base.base_steps import ModelTrainingStep
 from recommender.engines.autoencoders.training.data_preparation_step import TRAIN
@@ -26,7 +22,11 @@ from recommender.engines.autoencoders.training.data_extraction_step import (
     USERS,
     SERVICES,
 )
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.autoencoders.ml_components.embedder import (
+    Embedder,
+    SERVICE_EMBEDDER,
+    USER_EMBEDDER,
+)
 
 USER_BATCH_SIZE = "user_batch_size"
 SERVICE_BATCH_SIZE = "service_batch_size"
@@ -306,5 +306,5 @@ class AEModelTrainingStep(ModelTrainingStep):
 
     def save(self):
         """Save a model"""
-        self.trained_user_embedder.save(version=USER_AE_MODEL)
-        self.trained_service_embedder.save(version=SERVICE_AE_MODEL)
+        self.trained_user_embedder.save(version=USER_EMBEDDER)
+        self.trained_service_embedder.save(version=SERVICE_EMBEDDER)

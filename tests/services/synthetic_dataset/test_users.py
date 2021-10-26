@@ -3,7 +3,7 @@
 import pytest
 
 from recommender.models import Category, ScientificDomain, User, ScikitLearnTransformer
-from recommender.services.synthetic_dataset.users import (
+from recommender.engines.rl.ml_components.synthetic_dataset.users import (
     _filter_relevant,
     _sample_niche,
     _synthesize_user,
@@ -153,5 +153,3 @@ def test_synthesize_users(mongo):
     synthesize_users(100)
     assert len(User.objects) == 100
     assert User.objects.first().dataframe
-    assert len(ScikitLearnTransformer.objects) == 1
-    assert ScikitLearnTransformer.objects.first().name == SYNTHETIC_USERS

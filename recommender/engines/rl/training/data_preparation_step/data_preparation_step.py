@@ -5,54 +5,48 @@ from typing import Tuple
 
 from torch.utils.data import DataLoader
 
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
-from recommender.engines.autoencoders.ml_components.normalizer import Normalizer
+from recommender.engines.autoencoders.ml_components.embedder import (
+    Embedder,
+    USER_EMBEDDER,
+    SERVICE_EMBEDDER,
+)
 from recommender.engines.rl.ml_components.sars_encoder import SarsEncoder
 from recommender.engines.base.base_steps import DataPreparationStep
 from recommender.engines.rl.training.data_preparation_step.replay_buffer_v2 import (
     ReplayBufferV2,
 )
-from recommender.models import User, Service
+from recommender.engines.rl.training.model_training_step.model_training_step import (
+    HISTORY_LEN,
+)
+
+SARS_BATCH_SIZE = "sars_batch_size"
+SHUFFLE = "shuffle"
 
 
 class RLDataPreparationStep(DataPreparationStep):
     def __init__(self, pipeline_config):
         super().__init__(pipeline_config)
-        self.batch_size = self.resolve_constant("batch_size", 64)
-        self.shuffle = self.resolve_constant("shuffle", True)
-        self.user_embedder = Embedder.load(version="user")
-        self.service_embedder = Embedder.load(version="service")
+        self.batch_size = self.resolve_constant(SARS_BATCH_SIZE, 64)
+        self.shuffle = self.resolve_constant(SHUFFLE, True)
+        self.history_len = self.resolve_constant(HISTORY_LEN, 20)
+        self.user_embedder = Embedder.load(version=USER_EMBEDDER)
+        self.service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
         self.sars_encoder = SarsEncoder(
-            self.user_embedder,
-            self.service_embedder,
-            use_cached_embeddings=True,
-            save_cached_embeddings=False,
+            self.user_embedder, self.service_embedder, self.history_len
         )
 
-    def _cache_and_normalize(self, data):
-        # TODO: we should be doing this before the pipeline runs, same with NCF pipeline
-        self.user_embedder(User.objects, use_cache=False, save_cache=True)
-        self.service_embedder(Service.objects, use_cache=False, save_cache=True)
-        normalizer = Normalizer()
-        normalizer(User.objects, save_cache=True)
-        normalizer(Service.objects, save_cache=True)
-
-        for x in data:
-            x.reload()
-
-    def __call__(self, data=None) -> Tuple[DataLoader, dict]:
+    def __call__(self, data=None) -> Tuple[tuple, dict]:
         encoding_start = time.time()
-        self._cache_and_normalize(data)
-
-        encoded_sarses = self.sars_encoder(data)
+        sarses = data
+        encoded_sarses = self.sars_encoder(sarses)
         encoding_end = time.time()
 
         replay_buffer = ReplayBufferV2(encoded_sarses)
-        training_dl = DataLoader(
+        replay_buffer_dl = DataLoader(
             replay_buffer, batch_size=self.batch_size, shuffle=self.shuffle
         )
 
-        return training_dl, {
+        return (replay_buffer_dl, sarses), {
             "encoding_time": encoding_end - encoding_start,
-            "no_of_batches": len(training_dl),
+            "no_of_batches": len(replay_buffer_dl),
         }

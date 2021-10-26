@@ -40,11 +40,11 @@ tensorboard = "*"
 pytorch-nlp = "*"
 graphviz = "*"
 jupyterlab = "*"
-celery = {extras = [ "redis",], version = "*"}
 sentry-sdk = {extras = [ "flask",], version = "*"}
 pytest-xdist = "*"
 gym = "*"
 ray = {extras = ["default"], version = "*"}
+celery = {extras = ["redis"], version = "*"}
 
 [requires]
 python_version = "3.7"

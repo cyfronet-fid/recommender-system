@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, too-few-public-methods, no-member
+# pylint: disable=invalid-name, too-few-public-methods, no-member, too-many-arguments
 
 """Implementation of the SARS Encoder"""
 
@@ -30,6 +30,7 @@ class SarsEncoder:
         service_embedder: Embedder,
         use_cached_embeddings: bool = True,
         save_cached_embeddings: bool = False,
+        history_len: int = 20,
     ):
         self.use_cached_embeddings = use_cached_embeddings
         self.save_cached_embeddings = save_cached_embeddings
@@ -38,6 +39,7 @@ class SarsEncoder:
             service_embedder,
             use_cached_embeddings=self.use_cached_embeddings,
             save_cached_embeddings=self.save_cached_embeddings,
+            max_N=history_len,
         )
         self.reward_encoder = RewardEncoder()
         self.services2weights = Services2Weights(

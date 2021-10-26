@@ -3,7 +3,7 @@
 # pylint: disable=line-too-long, no-else-return, fixme
 """Autoencoder Data Preparation Step."""
 import pickle
-from typing import Tuple, Optional
+from typing import Tuple
 
 import pandas as pd
 import torch
@@ -14,11 +14,9 @@ from torch.utils.data import random_split
 from tqdm.auto import tqdm, trange
 
 from recommender.errors import (
-    NoSavedTransformerError,
     NoPrecalculatedTensorsError,
     InvalidObject,
 )
-from recommender.models import ScikitLearnTransformer
 
 from recommender.engines.autoencoders.ml_components.list_column_one_hot_encoder import (
     ListColumnOneHotEncoder,
@@ -197,32 +195,7 @@ def df_to_tensor(df, transformer, fit=False):
     return tensor, transformer
 
 
-def save_transformer(  # TODO Refactor saving and loading transformers tests
-    transformer, name: Optional[str] = None, description: Optional[str] = None
-):
-    """It saves transformer to database using pickle"""
-
-    ScikitLearnTransformer(
-        name=name, description=description, binary_transformer=pickle.dumps(transformer)
-    ).save()
-
-
-def load_last_transformer(name):  # TODO Refactor saving and loading transformers tests
-    """It loads transformer from database and unpickles it"""
-
-    last_transformer_model = (
-        ScikitLearnTransformer.objects(name=name).order_by("-id").first()
-    )
-
-    if last_transformer_model is None:
-        raise NoSavedTransformerError(f"No saved transformer with name {name}!")
-
-    transformer = pickle.loads(last_transformer_model.binary_transformer)
-
-    return transformer
-
-
-def precalculate_tensors(objects, transformer, fit=True):
+def precalculate_tensors(objects, transformer, fit=True, verbose=False):
     """Precalculate tensors for MongoEngine models"""
 
     objects = list(objects)
@@ -233,7 +206,9 @@ def precalculate_tensors(objects, transformer, fit=True):
     # calculate and save dfs
     objects_df_rows = []
     name = pluralize(objects[0].__class__.__name__).lower()
-    for object in tqdm(objects, desc=f"Calculating {name} dataframes..."):
+    for object in tqdm(
+        objects, desc=f"Calculating {name} dataframes...", disable=(not verbose)
+    ):
         object_df = object_to_df(object, save_df=True)
         objects_df_rows.append(object_df)
     objects_df = pd.concat(objects_df_rows, ignore_index=True)
@@ -241,7 +216,9 @@ def precalculate_tensors(objects, transformer, fit=True):
     # calculate and save tensors
     tensors, transformer = df_to_tensor(df=objects_df, transformer=transformer, fit=fit)
 
-    for i in trange(len(objects), desc=f"Saving {name} tensors..."):
+    for i in trange(
+        len(objects), desc=f"Saving {name} tensors...", disable=(not verbose)
+    ):
         objects[i].one_hot_tensor = tensors[i].tolist()
         objects[i].save()
 
@@ -253,8 +230,7 @@ def precalc_users_and_service_tensors():
     for model_class in (User, Service):
         name = pluralize(model_class.__name__).lower()
         t = create_transformer(name)
-        _, transformer = precalculate_tensors(model_class.objects, t)
-        save_transformer(transformer, name)
+        precalculate_tensors(model_class.objects, t)
 
 
 def data_prep_precalc_users_and_service_tensors(collections: dict):

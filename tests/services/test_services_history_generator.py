@@ -1,7 +1,7 @@
 # pylint: disable=missing-module-docstring, missing-function-docstring,
 # pylint: disable=too-many-locals, invalid-name, unused-argument
 
-from recommender.services.services_history_generator import (
+from recommender.engines.rl.ml_components.services_history_generator import (
     leads_to_order,
     generate_services_history,
     get_ordered_services,

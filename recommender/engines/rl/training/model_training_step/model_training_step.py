@@ -10,11 +10,23 @@ from time import time
 import numpy as np
 import torch
 
+from recommender.engines.autoencoders.training.model_training_step import (
+    SERVICE_EMBEDDING_DIM,
+    USER_EMBEDDING_DIM,
+)
 from recommender.engines.base.base_steps import ModelTrainingStep
+from recommender.engines.constants import DEVICE
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
 from recommender.engines.rl.ml_components.actor import Actor
 from recommender.engines.rl.ml_components.critic import Critic
 from recommender.engines.rl.ml_components.history_embedder import MLPHistoryEmbedder
+from recommender.engines.rl.ml_components.sars_encoder import (
+    STATE,
+    ACTION,
+    REWARD,
+    NEXT_STATE,
+)
+from recommender.engines.rl.training.data_extraction_step.data_extraction_step import K
 
 from recommender.models import Service
 
@@ -34,26 +46,46 @@ def log_time(to):
     return decorator_log_time
 
 
+HISTORY_LEN = "history_len"
+POLYAK = "polyak"
+GAMMA = "gamma"
+POLICY_DELAY = "policy_delay"
+TARGET_NOISE = "target_noise"
+NOISE_CLIP = "noise_clip"
+ACT_MAX = "act_max"
+ACT_MIN = "act_min"
+ACTOR_LAYER_SIZES = "actor_layer_size"
+ACTOR_OPTIMIZER = "actor_optimizer"
+ACTOR_OPTIMIZER_PARAMS = "actor_optimizer_params"
+CRITIC_LAYER_SIZES = "critic_layer_sizes"
+CRITIC_OPTIMIZER = "critic_optimizer"
+CRITIC_OPTIMIZER_PARAMS = "critic_optimizer_params"
+RL_EPOCHS = "rl_epochs"
+LEARNING_RATE = "lr"
+
+
 class RLModelTrainingStep(ModelTrainingStep):
     def __init__(self, pipeline_config):
         super().__init__(pipeline_config)
 
-        self.K = self.resolve_constant("K")
-        SE = self.resolve_constant("SE")
-        UE = self.resolve_constant("UE")
-        I = len(Service.objects)  # TODO: Consider not reaching to the databse for this
-        N = self.resolve_constant("N", 20)
-        self.device = self.resolve_constant("device", "cpu")
-        self.polyak = self.resolve_constant("polyak", 0.95)
-        self.gamma = self.resolve_constant("gamma", 1.0)
-        self.policy_delay = self.resolve_constant("policy_delay", 2)
+        self.K = self.resolve_constant(K)
+        self.SE = self.resolve_constant(SERVICE_EMBEDDING_DIM)
+        self.UE = self.resolve_constant(USER_EMBEDDING_DIM)
+        self.I = len(
+            Service.objects
+        )  # TODO: Consider not reaching to the database for this
+        self.N = self.resolve_constant(HISTORY_LEN, 20)
+        self.device = self.resolve_constant(DEVICE, "cpu")
+        self.polyak = self.resolve_constant(POLYAK, 0.95)
+        self.gamma = self.resolve_constant(GAMMA, 1.0)
+        self.policy_delay = self.resolve_constant(POLICY_DELAY, 2)
 
-        self.target_noise = self.resolve_constant("target_noise", 0.3)
-        self.noise_clip = self.resolve_constant("noise_clip", 0.5)
-        self.act_max = self.resolve_constant("act_max", 1.0)
-        self.act_min = self.resolve_constant("act_min", -1.0)
+        self.target_noise = self.resolve_constant(TARGET_NOISE, 0.3)
+        self.noise_clip = self.resolve_constant(NOISE_CLIP, 0.5)
+        self.act_max = self.resolve_constant(ACT_MAX, 1.0)
+        self.act_min = self.resolve_constant(ACT_MIN, -1.0)
 
-        self.epochs = self.resolve_constant("epochs", 100)
+        self.epochs = self.resolve_constant(RL_EPOCHS, 100)
 
         self.critics_mse_losses = []
         self.actor_train_durations = []
@@ -63,38 +95,42 @@ class RLModelTrainingStep(ModelTrainingStep):
         self.training_duration = None
 
         self.actor, self.actor_optimizer = self._init_actor(
-            self.K,
-            UE,
-            SE,
-            N,
-            I,
-            self.resolve_constant("actor_layer_sizes", (128, 256, 128)),
-            self.resolve_constant("actor_optimizer", torch.optim.Adam),
-            self.resolve_constant("actor_optimizer_params", {"lr": 1e-4}),
+            self.resolve_constant(ACTOR_LAYER_SIZES, (128, 256, 128)),
+            self.resolve_constant(ACTOR_OPTIMIZER, torch.optim.Adam),
+            self.resolve_constant(ACTOR_OPTIMIZER_PARAMS, {LEARNING_RATE: 1e-4}),
         )
         self.critics, self.critics_optimizer, self.critics_params = self._init_critics(
-            self.K,
-            UE,
-            SE,
-            N,
-            I,
-            self.resolve_constant("critic_layer_sizes", (128, 256, 128)),
-            self.resolve_constant("critic_optimizer", torch.optim.Adam),
-            self.resolve_constant("critic_optimizer_params", {"lr": 1e-4}),
+            self.resolve_constant(CRITIC_LAYER_SIZES, (128, 256, 128)),
+            self.resolve_constant(CRITIC_OPTIMIZER, torch.optim.Adam),
+            self.resolve_constant(CRITIC_OPTIMIZER_PARAMS, {LEARNING_RATE: 1e-4}),
         )
 
         self.target_actor, self.target_critics = self._init_target_networks()
 
-    def _init_actor(self, K, UE, SE, N, I, layer_sizes, optimizer, optimizer_params):
-        actor = Actor(K, SE, UE, I, MLPHistoryEmbedder(SE, N), layer_sizes)
+    def _init_actor(self, layer_sizes, optimizer, optimizer_params):
+        actor = Actor(
+            self.K,
+            self.SE,
+            self.UE,
+            self.I,
+            MLPHistoryEmbedder(self.SE, self.N),
+            layer_sizes,
+        )
         actor = actor.to(self.device)
         optimizer = optimizer(actor.parameters(), **optimizer_params)
 
         return actor, optimizer
 
-    def _init_critics(self, K, UE, SE, N, I, layer_sizes, optimizer, optimizer_params):
+    def _init_critics(self, layer_sizes, optimizer, optimizer_params):
         critics = [
-            Critic(K, SE, UE, I, MLPHistoryEmbedder(SE, N), layer_sizes)
+            Critic(
+                self.K,
+                self.SE,
+                self.UE,
+                self.I,
+                MLPHistoryEmbedder(self.SE, self.N),
+                layer_sizes,
+            )
             for _ in range(2)
         ]
 
@@ -118,9 +154,9 @@ class RLModelTrainingStep(ModelTrainingStep):
 
         return target_networks[0], target_networks[1:]
 
-    def __call__(self, data=None) -> Tuple[torch.nn.Module, dict]:
+    def __call__(self, data=None) -> Tuple[tuple, dict]:
         start_train = time()
-        replay_buffer = data
+        replay_buffer, sarses = data
 
         for _ in range(self.epochs):
             start_epoch = time()
@@ -135,14 +171,14 @@ class RLModelTrainingStep(ModelTrainingStep):
 
         end_train = time()
         self.training_duration = end_train - start_train
-        return self.actor, self._create_metadata()
+        return (self.actor, sarses), self._create_metadata()
 
     def _extract_batch_tensors(self, batch):
-        state = tuple(tensor.to(self.device) for tensor in batch["state"].values())
-        action = batch["action"].to(self.device)
-        reward = batch["reward"].to(self.device)
+        state = tuple(tensor.to(self.device) for tensor in batch[STATE].values())
+        action = batch[ACTION].to(self.device)
+        reward = batch[REWARD].to(self.device)
         next_state = tuple(
-            tensor.to(self.device) for tensor in batch["next_state"].values()
+            tensor.to(self.device) for tensor in batch[NEXT_STATE].values()
         )
         return state, action, reward, next_state
 

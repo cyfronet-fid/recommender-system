@@ -6,6 +6,6 @@ import pytest
     reason="Tested in `test_ncf_pipeline` with less granularity. Not a priority for now."
 )
 def test_model_training_step(
-    mongo, generate_data, mock_autoencoders_pipeline_exec, pipeline_config
+    mongo, generate_data, mock_autoencoders_pipeline_exec, ncf_pipeline_config
 ):
     pass
