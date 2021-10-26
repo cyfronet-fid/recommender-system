@@ -2,7 +2,7 @@
 
 import torch
 
-from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,

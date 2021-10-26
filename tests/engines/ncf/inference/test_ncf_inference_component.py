@@ -3,18 +3,16 @@
 import pytest
 from torch import Tensor
 
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.autoencoders.ml_components.embedder import (
+    Embedder,
+    USER_EMBEDDER,
+    SERVICE_EMBEDDER,
+)
 from recommender.engines.autoencoders.training.data_preparation_step import (
-    USERS,
-    SERVICES,
     create_users_transformer,
     precalculate_tensors,
     user_and_service_to_tensors,
     user_and_services_to_tensors,
-)
-from recommender.engines.autoencoders.ml_components.autoencoder import (
-    USER_AE_MODEL,
-    SERVICE_AE_MODEL,
 )
 from recommender.engines.ncf.inference.ncf_inference_component import (
     NCFInferenceComponent,
@@ -23,25 +21,19 @@ from recommender.engines.ncf.ml_components.neural_collaborative_filtering import
     NEURAL_CF,
     NeuralCollaborativeFilteringModel,
 )
+from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.errors import (
     InvalidRecommendationPanelIDError,
     NoSavedMLComponentError,
     NoPrecalculatedTensorsError,
 )
-from recommender.engine.agents.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 
 from recommender.models import User, Service
 from recommender.models.ml_component import MLComponent
-from ..fixtures import (
-    generate_data,
-    mock_autoencoders_pipeline_exec,
-    pipeline_config,
-    mock_ncf_pipeline_exec,
-)
 
 
 def test_ncf_inference_component(
-    mongo, generate_data, pipeline_config, mock_ncf_pipeline_exec
+    mongo, generate_data, ncf_pipeline_config, mock_ncf_pipeline_exec
 ):
     # With-no-model case
     ncf_model = NeuralCollaborativeFilteringModel.load(version=NEURAL_CF)
@@ -124,10 +116,10 @@ def test_user_and_services_to_tensors_errors(mongo, generate_data):
 def test_user_and_services_to_tensors(
     mongo, generate_data, mock_autoencoders_pipeline_exec
 ):
-    user_embedder = Embedder.load(USER_AE_MODEL)
+    user_embedder = Embedder.load(USER_EMBEDDER)
     user_embedder(User.objects, use_cache=False, save_cache=True)
 
-    service_embedder = Embedder.load(SERVICE_AE_MODEL)
+    service_embedder = Embedder.load(SERVICE_EMBEDDER)
     service_embedder(Service.objects, use_cache=False, save_cache=True)
 
     u1 = User.objects[0]

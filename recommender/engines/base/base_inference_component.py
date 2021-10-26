@@ -27,7 +27,6 @@ class BaseInferenceComponent(ABC):
         """
         self.K = K
         if self.K not in PANEL_ID_TO_K.values():
-            # TODO: maybe refactor below error to some other error
             raise InvalidRecommendationPanelIDError()
         self._load_models()
 

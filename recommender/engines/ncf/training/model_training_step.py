@@ -16,6 +16,10 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm
 
+from recommender.engines.autoencoders.training.model_training_step import (
+    USER_EMBEDDING_DIM,
+    SERVICE_EMBEDDING_DIM,
+)
 from recommender.engines.base.base_steps import ModelTrainingStep
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
     NeuralCollaborativeFilteringModel,
@@ -46,8 +50,6 @@ USER_IDS_EMBEDDING_DIM = "user_ids_embedding_dim"
 SERVICE_IDS_EMBEDDING_DIM = "service_ids_embedding_dim"
 MLP_LAYERS_SPEC = "mlp_layers_spec"
 CONTENT_MLP_LAYERS_SPEC = "content_mlp_layers_spec"
-UE = "user_embedding_dim"
-SE = "service_embedding_dim"
 OPTIMIZER = "optimizer"
 OPTIMIZER_PARAMS = "optimizer_params"
 EPOCHS = "epochs"
@@ -208,8 +210,8 @@ class NCFModelTrainingStep(ModelTrainingStep):
 
         self.mf_embedding_dim = self.resolve_constant(MF_EMBEDDING_DIM, 64)
         self.users_ids_embedding_dim = self.resolve_constant(USER_IDS_EMBEDDING_DIM, 64)
-        self.user_emb_dim = self.resolve_constant(UE)
-        self.service_emb_dim = self.resolve_constant(SE)
+        self.user_emb_dim = self.resolve_constant(USER_EMBEDDING_DIM)
+        self.service_emb_dim = self.resolve_constant(SERVICE_EMBEDDING_DIM)
         self.services_ids_embedding_dim = self.resolve_constant(
             SERVICE_IDS_EMBEDDING_DIM, 64
         )

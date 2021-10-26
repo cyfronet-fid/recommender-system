@@ -3,7 +3,9 @@
 import torch
 import pytest
 
-from recommender.services.synthetic_dataset.dataset import _normalize_embedded_services
+from recommender.engines.rl.ml_components.synthetic_dataset.dataset import (
+    _normalize_embedded_services,
+)
 
 
 @pytest.fixture

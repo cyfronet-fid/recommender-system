@@ -10,13 +10,16 @@ import torch
 from mongoengine import QuerySet
 from tqdm.auto import tqdm
 
+from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.rl.utils import (
     create_index_id_map,
 )
-from recommender.engine.models.autoencoders import AutoEncoder
 from recommender.engines.persistent_mixin import Persistent
 from recommender.errors import MissingOneHotTensorError, MissingDenseTensorError
 from recommender.models import User, Service
+
+USER_EMBEDDER = "USER_EMBEDDER"
+SERVICE_EMBEDDER = "SERVICE_EMBEDDER"
 
 
 class Embedder(Persistent):
@@ -52,7 +55,6 @@ class Embedder(Persistent):
             index_id_map: Pandas Dataframe with index to id mapping.
         """
         objects = list(objects)
-
         index_id_map = create_index_id_map(objects)
 
         if self.dense_tensors_exist(objects):

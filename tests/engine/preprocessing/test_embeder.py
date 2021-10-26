@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 import torch
 
-from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.errors import MissingDenseTensorError, MissingOneHotTensorError
 from tests.factories.marketplace import ServiceFactory, UserFactory

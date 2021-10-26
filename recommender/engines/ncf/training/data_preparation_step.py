@@ -9,14 +9,6 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from recommender.engines.autoencoders.ml_components.embedder import (
-    Embedder,
-)
-from recommender.engines.autoencoders.ml_components.autoencoder import (
-    USER_AE_MODEL,
-    SERVICE_AE_MODEL,
-)
-from recommender.engines.autoencoders.ml_components.normalizer import Normalizer
 from recommender.engines.base.base_steps import DataPreparationStep
 from recommender.engines.constants import DEVICE
 from recommender.engines.ncf.training.data_extraction_step import (
@@ -47,53 +39,6 @@ USERS_IDS = "users_ids"
 SERVICES_IDS = "services_ids"
 DATASETS = "datasets"
 EXAMPLE_NUMBERS = "example_numbers"
-
-
-def embed(data: List[Dict[str, Dict]]) -> List[Dict[str, Dict]]:
-    """Embed users and services in provided data using Embedders.
-
-    Args:
-        data: raw data produced in NCFDataExtractionStep.__call__.
-
-    Returns:
-        data: reloaded raw_data (with new tensors inside objects).
-
-    """
-    user_embedder = Embedder.load(version=USER_AE_MODEL)
-    user_embedder(User.objects, use_cache=False, save_cache=True)
-    services_embedder = Embedder.load(version=SERVICE_AE_MODEL)
-    services_embedder(Service.objects, use_cache=False, save_cache=True)
-
-    for entry in data:
-        entry[USER].reload()
-        for kind in (ORDERED_SERVICES, NOT_ORDERED_SERVICES):
-            for service in entry[kind]:
-                service.reload()
-
-    return data
-
-
-def normalise(data: List[Dict[str, Dict]]) -> List[Dict[str, Dict]]:
-    """Normalise users and services in provided data using universal Normalizer.
-
-    Args:
-        data: raw data produced in NCFDataExtractionStep.__call__.
-
-    Returns:
-        data: reloaded raw_data (with new tensors inside objects).
-    """
-
-    normalizer = Normalizer()
-    normalizer(User.objects, save_cache=True)
-    normalizer(Service.objects, save_cache=True)
-
-    for entry in data:
-        entry[USER].reload()
-        for kind in (ORDERED_SERVICES, NOT_ORDERED_SERVICES):
-            for service in entry[kind]:
-                service.reload()
-
-    return data
 
 
 def _split_services(
@@ -231,18 +176,12 @@ class NCFDataPreparationStep(DataPreparationStep):
 
     def __call__(self, data: Dict = None) -> Tuple[Dict, Dict]:
         """Perform data preparation consisting of:
-        -> embedding,
-        -> normalisation,
         -> casting to the proper device,
         -> tensorization into pytorch dataset.
         """
 
         raw_data = data[RAW_DATA]
-        embedded_data = embed(raw_data)
-        normalised_data = normalise(embedded_data)
-        tensors_dict = tensorize(
-            normalised_data, self.train_ds_size, self.valid_ds_size
-        )
+        tensors_dict = tensorize(raw_data, self.train_ds_size, self.valid_ds_size)
         casted_tensors_dict = cast_to_device(tensors_dict, self.device)
         pytorch_datasets = create_pytorch_datasets(casted_tensors_dict)
 

@@ -1,7 +1,13 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring
 from enum import Enum, auto
 
-from mongoengine import StringField, DateField, DictField, EmbeddedDocument, EnumField
+from mongoengine import (
+    StringField,
+    DictField,
+    EmbeddedDocument,
+    EnumField,
+    DateTimeField,
+)
 
 
 class Status(Enum):
@@ -11,7 +17,7 @@ class Status(Enum):
 
 class StepMetadata(EmbeddedDocument):
     type = StringField()
-    start_time = DateField()
-    end_time = DateField()
+    start_time = DateTimeField()
+    end_time = DateTimeField()
     details = DictField()
     status = EnumField(enum=Status)

@@ -3,13 +3,13 @@
 import pandas as pd
 import pytest
 
-from recommender.engine.agents.rl_agent.reward_mapping import (
+from recommender.engines.rl.ml_components.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
 )
-from recommender.services.synthetic_dataset.rewards import (
-    synthesize_reward,
+from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
     _get_closest_reward,
     _draw_reward,
+    synthesize_reward,
     RewardGeneration,
 )
 

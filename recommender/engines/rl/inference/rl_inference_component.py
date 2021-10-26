@@ -5,7 +5,11 @@ from typing import Tuple
 
 import torch
 
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.autoencoders.ml_components.embedder import (
+    Embedder,
+    USER_EMBEDDER,
+    SERVICE_EMBEDDER,
+)
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
 from recommender.engines.rl.utils import create_state
 from recommender.engines.base.base_inference_component import BaseInferenceComponent
@@ -16,24 +20,27 @@ from recommender.models import User, SearchData
 
 
 class RLInferenceComponent(BaseInferenceComponent):
-    def __init__(self, K: int, exploration: bool = False, act_noise: float = 0.0):
-        super().__init__(K)
+    def __init__(
+        self, K: int, exploration: bool = False, act_noise: float = 0.0, history_len=20
+    ):
         self.exploration = exploration
         self.act_noise = act_noise
         self.act_max = 1.0  # TODO: Maybe this should be actor's parameter?
         self.act_min = -1.0  # TODO: Maybe this should be actor's parameter?
+        self.history_len = history_len
+        super().__init__(K)
 
     def _load_models(self) -> None:
         version = K_TO_PANEL_ID.get(self.K)
         self.actor = Actor.load(version=version)
         self.actor.eval()
-        self.service_embedder = Embedder.load(
-            version="service"
-        )  # TODO: use constant from Embedders
-        self.user_embedder = Embedder.load(
-            version="user"
-        )  # TODO: use constant from Embedders
-        self.state_encoder = StateEncoder(self.user_embedder, self.service_embedder)
+        self.service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
+        self.user_embedder = Embedder.load(version=USER_EMBEDDER)
+        self.state_encoder = StateEncoder(
+            user_embedder=self.user_embedder,
+            service_embedder=self.service_embedder,
+            max_N=self.history_len,
+        )
         self.service_selector = ServiceSelector(self.service_embedder)
 
     def _for_logged_user(self, user: User, search_data: SearchData) -> Tuple[int]:

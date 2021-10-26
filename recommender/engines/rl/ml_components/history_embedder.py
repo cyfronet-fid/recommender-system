@@ -97,7 +97,7 @@ class MLPHistoryEmbedder(HistoryEmbedder):
 
         Args:
             service_history: history of services engaged by the
-            user represented as a tensor of shape [N, SE]
+            user represented as a tensor of shape [B, 0-N, SE]
             where N is the history length and SE is service content
              tensor embedding dim
 

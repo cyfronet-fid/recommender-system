@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 import torch
 
-from recommender.engine.models.autoencoders import AutoEncoder
+from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.rl.ml_components.service_selector import ServiceSelector
 from recommender.errors import InsufficientRecommendationSpace

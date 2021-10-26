@@ -10,7 +10,9 @@ from mongoengine import QuerySet
 
 from recommender.models import State, SearchData, User
 from recommender.models import UserAction
-from recommender.services.services_history_generator import generate_services_history
+from recommender.engines.rl.ml_components.services_history_generator import (
+    generate_services_history,
+)
 
 
 def _get_visit_ids(user_action: UserAction) -> Tuple[str, str]:

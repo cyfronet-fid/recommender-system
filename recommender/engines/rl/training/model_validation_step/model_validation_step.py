@@ -7,12 +7,15 @@ import numpy as np
 from recommender.engines.base.base_steps import ModelValidationStep
 from recommender.errors import InferenceTooSlowError, MeanRewardTooLowError
 
+TIME_UPPER_BOUND = "time_upper_bound"
+REWARD_LOWER_BOUND = "reward_upper_bound"
+
 
 class RLModelValidationStep(ModelValidationStep):
     def __init__(self, config):
         super().__init__(config)
-        self.time_upper_bound = self.resolve_constant("time_upper_bound", 1.0)
-        self.reward_lower_bound = self.resolve_constant("reward_lower_bound", 0.0)
+        self.time_upper_bound = self.resolve_constant(TIME_UPPER_BOUND, 1.0)
+        self.reward_lower_bound = self.resolve_constant(REWARD_LOWER_BOUND, 0.0)
 
     def __call__(self, data=None) -> Tuple[None, dict]:
         metrics = data

@@ -1,7 +1,7 @@
 # pylint: disable-all
 import pytest
 
-from recommender.engine.agents.rl_agent.reward_mapping import (
+from recommender.engines.rl.ml_components.reward_mapping import (
     _to_abstract_page_id,
     ua_to_reward_id,
 )
