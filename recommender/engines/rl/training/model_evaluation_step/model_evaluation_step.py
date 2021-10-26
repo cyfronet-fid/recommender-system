@@ -142,3 +142,18 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         }, {
             "simulation_duration": simulation_duration,
         }
+
+
+# if __name__ == '__main__':
+# connect(host=DevelopmentConfig.MONGODB_HOST)
+# actor = Actor(3, )
+# config = {
+#     ModelEvaluationStep.__name__: {
+#         TIME_MEASUREMENT_SAMPLES: 50
+#     },
+# }
+#
+# x = RLModelEvaluationStep(config)
+# print(x())
+#
+# disconnect()

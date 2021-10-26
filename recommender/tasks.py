@@ -1,4 +1,6 @@
-# pylint: disable=fixme, missing-module-docstring, missing-function-docstring
+# pylint: disable=missing-function-docstring, fixme
+
+"""This module contain celery tasks"""
 
 from recommender.engines.autoencoders.inference.embedding_component import (
     EmbeddingComponent,

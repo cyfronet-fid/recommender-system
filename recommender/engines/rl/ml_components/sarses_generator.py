@@ -1,5 +1,4 @@
-# pylint: disable=no-member, line-too-long, fixme, missing-function-docstring, missing-class-docstring
-# pylint: disable=too-few-public-methods
+# pylint: disable=no-member, line-too-long, too-few-public-methods, fixme
 
 """
 This module contains logic for composing marketplace DB dump,
@@ -146,6 +145,8 @@ def _get_next_recommendation(recommendation):
 
 
 def generate_sars(recommendation, root_uas):
+    """Generate sars for given recommendation and root user actions"""
+
     user = recommendation.user or _get_empty_user()
 
     # Create reward
@@ -183,7 +184,10 @@ def generate_sars(recommendation, root_uas):
     Sars(state=state, action=action, reward=reward, next_state=next_state).save()
 
 
-class Tmp:
+class Executor:
+    """Executor needed for mapping sars generation over recommendations and
+    processes pool"""
+
     def __init__(self, root_uas):
         self.root_uas = root_uas
 
@@ -198,10 +202,10 @@ def generate_sarses(multi_processing=True):
     root_uas = UserAction.objects(source__root__type__="recommendation_panel")
 
     if multi_processing:
-        tmp = Tmp(root_uas)
+        executor = Executor(root_uas)
         cpu_n = multiprocessing.cpu_count()
         with multiprocessing.Pool(cpu_n) as pool:
-            pool.map(tmp, list(Recommendation.objects))
+            pool.map(executor, list(Recommendation.objects))
     else:
         for recommendation in Recommendation.objects:
             generate_sars(recommendation, root_uas)

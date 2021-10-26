@@ -37,10 +37,10 @@ jobs:
 
     - name: Lint with pylint
       run: |
-        pipenv run pylint recommender tasks
+        pipenv run pylint recommender tests
 
     - name: Check with black
       run: |
-        pipenv run black --check recommender tasks
+        pipenv run black --check recommender tests
 
 
