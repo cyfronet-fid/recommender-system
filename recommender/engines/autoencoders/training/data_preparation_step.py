@@ -1,7 +1,9 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
 # pylint: disable=redefined-builtin, no-member, not-callable
 # pylint: disable=line-too-long, no-else-return, fixme
+
 """Autoencoder Data Preparation Step."""
+
 import pickle
 from typing import Tuple
 
