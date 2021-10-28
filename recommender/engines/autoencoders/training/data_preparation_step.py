@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
 # pylint: disable=redefined-builtin, no-member, not-callable
-# pylint: disable=line-too-long, no-else-return, fixme
+# pylint: disable=line-too-long, no-else-return
 
 """Autoencoder Data Preparation Step."""
 
@@ -16,7 +16,6 @@ from torch.utils.data import random_split
 from tqdm.auto import tqdm, trange
 
 from recommender.errors import (
-    NoPrecalculatedTensorsError,
     InvalidObject,
 )
 
@@ -208,10 +207,11 @@ def precalculate_tensors(objects, transformer, fit=True, verbose=False):
     # calculate and save dfs
     objects_df_rows = []
     name = pluralize(objects[0].__class__.__name__).lower()
-    for object in tqdm(
+
+    for obj in tqdm(
         objects, desc=f"Calculating {name} dataframes...", disable=(not verbose)
     ):
-        object_df = object_to_df(object, save_df=True)
+        object_df = object_to_df(obj, save_df=True)
         objects_df_rows.append(object_df)
     objects_df = pd.concat(objects_df_rows, ignore_index=True)
 
@@ -227,21 +227,29 @@ def precalculate_tensors(objects, transformer, fit=True, verbose=False):
     return tensors, transformer
 
 
-# TODO Refactor precalc_users_and_service_tensors and data_prep_precalc_users_and_service_tensors
-def precalc_users_and_service_tensors():
-    for model_class in (User, Service):
-        name = pluralize(model_class.__name__).lower()
-        t = create_transformer(name)
-        precalculate_tensors(model_class.objects, t)
+def precalc_users_and_service_tensors(collections: dict = None):
+    """
+    Precalculate users and services tensors
 
-
-def data_prep_precalc_users_and_service_tensors(collections: dict):
-    """Precalculate users and services tensors"""
+    Args:
+        collections: a dictionary of User and Service objects from data extraction step.
+                     If not specified, the function takes User and Service objects from a database.
+    """
     tensors = {USERS: {}, SERVICES: {}}
 
-    for name, data in collections.items():
+    if collections:
+        data = collections.items()
+    else:
+        data = {}
+        for model_class in (User, Service):
+            name = pluralize(model_class.__name__).lower()
+            objects = model_class.objects
+            data[name] = objects
+        data = data.items()
+
+    for name, obj in data:
         t = create_transformer(name)
-        tensor, _ = precalculate_tensors(data, t)
+        tensor, _ = precalculate_tensors(obj, t)
         if name == USERS:
             tensors[USERS] = tensor
         elif name == SERVICES:
@@ -250,64 +258,6 @@ def data_prep_precalc_users_and_service_tensors(collections: dict):
             raise ValueError
 
     return tensors
-
-
-def user_and_service_to_tensors(user, service):
-    """It takes MongoEngine models from database and transform them into
-    PyTorch tensors ready for inference.
-    """
-
-    if not (user.one_hot_tensor and service.one_hot_tensor):
-        raise NoPrecalculatedTensorsError(
-            "Given user or service has no precalculated one_hot_tensor"
-        )
-
-    users_ids = torch.tensor([user.id])
-
-    user_tensor = torch.Tensor(user.one_hot_tensor)
-    users_tensor = torch.unsqueeze(user_tensor, 0)
-
-    services_ids = torch.tensor([service.id])
-
-    service_tensor = torch.tensor(service.one_hot_tensor)
-    services_tensor = torch.unsqueeze(service_tensor, 0)
-
-    return users_ids, users_tensor, services_ids, services_tensor
-
-
-def user_and_services_to_tensors(user, services):
-    """Used for inferention in recommendation endpoint.
-    It takes raw MongoEngine models of one user and related services
-    and compose them into tensors ready for inference.
-    """
-
-    if not user.dense_tensor:
-        raise NoPrecalculatedTensorsError("Given user has no precalculated dense")
-
-    for service in services:
-        if not service.dense_tensor:
-            raise NoPrecalculatedTensorsError(
-                "One or more of given services has/have no precalculated"
-                " dense tensor(s)"
-            )
-
-    services_ids = []
-    services_tensors = []
-    services = list(services)
-    for service in services:
-        services_ids.append(service.id)
-        service_tensor = torch.unsqueeze(torch.Tensor(service.dense_tensor), dim=0)
-        services_tensors.append(service_tensor)
-
-    services_ids = torch.tensor(services_ids)
-    services_tensor = torch.cat(services_tensors, dim=0)
-
-    n = services_tensor.shape[0]
-    users_ids = torch.full([n], user.id)
-    user_tensor = torch.Tensor(user.dense_tensor)
-    users_tensor = torch.unsqueeze(user_tensor, dim=0).repeat(n, 1)
-
-    return users_ids, users_tensor, services_ids, services_tensor
 
 
 def split_autoencoder_datasets(
@@ -348,7 +298,7 @@ class AEDataPreparationStep(DataPreparationStep):
         all_datasets = {AUTOENCODERS: {}}
         raw_data = data[AUTOENCODERS]
 
-        tensors = data_prep_precalc_users_and_service_tensors(raw_data)
+        tensors = precalc_users_and_service_tensors(raw_data)
 
         for collection_name, dataset in tensors.items():
             splitted_ds = split_autoencoder_datasets(
