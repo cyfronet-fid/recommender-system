@@ -83,12 +83,13 @@ def seed_db():
     """Populates databse with a small amount of data
     for testing and development purposes"""
     populate_users_and_services(
-        common_services_no=30,
-        unordered_services_no=70,
-        total_users=100,
-        k_common_services_max=10,
-        k_common_services_min=1,
+        common_services_num=30,
+        unordered_services_num=70,
+        users_num=100,
+        k_common_services_min=10,
+        k_common_services_max=1,
         verbose=True,
+        valid=True,
     )
 
 

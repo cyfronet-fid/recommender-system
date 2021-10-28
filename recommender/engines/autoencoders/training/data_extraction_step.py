@@ -9,7 +9,6 @@ USERS = "users"
 NUM_OF_USERS = "num_of_users"
 SERVICES = "services"
 NUM_OF_SERVICES = "num_of_services"
-DETAILS = "details"
 
 
 def get_users_and_services():
@@ -39,7 +38,7 @@ class AEDataExtractionStep(DataExtractionStep):
 
     def __init__(self, pipeline_config):
         super().__init__(pipeline_config)
-        self.data = {AUTOENCODERS: {USERS: {}, SERVICES: {}}}
+        self.data = {AUTOENCODERS: {USERS: [], SERVICES: []}}
 
     def __call__(self, data=None):
         users, services, num_of_usr, num_of_srv = get_users_and_services()

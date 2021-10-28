@@ -16,7 +16,7 @@ from torch.optim import Adam
 from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.constants import WRITER, VERBOSE, DEVICE
 from recommender.engines.base.base_steps import ModelTrainingStep
-from recommender.engines.autoencoders.training.data_preparation_step import TRAIN
+from recommender.engines.autoencoders.training.data_preparation_step import TRAIN, VALID
 from recommender.engines.autoencoders.training.data_extraction_step import (
     AUTOENCODERS,
     USERS,
@@ -43,6 +43,25 @@ MODEL = "model"
 TRAINING_TIME = "training_time"
 LOSS = "loss"
 DATASET = "dataset"
+
+
+def get_train_and_valid_datasets(datasets, user_batch_size, service_batch_size):
+    """
+    Use pytorch's DataLoader on train/valid users/services datasets to enable training
+    """
+
+    training_datasets = {USERS: {}, SERVICES: {}}
+    for collection in (USERS, SERVICES):
+        if collection == USERS:
+            batch_size = user_batch_size
+        else:
+            batch_size = service_batch_size
+        for split in (TRAIN, VALID):
+            dataset = datasets[collection][split]
+            training_datasets[collection][split] = DataLoader(
+                dataset, batch_size=batch_size, shuffle=True
+            )
+    return training_datasets
 
 
 def create_autoencoder_model(
@@ -169,6 +188,7 @@ def perform_training(
     encoder_layer_sizes,
     decoder_layer_sizes,
     train_ds_dl,
+    valid_ds_dl,
     embedding_dim,
     features_dim,
     writer,
@@ -198,6 +218,7 @@ def perform_training(
         loss_function=autoencoder_loss_function,
         epochs=epochs,
         train_ds_dl=train_ds_dl,
+        valid_ds_dl=valid_ds_dl,
         writer=writer,
         save_period=10,
         verbose=verbose,
@@ -240,22 +261,20 @@ class AEModelTrainingStep(ModelTrainingStep):
         """Perform user and service training"""
 
         raw_data = data[AUTOENCODERS]
-
-        # Users
-        user_train_ds = raw_data[USERS][TRAIN]
-
-        user_train_ds_dl = DataLoader(
-            user_train_ds, batch_size=self.user_batch_size, shuffle=True
+        training_datasets = get_train_and_valid_datasets(
+            raw_data, self.user_batch_size, self.service_batch_size
         )
 
         user_features_dim = len(raw_data[USERS][TRAIN][0][0])
         service_features_dim = len(raw_data[SERVICES][TRAIN][0][0])
 
+        # Users
         user_model, user_loss, user_timer = perform_training(
             collection_name=USERS,
+            train_ds_dl=training_datasets[USERS][TRAIN],
+            valid_ds_dl=training_datasets[USERS][VALID],
             encoder_layer_sizes=self.encoder_layer_sizes,
             decoder_layer_sizes=self.decoder_layer_sizes,
-            train_ds_dl=user_train_ds_dl,
             embedding_dim=self.user_embedding_dim,
             features_dim=user_features_dim,
             writer=self.writer,
@@ -266,17 +285,12 @@ class AEModelTrainingStep(ModelTrainingStep):
         )
 
         # Services
-        service_train_ds = raw_data[SERVICES][TRAIN]
-
-        service_train_ds_dl = DataLoader(
-            service_train_ds, batch_size=self.service_batch_size, shuffle=True
-        )
-
         service_model, service_loss, service_timer = perform_training(
             collection_name=SERVICES,
+            train_ds_dl=training_datasets[SERVICES][TRAIN],
+            valid_ds_dl=training_datasets[SERVICES][VALID],
             encoder_layer_sizes=self.encoder_layer_sizes,
             decoder_layer_sizes=self.decoder_layer_sizes,
-            train_ds_dl=service_train_ds_dl,
             embedding_dim=self.service_embedding_dim,
             features_dim=service_features_dim,
             writer=self.writer,

@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long, disable=fixme
+# pylint: disable=line-too-long
 """Autoencoder Model Validation Step."""
 
 from typing import Tuple
@@ -14,7 +14,8 @@ MAX_LOSS_SCORE = "max_loss_score"
 
 
 def check_performance(metrics, max_loss_score: int) -> None:
-    """Check if the losses of the models are below certain threshold.
+    """
+    Check if the losses of the models are below certain threshold.
     Args:
         metrics: data from the AEModelEvaluationStep,
         max_loss_score: threshold used for validation.
@@ -34,10 +35,11 @@ class AEModelValidationStep(ModelValidationStep):
 
     def __init__(self, pipeline_config):
         super().__init__(pipeline_config)
-        self.max_loss_score = self.resolve_constant(MAX_LOSS_SCORE, 2)
+        self.max_loss_score = self.resolve_constant(MAX_LOSS_SCORE, 1.5)
 
     def __call__(self, data=None) -> Tuple[object, object]:
-        """Perform model validation consisting of checking:
+        """
+        Perform model validation consisting of checking:
         -> model performance regarding chosen metric.
         """
         metrics = data[METRICS]
