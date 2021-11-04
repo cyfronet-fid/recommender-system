@@ -35,6 +35,7 @@ def test_critic(mongo):
     SE = 64
 
     I = len(Service.objects)
+    max_N = 20
 
     # User Embedder
     user_autoencoder = AutoEncoder(features_dim=UOH, embedding_dim=UE)
@@ -45,10 +46,10 @@ def test_critic(mongo):
     service_embedder = Embedder(service_autoencoder)
 
     # HistoryEmbedder v1
-    history_embedder_v1 = MLPHistoryEmbedder(SE=SE)
+    history_embedder_v1 = MLPHistoryEmbedder(SE=SE, max_N=max_N)
 
     # HistoryEmbedder v2
-    history_embedder_v2 = MLPHistoryEmbedder(SE=SE)
+    history_embedder_v2 = MLPHistoryEmbedder(SE=SE, max_N=max_N)
 
     # State encoder
     state_encoder = StateEncoder(

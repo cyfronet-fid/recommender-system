@@ -67,18 +67,18 @@ class MLPHistoryEmbedder(HistoryEmbedder):
     It should be used and trained inside both actor and critic.
     """
 
-    def __init__(self, SE: int, N=20, layer_sizes=(256, 128)):
+    def __init__(self, SE: int, max_N: int, layer_sizes=(256, 128)):
         """
         Args:
             SE: service embedding dimension
-            N: upper bound on history length
+            max_N: upper bound on history length
             layer_sizes: list of layers to use in a network
         """
         super().__init__()
-        self.N = N
+        self.max_N = max_N
         self.SE = SE
 
-        layers = [torch.nn.Linear(self.N * SE, layer_sizes[0]), nn.ReLU()]
+        layers = [torch.nn.Linear(self.max_N * SE, layer_sizes[0]), nn.ReLU()]
         layers += list(
             chain.from_iterable(
                 [
@@ -91,28 +91,37 @@ class MLPHistoryEmbedder(HistoryEmbedder):
 
         self.network = nn.Sequential(*layers)
 
+    def _align_history(self, service_history):
+        B, current_N, SE = service_history.shape
+        missing_N = self.max_N - current_N
+
+        if missing_N > 0:
+            padding = torch.zeros(B, missing_N, SE)
+            aligned_history = torch.cat((service_history, padding), dim=1)
+        else:
+            aligned_history = service_history[:, -self.max_N :, :]
+
+        return aligned_history
+
     def forward(self, service_history: torch.Tensor) -> torch.Tensor:
         """
         Reduces service_history's temporal dimension using MLP feed forward network.
 
         Args:
             service_history: history of services engaged by the
-            user represented as a tensor of shape [B, 0-N, SE]
-            where N is the history length and SE is service content
+            user represented as a tensor of shape [B, N, SE]
+            where N is the history length (not constant) and SE is service content
              tensor embedding dim
 
         Returns:
-            Processed history of services engaged by the user as a tensor of shape [SE]
+            Processed history of services engaged by the user
+                as a tensor of shape [B, SE]
         """
 
-        B = service_history.shape[0]
+        aligned_history = self._align_history(service_history)
+        aligned_history = aligned_history.reshape(aligned_history.shape[0], -1)
 
-        merged_history = service_history.reshape((B, -1))
-        zeros = torch.zeros((B, self.N * self.SE))
-        zeros[:, : merged_history.shape[1]] = merged_history
-        padded_history = zeros.to(service_history.device)
-
-        x = self.network(padded_history)
+        x = self.network(aligned_history)
         x = F.relu(x)
 
         return x
