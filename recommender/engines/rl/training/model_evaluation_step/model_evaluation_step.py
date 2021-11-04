@@ -27,9 +27,6 @@ from recommender.engines.rl.ml_components.service_selector import ServiceSelecto
 from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
     synthesize_reward,
 )
-from recommender.engines.rl.training.model_training_step.model_training_step import (
-    HISTORY_LEN,
-)
 from recommender.engines.rl.utils import create_state
 from recommender.models import Service, SearchData
 from recommender.engines.rl.ml_components.synthetic_dataset.service_engagement import (
@@ -49,7 +46,6 @@ class RLModelEvaluationStep(ModelEvaluationStep):
             TIME_MEASUREMENT_SAMPLES, 50
         )
         self.device = self.resolve_constant(DEVICE, "cpu")
-        self.history_len = self.resolve_constant(HISTORY_LEN, 20)
 
         self.user_embedder = Embedder.load(version=USER_EMBEDDER)
         self.service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
@@ -57,7 +53,6 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         self.state_encoder = StateEncoder(
             user_embedder=self.user_embedder,
             service_embedder=self.service_embedder,
-            max_N=self.history_len,
         )
         self.reward_encoder = RewardEncoder()
 

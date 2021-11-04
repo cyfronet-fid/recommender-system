@@ -20,14 +20,11 @@ from recommender.models import User, SearchData
 
 
 class RLInferenceComponent(BaseInferenceComponent):
-    def __init__(
-        self, K: int, exploration: bool = False, act_noise: float = 0.0, history_len=20
-    ):
+    def __init__(self, K: int, exploration: bool = False, act_noise: float = 0.0):
         self.exploration = exploration
         self.act_noise = act_noise
         self.act_max = 1.0  # TODO: Maybe this should be actor's parameter?
         self.act_min = -1.0  # TODO: Maybe this should be actor's parameter?
-        self.history_len = history_len
         super().__init__(K)
 
     def _load_models(self) -> None:
@@ -39,7 +36,6 @@ class RLInferenceComponent(BaseInferenceComponent):
         self.state_encoder = StateEncoder(
             user_embedder=self.user_embedder,
             service_embedder=self.service_embedder,
-            max_N=self.history_len,
         )
         self.service_selector = ServiceSelector(self.service_embedder)
 

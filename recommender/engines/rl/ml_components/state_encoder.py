@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring, no-member, too-few-public-methods
 # pylint: disable=no-name-in-module, invalid-name, too-many-locals
-# pylint: disable=too-many-branches, too-many-arguments
+# pylint: disable=too-many-branches
 
 """Implementation of the State Encoder"""
 from typing import Tuple, List
@@ -25,14 +25,12 @@ class StateEncoder:
         service_embedder: Embedder,
         use_cached_embeddings: bool = True,
         save_cached_embeddings: bool = False,
-        max_N: int = 20,
     ):
         self.user_embedder = user_embedder
         self.service_embedder = service_embedder
         self.use_cached_embeddings = use_cached_embeddings
         self.save_cached_embeddings = save_cached_embeddings
         self.search_data_encoder = SearchDataEncoder()
-        self.max_N = max_N
 
     def __call__(self, states: List[State]) -> Tuple[(torch.Tensor,) * 3]:
         """
@@ -146,10 +144,5 @@ class StateEncoder:
                 sequences.append(services_history_tensor)
 
         service_histories_batch = pad_sequence(sequences, batch_first=True)
-
-        B, current_max_N, SE = service_histories_batch.shape
-        trimmed_service_histories_batch = torch.zeros((B, self.max_N, SE))
-        N = min(self.max_N, current_max_N)
-        trimmed_service_histories_batch[:, :N, :] = service_histories_batch[:, -N:, :]
 
         return service_histories_batch
