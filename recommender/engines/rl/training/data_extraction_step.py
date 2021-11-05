@@ -8,12 +8,12 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     SERVICE_EMBEDDER,
 )
 from recommender.engines.base.base_steps import DataExtractionStep
-from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
+from recommender.engines.rl.ml_components.synthetic_sarses.rewards import (
     RewardGeneration,
 )
 from recommender.models import Sars, UserAction, Recommendation
-from recommender.engines.rl.ml_components.sarses_generator import generate_sarses
-from recommender.engines.rl.ml_components.synthetic_dataset.dataset import (
+from recommender.engines.rl.ml_components.real_sarses import generate_real_sarses
+from recommender.engines.rl.ml_components.synthetic_sarses.synthetic_sarses import (
     generate_synthetic_sarses,
 )
 
@@ -63,7 +63,7 @@ class RLDataExtractionStep(DataExtractionStep):
             service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
             return generate_synthetic_sarses(service_embedder, **self.synthetic_params)
 
-        real_sarses = generate_sarses(multi_processing=False)
+        real_sarses = generate_real_sarses(multi_processing=False)
         real_sarses = real_sarses(__raw__={"action": {"$size": self.K}})
 
         return list(real_sarses)

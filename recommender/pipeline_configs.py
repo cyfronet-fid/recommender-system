@@ -79,10 +79,10 @@ from recommender.engines.autoencoders.training.model_training_step import (
 from recommender.engines.ncf.training.model_training_step import (
     LOSS_FUNCTION as NCF_LOSS_FUNCTION,
 )
-from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
+from recommender.engines.rl.ml_components.synthetic_sarses.rewards import (
     RewardGeneration,
 )
-from recommender.engines.rl.training.data_extraction_step.data_extraction_step import (
+from recommender.engines.rl.training.data_extraction_step import (
     MIN_USER_ACTIONS,
     MIN_RECOMMENDATIONS,
     SYNTHETIC_PARAMS,
@@ -90,18 +90,18 @@ from recommender.engines.rl.training.data_extraction_step.data_extraction_step i
     INTERACTIONS_RANGE,
     REWARD_GENERATION_MODE,
 )
-from recommender.engines.rl.training.data_preparation_step.data_preparation_step import (
+from recommender.engines.rl.training.data_preparation_step import (
     SARS_BATCH_SIZE,
     SHUFFLE,
 )
-from recommender.engines.rl.training.data_validation_step.data_validation_step import (
+from recommender.engines.rl.training.data_validation_step import (
     MIN_SARSES,
     MIN_EMPTY_TO_NON_EMPTY_RATIO,
 )
-from recommender.engines.rl.training.model_evaluation_step.model_evaluation_step import (
+from recommender.engines.rl.training.model_evaluation_step import (
     TIME_MEASUREMENT_SAMPLES,
 )
-from recommender.engines.rl.training.model_training_step.model_training_step import (
+from recommender.engines.rl.training.model_training_step import (
     HISTORY_LEN,
     POLYAK,
     ACTOR_LAYER_SIZES,
@@ -119,7 +119,7 @@ from recommender.engines.rl.training.model_training_step.model_training_step imp
     RL_EPOCHS,
     LEARNING_RATE,
 )
-from recommender.engines.rl.training.model_validation_step.model_validation_step import (
+from recommender.engines.rl.training.model_validation_step import (
     TIME_UPPER_BOUND,
     REWARD_LOWER_BOUND,
 )

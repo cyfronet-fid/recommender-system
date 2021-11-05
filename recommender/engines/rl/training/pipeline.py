@@ -5,14 +5,12 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     Embedder,
 )
 from recommender.engines.base.base_pipeline import BasePipeline
-from recommender.engines.rl.training import (
-    RLModelTrainingStep,
-    RLDataExtractionStep,
-    RLDataValidationStep,
-    RLDataPreparationStep,
-    RLModelEvaluationStep,
-    RLModelValidationStep,
-)
+from recommender.engines.rl.training import RLDataExtractionStep
+from recommender.engines.rl.training.data_preparation_step import RLDataPreparationStep
+from recommender.engines.rl.training.data_validation_step import RLDataValidationStep
+from recommender.engines.rl.training.model_evaluation_step import RLModelEvaluationStep
+from recommender.engines.rl.training.model_training_step import RLModelTrainingStep
+from recommender.engines.rl.training.model_validation_step import RLModelValidationStep
 
 
 class RLPipeline(BasePipeline):

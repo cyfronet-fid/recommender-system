@@ -6,7 +6,7 @@
 # import pytest
 # import torch
 #
-# from recommender.services.synthetic_dataset.env import SyntheticMP, NoSyntheticUsers
+# from recommender.services.synthetic_sarses.env import SyntheticMP, NoSyntheticUsers
 # from tests.factories.marketplace import ServiceFactory, UserFactory
 # from tests.factories.marketplace.category import CategoryFactory
 # from tests.factories.marketplace.scientific_domain import ScientificDomainFactory
@@ -82,17 +82,17 @@
 #     mocker, users, services, service_embeddings, index_id_map, interactions_per_user
 # ):
 #     load_last_module_mock = mocker.patch(
-#         "recommender.services.synthetic_dataset.env.load_last_module"
+#         "recommender.services.synthetic_sarses.env.load_last_module"
 #     )
 #     load_last_module_mock.return_value = None
 #
 #     create_embedder_mock = mocker.patch(
-#         "recommender.services.synthetic_dataset.env.create_embedder"
+#         "recommender.services.synthetic_sarses.env.create_embedder"
 #     )
 #     create_embedder_mock.return_value = None
 #
 #     use_service_embedder_mock = mocker.patch(
-#         "recommender.services.synthetic_dataset.env.use_service_embedder"
+#         "recommender.services.synthetic_sarses.env.use_service_embedder"
 #     )
 #     use_service_embedder_mock.return_value = (service_embeddings, index_id_map)
 #

@@ -5,7 +5,7 @@ from factory.mongoengine import MongoEngineFactory
 from factory.random import reseed_random, random
 from faker import Factory as FakerFactory
 
-from recommender.engines.rl.ml_components.reward_encoder import RewardEncoder
+from recommender.engines.rl.ml_components.encoders.reward_encoder import RewardEncoder
 from recommender.models import Sars
 from .marketplace import ServiceFactory
 from .state import StateFactory

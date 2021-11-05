@@ -2,13 +2,12 @@
 
 import pytest
 
-from recommender.models import Category, ScientificDomain, User, ScikitLearnTransformer
-from recommender.engines.rl.ml_components.synthetic_dataset.users import (
+from recommender.models import Category, ScientificDomain, User
+from recommender.engines.rl.ml_components.synthetic_sarses import (
     _filter_relevant,
     _sample_niche,
     _synthesize_user,
     synthesize_users,
-    SYNTHETIC_USERS,
 )
 from tests.factories.marketplace import ServiceFactory, UserFactory
 from tests.factories.marketplace.category import CategoryFactory

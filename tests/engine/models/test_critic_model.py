@@ -4,12 +4,12 @@ import torch
 
 from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.rl.ml_components.services2weights import Services2Weights
-from recommender.engines.rl.ml_components.critic import Critic
-from recommender.engines.rl.ml_components.history_embedder import (
+from recommender.engines.rl.ml_components.models.critic import Critic
+from recommender.engines.rl.ml_components.models.history_embedder import (
     MLPHistoryEmbedder,
 )
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
-from recommender.engines.rl.ml_components.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.encoders.state_encoder import StateEncoder
 from recommender.models import User
 from recommender.engines.autoencoders.training.data_preparation_step import (
     precalc_users_and_service_tensors,

@@ -3,10 +3,10 @@
 import pandas as pd
 import pytest
 
-from recommender.engines.rl.ml_components.reward_mapping import (
+from recommender.engines.rl.ml_components.real_sarses.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
 )
-from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
+from recommender.engines.rl.ml_components.synthetic_sarses.rewards import (
     _get_closest_reward,
     _draw_reward,
     synthesize_reward,

@@ -8,7 +8,7 @@ import torch
 from torch.nn import Linear, ReLU, Sequential, BatchNorm1d
 
 from recommender.engines.persistent_mixin import Persistent
-from recommender.engines.rl.ml_components.history_embedder import HistoryEmbedder
+from recommender.engines.rl.ml_components.models.history_embedder import HistoryEmbedder
 
 
 class Critic(torch.nn.Module, Persistent):

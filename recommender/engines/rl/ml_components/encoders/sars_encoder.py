@@ -7,9 +7,9 @@ from typing import Dict, Union, List
 import torch
 
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
-from recommender.engines.rl.ml_components.reward_encoder import RewardEncoder
+from recommender.engines.rl.ml_components.encoders.reward_encoder import RewardEncoder
 from recommender.engines.rl.ml_components.services2weights import Services2Weights
-from recommender.engines.rl.ml_components.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.encoders.state_encoder import StateEncoder
 from recommender.models import Sars
 
 STATE = "state"

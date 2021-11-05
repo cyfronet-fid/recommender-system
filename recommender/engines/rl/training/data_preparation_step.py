@@ -10,11 +10,11 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     USER_EMBEDDER,
     SERVICE_EMBEDDER,
 )
-from recommender.engines.rl.ml_components.sars_encoder import SarsEncoder
-from recommender.engines.base.base_steps import DataPreparationStep
-from recommender.engines.rl.training.data_preparation_step.replay_buffer_v2 import (
-    ReplayBufferV2,
+from recommender.engines.rl.ml_components.encoders.sars_encoder import (
+    SarsEncoder,
 )
+from recommender.engines.base.base_steps import DataPreparationStep
+from recommender.engines.rl.ml_components.replay_buffer import ReplayBuffer
 
 SARS_BATCH_SIZE = "sars_batch_size"
 SHUFFLE = "shuffle"
@@ -35,7 +35,7 @@ class RLDataPreparationStep(DataPreparationStep):
         encoded_sarses = self.sars_encoder(sarses)
         encoding_end = time.time()
 
-        replay_buffer = ReplayBufferV2(encoded_sarses)
+        replay_buffer = ReplayBuffer(encoded_sarses)
         replay_buffer_dl = DataLoader(
             replay_buffer, batch_size=self.batch_size, shuffle=self.shuffle
         )

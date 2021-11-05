@@ -8,7 +8,7 @@ from typing import Tuple, List
 import torch
 from torch.nn.utils.rnn import pad_sequence
 
-from recommender.engines.rl.ml_components.search_data_encoder import (
+from recommender.engines.rl.ml_components.encoders.search_data_encoder import (
     SearchDataEncoder,
 )
 from recommender.engines.autoencoders.ml_components.embedder import Embedder

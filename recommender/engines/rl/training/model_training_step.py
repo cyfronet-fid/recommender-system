@@ -17,16 +17,16 @@ from recommender.engines.autoencoders.training.model_training_step import (
 from recommender.engines.base.base_steps import ModelTrainingStep
 from recommender.engines.constants import DEVICE
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
-from recommender.engines.rl.ml_components.actor import Actor
-from recommender.engines.rl.ml_components.critic import Critic
-from recommender.engines.rl.ml_components.history_embedder import MLPHistoryEmbedder
-from recommender.engines.rl.ml_components.sars_encoder import (
+from recommender.engines.rl.ml_components.models.actor import Actor
+from recommender.engines.rl.ml_components.models.critic import Critic
+from recommender.engines.rl.ml_components.models.history_embedder import MLPHistoryEmbedder
+from recommender.engines.rl.ml_components.encoders.sars_encoder import (
     STATE,
     ACTION,
     REWARD,
     NEXT_STATE,
 )
-from recommender.engines.rl.training.data_extraction_step.data_extraction_step import K
+from recommender.engines.rl.training.data_extraction_step import K
 
 from recommender.models import Service
 

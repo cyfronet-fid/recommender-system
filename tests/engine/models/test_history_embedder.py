@@ -4,7 +4,7 @@ import random
 import pytest
 import torch
 
-from recommender.engines.rl.ml_components.history_embedder import (
+from recommender.engines.rl.ml_components.models.history_embedder import (
     LSTMHistoryEmbedder,
     MLPHistoryEmbedder,
 )

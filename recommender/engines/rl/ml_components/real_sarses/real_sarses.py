@@ -21,7 +21,9 @@ from typing import List
 import torch
 
 from recommender.models import User, UserAction, Recommendation, State, Sars, Service
-from recommender.engines.rl.ml_components.reward_mapping import ua_to_reward_id
+from recommender.engines.rl.ml_components.real_sarses.reward_mapping import (
+    ua_to_reward_id,
+)
 from recommender.engines.rl.ml_components.services_history_generator import (
     concat_histories,
 )
@@ -144,7 +146,7 @@ def _get_next_recommendation(recommendation):
     return next_recommendation
 
 
-def generate_sars(recommendation, root_uas):
+def _generate_sars(recommendation, root_uas):
     """Generate sars for given recommendation and root user actions"""
 
     user = recommendation.user or _get_empty_user()
@@ -192,10 +194,10 @@ class Executor:
         self.root_uas = root_uas
 
     def __call__(self, recc):
-        generate_sars(recc, self.root_uas)
+        _generate_sars(recc, self.root_uas)
 
 
-def generate_sarses(multi_processing=True):
+def generate_real_sarses(multi_processing=True):
     """Use this method to generate SARSes in the database"""
 
     # Find all root user actions rooted in recommendation panel
@@ -208,6 +210,6 @@ def generate_sarses(multi_processing=True):
             pool.map(executor, list(Recommendation.objects))
     else:
         for recommendation in Recommendation.objects:
-            generate_sars(recommendation, root_uas)
+            _generate_sars(recommendation, root_uas)
 
     return Sars.objects

@@ -2,7 +2,7 @@
 # pylint: disable=too-many-locals, invalid-name, unused-argument
 
 from recommender.engines.rl.ml_components.services_history_generator import (
-    leads_to_order,
+    _leads_to_order,
     generate_services_history,
     get_ordered_services,
 )
@@ -60,10 +60,10 @@ def test_services_history_generator(mongo):
     user.save()
 
     non_leading = [ua1, ua6, ua8, ua9, ua10, ua11]
-    assert any(leads_to_order(ua) for ua in non_leading) is False
+    assert any(_leads_to_order(ua) for ua in non_leading) is False
 
     leading = [root_ua, ua2, ua3, ua4, ua5, ua7]
-    assert all(leads_to_order(ua) for ua in leading) is True
+    assert all(_leads_to_order(ua) for ua in leading) is True
 
     services_history = generate_services_history(user)
     valid_services_history = user.accessed_services[:-1] + [

@@ -2,7 +2,7 @@
 import torch
 import pytest
 
-from recommender.engines.rl.ml_components.reward_encoder import (
+from recommender.engines.rl.ml_components.encoders.reward_encoder import (
     RewardEncoder,
 )
 

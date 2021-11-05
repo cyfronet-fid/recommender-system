@@ -11,12 +11,14 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     SERVICE_EMBEDDER,
 )
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
-from recommender.engines.rl.utils import create_state
+from recommender.engines.rl.ml_components.services_history_generator import (
+    generate_services_history,
+)
 from recommender.engines.base.base_inference_component import BaseInferenceComponent
-from recommender.engines.rl.ml_components.actor import Actor
-from recommender.engines.rl.ml_components.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.models.actor import Actor
+from recommender.engines.rl.ml_components.encoders.state_encoder import StateEncoder
 from recommender.engines.rl.ml_components.service_selector import ServiceSelector
-from recommender.models import User, SearchData
+from recommender.models import User, SearchData, State
 
 
 class RLInferenceComponent(BaseInferenceComponent):
@@ -40,7 +42,11 @@ class RLInferenceComponent(BaseInferenceComponent):
         self.service_selector = ServiceSelector(self.service_embedder)
 
     def _for_logged_user(self, user: User, search_data: SearchData) -> Tuple[int]:
-        state = create_state(user, search_data)
+        state = State(
+            user=user,
+            services_history=generate_services_history(user),
+            search_data=search_data,
+        )
         state_tensors = self.state_encoder([state])
         weights_tensor = self._get_weights(state_tensors)
         search_data_mask = self._get_search_data_mask(state_tensors)

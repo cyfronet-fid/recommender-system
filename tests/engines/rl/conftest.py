@@ -6,7 +6,6 @@ import torch
 from recommender.engines.autoencoders.training.model_training_step import (
     SERVICE_EMBEDDING_DIM,
     USER_EMBEDDING_DIM,
-    LR,
 )
 from recommender.engines.base.base_steps import (
     DataExtractionStep,
@@ -17,10 +16,10 @@ from recommender.engines.base.base_steps import (
     ModelValidationStep,
 )
 from recommender.engines.constants import VERBOSE, DEVICE
-from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
+from recommender.engines.rl.ml_components.synthetic_sarses.rewards import (
     RewardGeneration,
 )
-from recommender.engines.rl.training.data_extraction_step.data_extraction_step import (
+from recommender.engines.rl.training.data_extraction_step import (
     GENERATE_NEW,
     MIN_RECOMMENDATIONS,
     MIN_USER_ACTIONS,
@@ -29,18 +28,18 @@ from recommender.engines.rl.training.data_extraction_step.data_extraction_step i
     INTERACTIONS_RANGE,
     REWARD_GENERATION_MODE,
 )
-from recommender.engines.rl.training.data_preparation_step.data_preparation_step import (
+from recommender.engines.rl.training.data_preparation_step import (
     SHUFFLE,
     SARS_BATCH_SIZE,
 )
-from recommender.engines.rl.training.data_validation_step.data_validation_step import (
+from recommender.engines.rl.training.data_validation_step import (
     MIN_EMPTY_TO_NON_EMPTY_RATIO,
     MIN_SARSES,
 )
-from recommender.engines.rl.training.model_evaluation_step.model_evaluation_step import (
+from recommender.engines.rl.training.model_evaluation_step import (
     TIME_MEASUREMENT_SAMPLES,
 )
-from recommender.engines.rl.training.model_training_step.model_training_step import (
+from recommender.engines.rl.training.model_training_step import (
     RL_EPOCHS,
     ACT_MAX,
     ACT_MIN,
@@ -58,7 +57,7 @@ from recommender.engines.rl.training.model_training_step.model_training_step imp
     HISTORY_LEN,
     LEARNING_RATE,
 )
-from recommender.engines.rl.training.model_validation_step.model_validation_step import (
+from recommender.engines.rl.training.model_validation_step import (
     TIME_UPPER_BOUND,
     REWARD_LOWER_BOUND,
 )

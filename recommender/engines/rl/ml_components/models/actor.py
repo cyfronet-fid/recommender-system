@@ -8,7 +8,7 @@ from torch import nn
 from torch.nn import BatchNorm1d
 
 from recommender.engines.persistent_mixin import Persistent
-from recommender.engines.rl.ml_components.history_embedder import HistoryEmbedder
+from recommender.engines.rl.ml_components.models.history_embedder import HistoryEmbedder
 
 ACTOR_V1 = "actor_v1"
 ACTOR_V2 = "actor_v2"

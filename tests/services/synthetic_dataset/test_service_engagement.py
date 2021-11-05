@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 import pytest
 
-from recommender.engines.rl.ml_components.synthetic_dataset.service_engagement import (
+from recommender.engines.rl.ml_components.synthetic_sarses import (
     approx_service_engagement,
     _distance_metric,
     _compute_distance_score,

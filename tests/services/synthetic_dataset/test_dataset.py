@@ -3,7 +3,7 @@
 import torch
 import pytest
 
-from recommender.engines.rl.ml_components.synthetic_dataset.dataset import (
+from recommender.engines.rl.ml_components.synthetic_sarses.synthetic_sarses import (
     _normalize_embedded_services,
 )
 

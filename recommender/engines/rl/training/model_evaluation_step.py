@@ -8,7 +8,7 @@ from typing import Tuple
 import pandas as pd
 
 from recommender.engines.constants import DEVICE
-from recommender.engines.rl.ml_components.reward_mapping import (
+from recommender.engines.rl.ml_components.real_sarses.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
 )
 from recommender.engines.autoencoders.ml_components.embedder import (
@@ -21,10 +21,13 @@ from recommender.engines.autoencoders.ml_components.normalizer import (
     NormalizationMode,
 )
 from recommender.engines.base.base_steps import ModelEvaluationStep
-from recommender.engines.rl.ml_components.reward_encoder import RewardEncoder
-from recommender.engines.rl.ml_components.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.encoders.reward_encoder import RewardEncoder
+from recommender.engines.rl.ml_components.encoders.state_encoder import StateEncoder
+from recommender.engines.rl.ml_components.services_history_generator import (
+    generate_services_history,
+)
 from recommender.engines.rl.ml_components.service_selector import ServiceSelector
-from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
+from recommender.engines.rl.ml_components.synthetic_sarses.rewards import (
     synthesize_reward,
 )
 from recommender.engines.rl.utils import create_state
@@ -73,6 +76,7 @@ class RLModelEvaluationStep(ModelEvaluationStep):
 
         return normalized_services, index_id_map
 
+    # TODO: evaluate reward and mean recommendation time in one full sweep
     def _evaluate_reward(self, actor, sarses):
         # TODO: Later add more than 1 step per episode for evaluation
         rewards = []
@@ -110,7 +114,11 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         for _ in range(self.time_measurement_samples):
             start = time()
             example_user = random.choice(sarses).state.user
-            example_state = create_state(example_user, SearchData())
+            example_state = State(
+                user=example_user,
+                services_history=generate_services_history(example_user),
+                search_data=SearchData(),
+            )
             self._get_recommendation(actor, example_state)
             end = time()
             recommendation_durations.append(end - start)

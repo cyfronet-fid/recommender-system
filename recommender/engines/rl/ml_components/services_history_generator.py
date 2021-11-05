@@ -44,7 +44,7 @@ def _bfs_ordered_finder(uas: List[UserAction]) -> bool:
     return order
 
 
-def leads_to_order(user_action: UserAction) -> bool:
+def _leads_to_order(user_action: UserAction) -> bool:
     """
     Check if this user action leads to the service order.
 
@@ -100,7 +100,7 @@ def concat_histories(accessed_services, root_uas):
     clicked_services = _get_ruas_services(root_uas)
 
     # Get ordered services
-    root_uas_leading_to_order = list(filter(leads_to_order, root_uas))
+    root_uas_leading_to_order = list(filter(_leads_to_order, root_uas))
     ordered_services = _get_ruas_services(root_uas_leading_to_order)
 
     # Smart concat
@@ -175,7 +175,7 @@ def get_ordered_services(user: User) -> List[Service]:
     )
 
     # Get ordered services
-    root_uas_leading_to_order = list(filter(leads_to_order, root_uas))
+    root_uas_leading_to_order = list(filter(_leads_to_order, root_uas))
     ordered_services = _get_ruas_services(root_uas_leading_to_order)
 
     # Smart concat

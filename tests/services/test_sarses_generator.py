@@ -3,10 +3,12 @@
 from tests.factories.marketplace import UserFactory
 from tests.factories.recommendation import RecommendationFactory, faker
 from tests.factories.user_action import UserActionFactory
-from recommender.engines.rl.ml_components.sarses_generator import generate_sarses
+from recommender.engines.rl.ml_components.real_sarses import generate_real_sarses
 from recommender.models import Sars, UserAction
-from recommender.engines.rl.ml_components.reward_mapping import ua_to_reward_id
-from recommender.engines.rl.ml_components.sarses_generator import (
+from recommender.engines.rl.ml_components.real_sarses.reward_mapping import (
+    ua_to_reward_id,
+)
+from recommender.engines.rl.ml_components.real_sarses import (
     RECOMMENDATION_PAGES_IDS,
     _tree_collapse,
     _get_clicked_services_and_reward,
@@ -207,7 +209,7 @@ class TestSarsesGenerator:
 
         _next_recommendation = RecommendationFactory(v1=True, user=user)
 
-        generate_sarses(multi_processing=False)
+        generate_real_sarses(multi_processing=False)
         sars = Sars.objects.first()
 
         clicked_before = user.accessed_services + ruas2services(
@@ -279,7 +281,7 @@ class TestSarsesGenerator:
             v1=True, not_logged=True, unique_id=unique_id
         )
 
-        generate_sarses(multi_processing=False)
+        generate_real_sarses(multi_processing=False)
         sars = Sars.objects.first()
 
         clicked_before = ruas2services(root_actions_before_recommendation)

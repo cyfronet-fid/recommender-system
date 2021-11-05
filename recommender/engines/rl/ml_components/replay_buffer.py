@@ -1,21 +1,10 @@
-# pylint: disable=too-few-public-methods, missing-function-docstring, no-member
-
-"""Replay Buffer implementation"""
-
 from torch.utils.data import Dataset
 
-from recommender.engines.rl.ml_components.sars_encoder import (
-    STATE,
-    USER,
-    SERVICES_HISTORY,
-    ACTION,
-    REWARD,
-    NEXT_STATE,
-    MASK,
-)
+from recommender.engines.rl.ml_components.encoders.sars_encoder import STATE, USER, SERVICES_HISTORY, MASK, ACTION, \
+    REWARD, NEXT_STATE
 
 
-class ReplayBufferV2(Dataset):
+class ReplayBuffer(Dataset):
     """Replay Buffer used in Reinforcement Learning Actor Critic algorithm training."""
 
     def __init__(self, encoded_sarses: dict) -> None:
