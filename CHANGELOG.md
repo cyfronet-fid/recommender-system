@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+## [3.0.1] - 2021-11-05
+### Added
+
+### Changed
+- Training time significantly decreased, by reducing epochs and unused models [@wujuu]
+
+### Fixed
+- Fixed RLInference bugs on user's history longer than max history length [@wujuu] 
+
+### Removed
+
 ## [3.0.0] - 2021-10-27
 ### Added
 - fix AGENT_VERSION default in execute_training task [@JanKapala]
