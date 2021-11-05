@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
-
+- Flask CLI commands (testing db seed, execution of individual AI pipelines and more) [@wujuu]
 ### Changed
 
 ### Fixed

@@ -16,7 +16,7 @@ from recommender.api import api
 from recommender.models import User
 from settings import config_by_name
 
-from .commands import seed_faker, train_rl_pipeline, execute_pipelines
+from .commands import seed_faker, seed_db, execute_training, drop_mp_dump_task
 
 
 def create_app():
@@ -42,13 +42,18 @@ def _register_commands(app):
     def seed_faker_command():
         seed_faker()
 
-    @app.cli.command("train_rl_pipeline")
-    def rl_pipeline_command():
-        train_rl_pipeline()
+    @app.cli.command("seed_mp_dump")
+    def seed_mp_dump_command():
+        seed_db()
 
-    @app.cli.command("execute_pipelines")
-    def execute_pipelines_command():
-        execute_pipelines()
+    @app.cli.command("drop_mp_dump")
+    def drop_mp_dump_command():
+        drop_mp_dump_task()
+
+    @app.cli.command("execute_training")
+    @click.argument("task")
+    def execute_training_command(task):
+        execute_training(task)
 
 
 def _register_extensions(app):

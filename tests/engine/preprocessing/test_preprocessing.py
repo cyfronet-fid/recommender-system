@@ -104,9 +104,9 @@ def test_precalculate_tensors(mongo):
 
 def test_precalc_users_and_service_tensors(mongo):
     populate_users_and_services(
-        common_services_number=4,
-        no_one_services_number=1,
-        users_number=4,
+        common_services_no=4,
+        unordered_services_no=1,
+        total_users=4,
         k_common_services_min=1,
         k_common_services_max=3,
     )
