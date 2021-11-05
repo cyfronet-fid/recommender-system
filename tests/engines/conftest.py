@@ -51,9 +51,9 @@ from tests.factories.populate_database import populate_users_and_services
 @pytest.fixture
 def generate_data(mongo):
     populate_users_and_services(
-        common_services_number=9,
-        no_one_services_number=9,
-        users_number=5,
+        common_services_no=9,
+        unordered_services_no=9,
+        total_users=5,
         k_common_services_min=5,
         k_common_services_max=7,
     )
