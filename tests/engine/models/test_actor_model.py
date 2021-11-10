@@ -12,6 +12,7 @@ def test_actor_proper_shape():
     N = 5
     SE = 16
     BATCH_SIZE = 64
+    max_N = 20
     UE = 50
     K = 3
     I = 100
@@ -22,6 +23,6 @@ def test_actor_proper_shape():
 
     example_state = (example_user, example_services_history, example_mask)
 
-    actor = Actor(K, SE, UE, I, MLPHistoryEmbedder(SE))
+    actor = Actor(K, SE, UE, I, MLPHistoryEmbedder(SE, max_N))
 
     assert actor(example_state).shape == torch.Size([BATCH_SIZE, K, SE])

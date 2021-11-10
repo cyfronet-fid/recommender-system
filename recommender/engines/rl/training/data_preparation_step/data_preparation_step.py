@@ -15,9 +15,6 @@ from recommender.engines.base.base_steps import DataPreparationStep
 from recommender.engines.rl.training.data_preparation_step.replay_buffer_v2 import (
     ReplayBufferV2,
 )
-from recommender.engines.rl.training.model_training_step.model_training_step import (
-    HISTORY_LEN,
-)
 
 SARS_BATCH_SIZE = "sars_batch_size"
 SHUFFLE = "shuffle"
@@ -28,12 +25,9 @@ class RLDataPreparationStep(DataPreparationStep):
         super().__init__(pipeline_config)
         self.batch_size = self.resolve_constant(SARS_BATCH_SIZE, 64)
         self.shuffle = self.resolve_constant(SHUFFLE, True)
-        self.history_len = self.resolve_constant(HISTORY_LEN, 20)
         self.user_embedder = Embedder.load(version=USER_EMBEDDER)
         self.service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
-        self.sars_encoder = SarsEncoder(
-            self.user_embedder, self.service_embedder, self.history_len
-        )
+        self.sars_encoder = SarsEncoder(self.user_embedder, self.service_embedder)
 
     def __call__(self, data=None) -> Tuple[tuple, dict]:
         encoding_start = time.time()
