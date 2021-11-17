@@ -3,6 +3,7 @@
 
 """Recommendations endpoint definition"""
 import copy
+import os
 from typing import Dict, Any
 
 from flask import request
@@ -24,6 +25,9 @@ from recommender.api.schemas.recommendation import (
 )
 from recommender.services.deserializer import Deserializer
 
+NCF_ENGINE_NAME = "NCF"
+RL_ENGINE_NAME = "RL"
+
 api = Namespace("recommendations", "Endpoint used for getting recommendations")
 
 
@@ -43,6 +47,20 @@ def get_K(context: Dict[str, Any]) -> int:
     return K
 
 
+def get_default_recommendation_alg(env_variable: str = "DEFAULT_RECOMMENDATION_ALG"):
+    """
+    Get the default recommendation algorithm from the .env
+
+    Args:
+        env_variable: the name of the default recommendation algorithm from .env
+    """
+    recommendation_alg = os.environ.get(env_variable, "RL")
+
+    if recommendation_alg == "NCF":
+        return NCFInferenceComponent
+    return RLInferenceComponent
+
+
 def load_engine(json_dict: dict) -> BaseInferenceComponent:
     """
     Load the engine based on 'engine_version' parameter from a query
@@ -57,10 +75,13 @@ def load_engine(json_dict: dict) -> BaseInferenceComponent:
     K = get_K(json_dict)
 
     engines = {
-        NCFInferenceComponent.__name__: NCFInferenceComponent,
-        RLInferenceComponent.__name__: RLInferenceComponent,
+        NCF_ENGINE_NAME: NCFInferenceComponent,
+        RL_ENGINE_NAME: RLInferenceComponent,
     }
-    engine = engines.get(engine_version, RLInferenceComponent)(K)
+
+    def_recommend_alg = get_default_recommendation_alg("DEFAULT_RECOMMENDATION_ALG")
+    engine = engines.get(engine_version, def_recommend_alg)(K)
+
     return engine
 
 

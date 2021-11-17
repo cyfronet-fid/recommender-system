@@ -33,7 +33,7 @@ git clone https://github.com/cyfronet-fid/recommender-system.git
 ```
 3. Install all required project packages by executing
 ```bash
-pipenv --dev install
+pipenv install --dev
 ```
 
 4. To open project virtual environment shell, type:
@@ -126,13 +126,13 @@ NOTE: The url of the jupyter server will be displayed in the docker-compose outp
 
 ### Training
 
-Recommender system can use one of two recommendation engines implemented as agents:
-- `Pre Agent` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
-- `RL Agent` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
+Recommender system can use one of two recommendation engines implemented:
+- `NCF` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
+- `RL` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
 
-Use `AGENT_VERSION` env variable to select an agent version (look into [ENV variables](#env-variables) section). You don't have to restart the server after the modification of this variable in the .env file - the system will use an appropriate agent dynamically (if it is trained).
-
-For now the only trainable recommendation agent is the Pre Agent. RL Agent training will be available soon.
+To specify from which engine the recommendations are requested, provide optional `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine.
+It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
+(look into [ENV variables](#env-variables) section).
 
 The simplest way to train a chosen agent is using `./bin/rails recommender:update` task on the Marketplace side. It sends a request to the `/update` endpoint of the Recommender System. It automatically sends most recent training data, preprocesses and uses it to train needed models.
 
@@ -171,7 +171,7 @@ present in the project root directory. Details:
 - `SENTRY_ENVIRONMENT` - environment name - it's optional and it can be a free-form string. If not specified and using docker, it is set to `development`/`testing`/`production` respectively to the docker environment.
 - `SENTRY_RELEASE` - human readable release name - it's optional and it can be a free-form string. If not specified, sentry automatically set it based on commit revision number.
 - `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
-- `AGENT_VERSION` - the version of the recommender agent (one of `pre_agent`, `rl_agent`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
+- `DEFAULT_RECOMMENDATION_ALG` - the version of the recommender engine (one of `NCF`, `RL`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 
