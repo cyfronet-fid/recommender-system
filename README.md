@@ -33,7 +33,7 @@ git clone https://github.com/cyfronet-fid/recommender-system.git
 ```
 3. Install all required project packages by executing
 ```bash
-pipenv --dev install
+pipenv install --dev
 ```
 
 4. To open project virtual environment shell, type:
