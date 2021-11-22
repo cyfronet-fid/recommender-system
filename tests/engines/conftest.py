@@ -23,6 +23,8 @@ from recommender.engines.autoencoders.training.data_validation_step import (
 )
 from recommender.engines.autoencoders.training.model_evaluation_step import BATCH_SIZE
 from recommender.engines.autoencoders.training.model_training_step import (
+    ENCODER_LAYER_SIZES,
+    DECODER_LAYER_SIZES,
     USER_EMBEDDING_DIM,
     SERVICE_EMBEDDING_DIM,
     LOSS_FUNCTION,
@@ -78,6 +80,8 @@ def ae_pipeline_config(embedding_dims):
         DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 1},
         DataPreparationStep.__name__: {TRAIN_DS_SIZE: 0.6, VALID_DS_SIZE: 0.2},
         ModelTrainingStep.__name__: {
+            ENCODER_LAYER_SIZES: (128, 64),
+            DECODER_LAYER_SIZES: (64, 128),
             USER_BATCH_SIZE: 128,
             SERVICE_BATCH_SIZE: 128,
             USER_EMBEDDING_DIM: user_embedding_dim,

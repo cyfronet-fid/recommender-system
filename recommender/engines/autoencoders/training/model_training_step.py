@@ -28,6 +28,8 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     USER_EMBEDDER,
 )
 
+ENCODER_LAYER_SIZES = "encoder_layer_sizes"
+DECODER_LAYER_SIZES = "decoder_layer_sizes"
 USER_BATCH_SIZE = "user_batch_size"
 SERVICE_BATCH_SIZE = "service_batch_size"
 USER_EMBEDDING_DIM = "user_embedding_dim"
@@ -45,6 +47,8 @@ DATASET = "dataset"
 
 def create_autoencoder_model(
     collection_name,
+    encoder_layer_sizes,
+    decoder_layer_sizes,
     features_dim,
     embedding_dim,
     writer=None,
@@ -54,14 +58,10 @@ def create_autoencoder_model(
     """This function should be used to instantiate and Autoencoder rather
     than direct autoencoder class"""
 
-    if collection_name == USERS:
-        model = AutoEncoder(features_dim=features_dim, embedding_dim=embedding_dim).to(
-            device
-        )
-    elif collection_name == SERVICES:
-        model = AutoEncoder(features_dim=features_dim, embedding_dim=embedding_dim).to(
-            device
-        )
+    if collection_name in (USERS, SERVICES):
+        model = AutoEncoder(
+            features_dim, embedding_dim, encoder_layer_sizes, decoder_layer_sizes
+        ).to(device)
     else:
         raise ValueError
 
@@ -166,6 +166,8 @@ def train_autoencoder(
 
 def perform_training(
     collection_name,
+    encoder_layer_sizes,
+    decoder_layer_sizes,
     train_ds_dl,
     embedding_dim,
     features_dim,
@@ -179,6 +181,8 @@ def perform_training(
 
     autoencoder_model = create_autoencoder_model(
         collection_name,
+        encoder_layer_sizes=encoder_layer_sizes,
+        decoder_layer_sizes=decoder_layer_sizes,
         features_dim=features_dim,
         embedding_dim=embedding_dim,
         writer=writer,
@@ -220,6 +224,8 @@ class AEModelTrainingStep(ModelTrainingStep):
         self.device = self.resolve_constant(DEVICE, torch.device("cpu"))
         self.writer = self.resolve_constant(WRITER)
         self.verbose = self.resolve_constant(VERBOSE, True)
+        self.encoder_layer_sizes = self.resolve_constant(ENCODER_LAYER_SIZES, (128, 64))
+        self.decoder_layer_sizes = self.resolve_constant(DECODER_LAYER_SIZES, (64, 128))
         self.user_batch_size = self.resolve_constant(USER_BATCH_SIZE, 128)
         self.service_batch_size = self.resolve_constant(SERVICE_BATCH_SIZE, 128)
         self.user_embedding_dim = self.resolve_constant(USER_EMBEDDING_DIM, 32)
@@ -247,6 +253,8 @@ class AEModelTrainingStep(ModelTrainingStep):
 
         user_model, user_loss, user_timer = perform_training(
             collection_name=USERS,
+            encoder_layer_sizes=self.encoder_layer_sizes,
+            decoder_layer_sizes=self.decoder_layer_sizes,
             train_ds_dl=user_train_ds_dl,
             embedding_dim=self.user_embedding_dim,
             features_dim=user_features_dim,
@@ -266,6 +274,8 @@ class AEModelTrainingStep(ModelTrainingStep):
 
         service_model, service_loss, service_timer = perform_training(
             collection_name=SERVICES,
+            encoder_layer_sizes=self.encoder_layer_sizes,
+            decoder_layer_sizes=self.decoder_layer_sizes,
             train_ds_dl=service_train_ds_dl,
             embedding_dim=self.service_embedding_dim,
             features_dim=service_features_dim,

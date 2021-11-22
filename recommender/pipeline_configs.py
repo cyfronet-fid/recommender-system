@@ -71,6 +71,8 @@ from recommender.engines.ncf.training.model_validation_step import (
 
 from recommender.engines.autoencoders.training.model_training_step import (
     LOSS_FUNCTION as AE_LOSS_FUNCTION,
+    ENCODER_LAYER_SIZES,
+    DECODER_LAYER_SIZES,
     USER_BATCH_SIZE,
     SERVICE_BATCH_SIZE,
     USER_EMBEDDING_DIM,
@@ -137,6 +139,8 @@ AUTOENCODERS_PIPELINE_CONFIG = {
     DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 1},
     DataPreparationStep.__name__: {TRAIN_DS_SIZE: 0.96, VALID_DS_SIZE: 0.02},
     ModelTrainingStep.__name__: {
+        ENCODER_LAYER_SIZES: (128, 64),
+        DECODER_LAYER_SIZES: (64, 128),
         USER_BATCH_SIZE: 128,
         SERVICE_BATCH_SIZE: 128,
         SERVICE_EMBEDDING_DIM: SE,
