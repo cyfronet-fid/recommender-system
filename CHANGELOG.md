@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add the AI docs, describing the training, data and algorithm evaluation
 - Flask CLI commands (testing db seed, execution of individual AI pipelines and more) [@wujuu]
+- Unit and integration tests for each pipeline step of the autoencoders [@Michal-Kolomanski]
+- New ENV variable, which points to default recommendation algorithm [@Michal-Kolomanski]
+- Methods refactoring in the AEDataPreparationStep [@Michal-Kolomanski]
+- The ability to modify the sizes and number of layers in the autoencoders networks.[@Michal-Kolomanski]
+- Refactoring neural network layer definitions across all pipelines [@Michal-Kolomanski]
 
 ### Changed
 

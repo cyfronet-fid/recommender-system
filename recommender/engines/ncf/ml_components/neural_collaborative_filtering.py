@@ -39,11 +39,9 @@ class NeuralCollaborativeFilteringModel(Module, Persistent):
             service_ids_embedding_dim,
             mlp_layers_spec,
         )
-
         self.content_mlp = ContentMLP(
             content_mlp_layers_spec, user_emb_dim, service_emb_dim
         )
-
         self.fc = Linear(
             mf_embedding_dim + mlp_layers_spec[-1] + content_mlp_layers_spec[-1], 1
         )

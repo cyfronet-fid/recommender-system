@@ -1,17 +1,17 @@
 # pylint: disable=invalid-name, too-many-arguments, no-member
 
 """Critic Model implementation"""
-from itertools import chain
 from typing import Tuple
 
 import torch
-from torch.nn import Linear, ReLU, Sequential, BatchNorm1d
+from torch.nn import Module, Sequential, ReLU
 
 from recommender.engines.persistent_mixin import Persistent
 from recommender.engines.rl.ml_components.history_embedder import HistoryEmbedder
+from recommender.engines.base.base_neural_network import BaseNeuralNetwork
 
 
-class Critic(torch.nn.Module, Persistent):
+class Critic(Module, Persistent, BaseNeuralNetwork):
     """Critic Model"""
 
     def __init__(
@@ -29,20 +29,12 @@ class Critic(torch.nn.Module, Persistent):
 
         self.history_embedder = history_embedder
 
-        layers = [
-            Linear(UE + SE + I + K * SE, layer_sizes[0]),
-            ReLU(),
-            BatchNorm1d(layer_sizes[0]),
-        ]
-        layers += list(
-            chain.from_iterable(
-                [
-                    [Linear(n_size, next_n_size), ReLU(), BatchNorm1d(next_n_size)]
-                    for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
-                ]
-            )
+        input_dim = UE + SE + I + K * SE
+        output_dim = 1
+
+        layers = self._create_layers(
+            input_dim, output_dim, layer_sizes, inc_batchnorm=True, activation=ReLU
         )
-        layers += [(Linear(layer_sizes[-1], 1))]
 
         self.network = Sequential(*layers)
 

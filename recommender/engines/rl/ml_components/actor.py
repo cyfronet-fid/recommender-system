@@ -1,20 +1,19 @@
 # pylint: disable=missing-module-docstring, invalid-name, too-many-arguments, no-member
 
 from typing import Tuple
-from itertools import chain
 
 import torch
-from torch import nn
-from torch.nn import BatchNorm1d
+from torch.nn import Module, Sequential, ReLU
 
 from recommender.engines.persistent_mixin import Persistent
 from recommender.engines.rl.ml_components.history_embedder import HistoryEmbedder
+from recommender.engines.base.base_neural_network import BaseNeuralNetwork
 
 ACTOR_V1 = "actor_v1"
 ACTOR_V2 = "actor_v2"
 
 
-class Actor(nn.Module, Persistent):
+class Actor(Module, Persistent, BaseNeuralNetwork):
     """Actor neural network representing a deterministic policy used by RLAgent"""
 
     def __init__(
@@ -42,26 +41,14 @@ class Actor(nn.Module, Persistent):
 
         self.history_embedder = history_embedder
 
-        layers = [
-            nn.Linear(UE + SE + I, layer_sizes[0]),
-            nn.ReLU(),
-            BatchNorm1d(layer_sizes[0]),
-        ]
-        layers += list(
-            chain.from_iterable(
-                [
-                    [
-                        nn.Linear(n_size, next_n_size),
-                        nn.ReLU(),
-                        BatchNorm1d(next_n_size),
-                    ]
-                    for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
-                ]
-            )
-        )
-        layers += [(nn.Linear(layer_sizes[-1], K * SE))]
+        input_dim = UE + SE + I
+        output_dim = K * SE
 
-        self.network = nn.Sequential(*layers)
+        layers = self._create_layers(
+            input_dim, output_dim, layer_sizes, inc_batchnorm=True, activation=ReLU
+        )
+
+        self.network = Sequential(*layers)
 
     def forward(self, state: Tuple[(torch.Tensor,) * 3]) -> torch.Tensor:
         """
