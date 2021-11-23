@@ -1,12 +1,14 @@
 # pylint: disable=invalid-name
 
 """This module defines the history embedder classes"""
-from itertools import chain
 from abc import ABC, abstractmethod
 
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torch.nn import ReLU
+
+from recommender.engines.base.base_neural_network import BaseNeuralNetwork
 
 
 class HistoryEmbedder(torch.nn.Module, ABC):
@@ -60,7 +62,7 @@ class LSTMHistoryEmbedder(HistoryEmbedder):
         return output[:, -1]
 
 
-class MLPHistoryEmbedder(HistoryEmbedder):
+class MLPHistoryEmbedder(HistoryEmbedder, BaseNeuralNetwork):
     """
     Model used for transforming services history tensor [N, SE]
     into a history tensor [SE], using a simple feed forward network.
@@ -78,16 +80,12 @@ class MLPHistoryEmbedder(HistoryEmbedder):
         self.max_N = max_N
         self.SE = SE
 
-        layers = [torch.nn.Linear(self.max_N * SE, layer_sizes[0]), nn.ReLU()]
-        layers += list(
-            chain.from_iterable(
-                [
-                    [nn.Linear(n_size, next_n_size), nn.ReLU()]
-                    for n_size, next_n_size in zip(layer_sizes, layer_sizes[1:])
-                ]
-            )
+        input_dim = self.max_N * SE
+        output_dim = SE
+
+        layers = self._create_layers(
+            input_dim, output_dim, layer_sizes, inc_batchnorm=False, activation=ReLU
         )
-        layers += [(nn.Linear(layer_sizes[-1], SE))]
 
         self.network = nn.Sequential(*layers)
 

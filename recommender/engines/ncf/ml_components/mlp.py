@@ -3,10 +3,12 @@
 """Multilayer Perceptron used in Neural Collaborative Filtering model"""
 
 import torch
-from torch.nn import Module, Embedding, Linear, ReLU, BatchNorm1d, Sequential
+from torch.nn import Module, Embedding, Sequential, ReLU
+
+from recommender.engines.base.base_neural_network import BaseNeuralNetwork
 
 
-class MLP(Module):
+class MLP(Module, BaseNeuralNetwork):
     """Multilayer Perceptron"""
 
     def __init__(
@@ -24,32 +26,13 @@ class MLP(Module):
             services_max_id + 1, service_ids_embedding_dim
         )
 
-        self.layers = self.create_layers(
-            user_ids_embedding_dim, service_ids_embedding_dim, layers_spec
+        input_dim = user_ids_embedding_dim + service_ids_embedding_dim
+        output_dim = False
+
+        layers = self._create_layers(
+            input_dim, output_dim, layers_spec, inc_batchnorm=True, activation=ReLU
         )
-
-    def create_layers(
-        self, user_ids_embedding_dim, service_ids_embedding_dim, layers_spec
-    ):
-        layers = []
-        first = torch.nn.Sequential(
-            Linear(user_ids_embedding_dim + service_ids_embedding_dim, layers_spec[0]),
-            ReLU(),
-            BatchNorm1d(layers_spec[0]),
-        )
-        layers.append(first)
-
-        for i in range(len(layers_spec) - 1):
-            current = Sequential(
-                Linear(layers_spec[i], layers_spec[i + 1]),
-                ReLU(),
-                BatchNorm1d(layers_spec[i + 1]),
-            )
-            layers.append(current)
-
-        layers = Sequential(*layers)
-
-        return layers
+        self.layers = Sequential(*layers)
 
     def forward(self, users_ids, services_ids):
         mlp_user_tensor = self.mlp_user_embedder(users_ids)
