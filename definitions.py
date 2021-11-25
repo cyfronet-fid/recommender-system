@@ -1,7 +1,7 @@
 """This file contains global definitions"""
 
-import os
+from pathlib import Path
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-LOG_DIR = os.path.join(ROOT_DIR, "runs")
+ROOT_DIR = Path(__file__).resolve().parent
+LOG_DIR = ROOT_DIR / "runs"
+MIGRATIONS_DIR = ROOT_DIR / "recommender" / "migrate" / "migrations"

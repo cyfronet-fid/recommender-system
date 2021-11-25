@@ -45,6 +45,7 @@ pytest-xdist = "*"
 gym = "*"
 ray = {extras = ["default"], version = "*"}
 celery = {extras = ["redis"], version = "*"}
+click = "*"
 
 [requires]
 python_version = "3.7"

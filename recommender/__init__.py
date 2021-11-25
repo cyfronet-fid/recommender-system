@@ -11,12 +11,11 @@ from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
+from recommender.commands import migrate_command, train_command, db_command
 from recommender.extensions import db, celery
 from recommender.api import api
 from recommender.models import User
 from settings import config_by_name
-
-from .commands import seed_faker, seed_db, execute_training, drop_mp_dump_task
 
 
 def create_app():
@@ -38,22 +37,24 @@ def create_app():
 
 
 def _register_commands(app):
-    @app.cli.command("seed_faker")
-    def seed_faker_command():
-        seed_faker()
+    @app.cli.command("db")
+    @click.argument("task", type=click.Choice(["seed", "drop_mp", "seed_faker"]))
+    def tmp_db_command(task):
+        db_command(task)
 
-    @app.cli.command("seed_mp_dump")
-    def seed_mp_dump_command():
-        seed_db()
+    @app.cli.command("train")
+    @click.argument(
+        "task", type=click.Choice(["ae", "ncf", "rl_v1", "rl_v2", "embedding", "all"])
+    )
+    def tmp_train_command(task):
+        train_command(task)
 
-    @app.cli.command("drop_mp_dump")
-    def drop_mp_dump_command():
-        drop_mp_dump_task()
-
-    @app.cli.command("execute_training")
-    @click.argument("task")
-    def execute_training_command(task):
-        execute_training(task)
+    @app.cli.command("migrate")
+    @click.argument(
+        "task", type=click.Choice(["apply", "rollback", "list", "repopulate", "check"])
+    )
+    def tmp_migrate_command(task):
+        migrate_command(task)
 
 
 def _register_extensions(app):

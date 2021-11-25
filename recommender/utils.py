@@ -1,9 +1,8 @@
-# pylint: disable=invalid-name, no-member, missing-function-docstring, global-variable-undefined
+# pylint: disable=invalid-name, no-member, missing-function-docstring, global-variable-undefined, fixme
 
 """Project Utilities"""
 
 import json
-import os
 import random
 import functools
 from time import time
@@ -11,7 +10,7 @@ from datetime import datetime
 from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
 from bson import SON, ObjectId
-from mongoengine import Document, connect, disconnect
+from mongoengine import Document
 from torch.utils.tensorboard import SummaryWriter
 
 from definitions import LOG_DIR
@@ -19,7 +18,6 @@ from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_
 from recommender.models import User
 from recommender.models import Service
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
-from settings import DevelopmentConfig, ProductionConfig
 
 
 def _son_to_dict(son_obj: SON) -> dict:
@@ -181,25 +179,26 @@ def load_examples() -> Dict:
         "target_users": [1, 2, 3],
     }
 
+    # TODO: Commented, as it yet again breaks the application xd - migrations this time
     # Below, `os.environ["FLASK_ENV"]` and manual connection is used rather
     # than standard flask DB connection, because this code is executed before
     # flask app building is finished. It has to be done in this way to provide
     # realistic /recommendations endpoint examples in the swagger.
 
-    if os.environ.get("FLASK_ENV") == "testing":
-        return examples
-
-    if os.environ.get("FLASK_ENV") == "development":
-        host = DevelopmentConfig.MONGODB_HOST
-    elif os.environ.get("FLASK_ENV") == "production":
-        host = ProductionConfig.MONGODB_HOST
-    else:
-        return examples
-    connect(host=host)
-    examples = _get_search_data_examples(
-        k=max(list(PANEL_ID_TO_K.values())), deterministic=True
-    )
-    disconnect()
+    # if os.environ.get("FLASK_ENV") == "testing":
+    #     return examples
+    #
+    # if os.environ.get("FLASK_ENV") == "development":
+    #     host = DevelopmentConfig.MONGODB_HOST
+    # elif os.environ.get("FLASK_ENV") == "production":
+    #     host = ProductionConfig.MONGODB_HOST
+    # else:
+    #     return examples
+    # connect(host=host)
+    # examples = _get_search_data_examples(
+    #     k=max(list(PANEL_ID_TO_K.values())), deterministic=True
+    # )
+    # disconnect()
 
     return examples
 
