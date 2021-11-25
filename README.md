@@ -155,6 +155,32 @@ pipenv run pytest ./tests
 docker-compose -f docker-compose.testing.yml up && docker-compose -f docker-compose.testing.yml down
 ```
 
+### Migrations
+We are using MongoDB as our database, which is a NoSQL, schema-less, document-based DB. However, we are also using `mongoengine` - an
+ODM (Object Document Mapping), which defines a "schema" for each document (like specifying field names or required values). 
+This means that we need a minimalistic migration system to apply the defined "schema" changes, 
+like changing a field name or dropping a collection, if we want to maintain the Application <=> DB integrity.
+
+Migration flask CLI commands (first set the `FLASK_ENV` variable to either `development` or `production`):
+- `flask migrate apply` - applies migrations that have not been applied yet
+- `flask migrate rollback` - reverts the previously applied migration
+- `flask migrate list` - lists all migrations along with their application status
+- `flask migrate check` - checks the integrity of the migrations - if the migration files match the DB migration cache
+- `flask migrate repopulate` - deletes migration cache and repopulates it with all the migrations defined in `/recommender/migrate` dir.
+
+To create a new migration:
+1. In the `/recommender/migrations` dir:
+2. Create a python module with a name `YYYYMMDDMMHHSS_migration_name` (e.g. `20211126112815_remove_unused_collections`)
+3. In this module create a migration class (with an arbitrary name) which inherits from `BaseMigration`
+4. Implement `up` (application) and `down` (teardown) methods, by using `self.pymongo_db` ([pymongo](https://pymongo.readthedocs.io/en/stable/), a low-level adapter for mongoDB, connected to proper (dependent on the `FLASK_ENV` variable) recommender DB instance)
+
+(See existing files in the `/recommender/migrate` dir for a more detailed example.)
+
+**DO NOT DELETE EXISTING MIGRATION FILES. DO NOT CHANGE EXISTING MIGRATION FILE NAMES. DO NOT MODIFY THE CODE OF EXISTING MIGRATION FILES**
+
+(If you performed any of those actions, run `flask migrate check` to determine what went wrong.)
+
+
 ### ENV variables
 We are using .env to store instance specific constants or secrets. This file is not tracked by git and it needs to be 
 present in the project root directory. Details:
