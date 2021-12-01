@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The ability to modify the sizes and number of layers in the autoencoders networks.[@Michal-Kolomanski]
 - Refactoring neural network layer definitions across all pipelines [@Michal-Kolomanski]
 - Implement migration process [@wujuu]
+- Split validation in autoencoder's data preparation step [@Michal-Kolomanski]
 
 ### Changed
 

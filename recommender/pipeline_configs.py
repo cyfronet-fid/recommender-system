@@ -136,7 +136,7 @@ AUTOENCODERS_PIPELINE_CONFIG = {
     VERBOSE: True,
     AE_LOSS_FUNCTION: CosineEmbeddingLoss(),
     DataExtractionStep.__name__: {},
-    DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 1},
+    DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 2},
     DataPreparationStep.__name__: {TRAIN_DS_SIZE: 0.96, VALID_DS_SIZE: 0.02},
     ModelTrainingStep.__name__: {
         ENCODER_LAYER_SIZES: (128, 64),

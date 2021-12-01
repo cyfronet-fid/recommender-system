@@ -23,6 +23,7 @@ from recommender.engines.autoencoders.training.data_preparation_step import (
     TRAIN,
     VALID,
     TEST,
+    create_details,
 )
 from recommender.engines.autoencoders.training.model_training_step import (
     ENCODER_LAYER_SIZES,
@@ -105,7 +106,6 @@ def simulate_data_preparation_step(
     """Simulate the autoencoders data preparation step"""
 
     data = {AUTOENCODERS: {}}
-    details = {}
     config = ae_pipeline_config[DataPreparationStep.__name__]
     train_ds_size = config[TRAIN_DS_SIZE]
     valid_ds_size = config[VALID_DS_SIZE]
@@ -126,6 +126,7 @@ def simulate_data_preparation_step(
         )
 
         data[AUTOENCODERS][collection_name] = splitted_ds
+    details = create_details(data)
 
     return data, details
 

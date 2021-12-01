@@ -8,7 +8,7 @@ from recommender.engines.autoencoders.training.data_validation_step import (
     DATA_IS_VALID,
 )
 from recommender.errors import (
-    NoUsersOrServices,
+    NotEnoughUsersOrServices,
     NoCategoriesScientificDomains,
 )
 
@@ -37,7 +37,7 @@ def test_data_validation_step(
     data_ext_step, details_ext_step = get_empty_data_and_details()
 
     # Expect no users/services exception
-    with pytest.raises(NoUsersOrServices):
+    with pytest.raises(NotEnoughUsersOrServices):
         ae_data_validation_step(data_ext_step)
 
     # Simulate the proper data extraction step

@@ -104,9 +104,9 @@ class NoSavedMLComponentError(RecommendationEngineError):
         return "No saved ML component"
 
 
-class NoUsersOrServices(RecommendationEngineError):
+class NotEnoughUsersOrServices(RecommendationEngineError):
     def message(self):
-        return "There are no Users or Services"
+        return "There are not enough Users or Services"
 
 
 class NoCategoriesScientificDomains(RecommendationEngineError):
@@ -148,3 +148,11 @@ class NoSavedTransformerError(Exception):
 class DataSetTooSmallError(Exception):
     def message(self):  # pragma: no cover
         return "Not enough SARSes to train the RL agent"
+
+
+class InvalidDatasetSplit(Exception):
+    def message(self):
+        return """
+At the very least, valid and train datasets should have at least one user/service object.
+Raise the amount of passed users/services or adjust the splitting ratio.
+"""
