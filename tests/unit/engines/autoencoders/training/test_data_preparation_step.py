@@ -29,12 +29,14 @@ from recommender.engines.autoencoders.training.data_preparation_step import (
     create_transformer,
     precalc_users_and_service_tensors,
     create_users_transformer,
+    validate_split,
 )
 from recommender.errors import InvalidObject
 from recommender.models import Service
 from tests.factories.marketplace import ServiceFactory, UserFactory
 from tests.factories.populate_database import populate_users_and_services
 from tests.conftest import users_services_args
+from recommender.errors import InvalidDatasetSplit
 
 
 def test_data_preparation_step(
@@ -217,3 +219,46 @@ def test_precalc_users_and_service_tensors(
 
     for service in Service.objects:
         assert len(service.one_hot_tensor) > 0
+
+
+def test_validate_split(simulate_data_preparation_step):
+    """
+    Test validate_split function
+    -> with valid split
+    -> with invalid split
+    """
+    data, _ = simulate_data_preparation_step
+    data = data[AUTOENCODERS]
+    for dataset in data.values():
+        # Valid split
+        validate_split(dataset)
+
+    # Invalid split
+    invalid_data = {
+        USERS: {
+            TRAIN: data[USERS][TRAIN],
+            VALID: [],  # Valid should always have at lest one object
+            TEST: None,
+        },
+        SERVICES: {TRAIN: data[USERS][TRAIN], VALID: [], TEST: None},
+    }
+
+    for dataset in invalid_data.values():
+        with pytest.raises(InvalidDatasetSplit):
+            validate_split(dataset)
+
+
+def test_create_details(simulate_data_preparation_step):
+    """
+    Test create_details function which is called in simulate_data_preparation_step
+    -> Correctness of the returned set
+    """
+
+    _, details = simulate_data_preparation_step
+
+    for datasets in details.values():
+        assert TRAIN and VALID and TEST in datasets
+        assert len(datasets) == 3
+
+        for num_of_objects in datasets.values():
+            assert isinstance(num_of_objects, int)

@@ -7,7 +7,7 @@ from recommender.engines.base.base_steps import DataValidationStep
 from recommender.engines.autoencoders.training.data_extraction_step import AUTOENCODERS
 
 from recommender.errors import (
-    NoUsersOrServices,
+    NotEnoughUsersOrServices,
     NoCategoriesScientificDomains,
 )
 
@@ -18,7 +18,7 @@ LEAST_NUM_OF_USR_SRV = "least_num_of_usr_srv"
 def valid_num_of_usr_and_srv(collection: list, least_num_of_usr_srv: int = 1):
     """Check if there are users and services in data"""
     if len(collection) < least_num_of_usr_srv:
-        raise NoUsersOrServices()
+        raise NotEnoughUsersOrServices()
 
 
 def valid_properties(collection: list):
@@ -34,7 +34,7 @@ class AEDataValidationStep(DataValidationStep):
 
     def __init__(self, pipeline_config):
         super().__init__(pipeline_config)
-        self.least_num_of_usr_srv = self.resolve_constant(LEAST_NUM_OF_USR_SRV, 1)
+        self.least_num_of_usr_srv = self.resolve_constant(LEAST_NUM_OF_USR_SRV, 2)
 
     def __call__(self, data: Dict = None) -> Tuple[Dict, Dict]:
         details = {DATA_IS_VALID: False}

@@ -158,7 +158,7 @@ def ae_pipeline_config(embedding_dims):
         VERBOSE: True,
         LOSS_FUNCTION: CosineEmbeddingLoss(),
         DataExtractionStep.__name__: {},
-        DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 1},
+        DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 2},
         DataPreparationStep.__name__: {TRAIN_DS_SIZE: 0.6, VALID_DS_SIZE: 0.2},
         ModelTrainingStep.__name__: {
             USER_BATCH_SIZE: 128,

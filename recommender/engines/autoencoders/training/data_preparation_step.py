@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
 # pylint: disable=redefined-builtin, no-member, not-callable
-# pylint: disable=line-too-long, no-else-return
+# pylint: disable=line-too-long, no-else-return, fixme
 
 """Autoencoder Data Preparation Step."""
 
@@ -30,6 +30,7 @@ from recommender.engines.autoencoders.training.data_extraction_step import (
 )
 from recommender.engines.constants import DEVICE
 from recommender.models import User, Service
+from recommender.errors import InvalidDatasetSplit
 
 TRAIN = "training"
 VALID = "validation"
@@ -285,6 +286,28 @@ def split_autoencoder_datasets(
     return output
 
 
+def validate_split(datasets):
+    """Train and valid datasets should always have at least one object"""
+    for split in (TRAIN, VALID):
+        if len(datasets[split]) < 1:
+            print(
+                f"{split} dataset of user or service is empty after the split"
+            )  # TODO logger
+            raise InvalidDatasetSplit()
+
+
+def create_details(data):
+    """Count objects in each train/valid/test dataset for User/Service collections"""
+    details = {USERS: {}, SERVICES: {}}
+    data = data[AUTOENCODERS]
+
+    for collection, datasets in data.items():
+        for split in datasets:
+            details[collection][split] = len(split)
+
+    return details
+
+
 class AEDataPreparationStep(DataPreparationStep):
     """Autoencoder data preparation step"""
 
@@ -308,9 +331,10 @@ class AEDataPreparationStep(DataPreparationStep):
                 device=self.device,
             )
 
+            validate_split(splitted_ds)
             all_datasets[AUTOENCODERS][collection_name] = splitted_ds
 
-        details = {}
         data = all_datasets
+        details = create_details(data)
 
         return data, details
