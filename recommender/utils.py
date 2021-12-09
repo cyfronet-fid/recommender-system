@@ -1,4 +1,5 @@
-# pylint: disable=invalid-name, no-member, missing-function-docstring, global-variable-undefined, fixme
+# pylint: disable=invalid-name, no-member, missing-function-docstring
+# pylint: disable=global-variable-undefined, too-many-branches, fixme
 
 """Project Utilities"""
 
@@ -9,14 +10,17 @@ from time import time
 from datetime import datetime
 from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
+
+import graphviz
 from bson import SON, ObjectId
 from mongoengine import Document
 from torch.utils.tensorboard import SummaryWriter
+from tqdm.auto import tqdm
 
-from definitions import RUN_DIR
+from definitions import ROOT_DIR, RUN_DIR
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
-from recommender.models import User
-from recommender.models import Service
+from recommender.engines.rl.utils import _get_visit_ids
+from recommender.models import User, Service, UserAction, Recommendation
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
 from logger_config import get_logger
 
@@ -256,3 +260,58 @@ def clear_times():
     if "performance_measurements" not in globals():
         global performance_measurements
     performance_measurements = {}
+
+
+def visualize_uas(filename=None, view=True, save=False):
+    """Visualize all user actions as a graph in the svg file"""
+
+    if save:
+        filename = filename or ROOT_DIR / "graphs" / (
+            "user_actions_visualization" + "_" + str(time())
+        )
+    else:
+        filename = None
+    graph = graphviz.Digraph(name="Container")
+
+    for user_action in tqdm(UserAction.objects.order_by("+timestamp")):
+        ua_svid, ua_tvid = _get_visit_ids(user_action)
+
+        if user_action.action.order:
+            action_color = "red"
+            action_label = "Order"
+        else:
+            action_color = "black"
+            action_label = ""
+
+        # Source
+        source_label = ua_svid[:4]
+        source_color = "black"
+
+        recommendation = Recommendation.objects(visit_id=ua_svid).first()
+        if recommendation is not None:
+            if (
+                user_action.source.root is not None
+                and user_action.source.root.service is not None
+            ):
+                action_color = "green"
+                action_label = f"via service(id={user_action.source.root.service.id})"
+
+            source_color = "green"
+            source_label = f"{source_label}\n(recommendation)"
+
+        graph.node(ua_svid, label=source_label, color=source_color)
+
+        # Target
+        target_label = ua_tvid[:4]
+        target_color = "black"
+        recommendation = Recommendation.objects(visit_id=ua_tvid).first()
+        if recommendation is not None:
+            target_color = "green"
+            target_label = f"{target_label}\n(recommendation)"
+
+        graph.node(ua_tvid, label=target_label, color=target_color)
+
+        graph.edge(ua_svid, ua_tvid, color=action_color, label=action_label)
+
+    print("Rendering graph into SVG file...")
+    graph.render(filename=filename, format="svg", view=view)

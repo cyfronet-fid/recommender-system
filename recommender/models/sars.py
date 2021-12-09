@@ -8,6 +8,7 @@ from mongoengine import (
     BooleanField,
 )
 
+from .recommendation import Recommendation
 from .service import Service
 from .state import State
 
@@ -18,3 +19,4 @@ class Sars(Document):
     reward = ListField(ListField(StringField()))
     next_state = ReferenceField(State)
     synthetic = BooleanField(default=False)
+    source_recommendation = ReferenceField(Recommendation, blank=True)

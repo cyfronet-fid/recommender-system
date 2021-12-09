@@ -1,7 +1,7 @@
 # pylint: disable=missing-function-docstring
 
 """Flask CLI db commands"""
-
+from recommender.engines.rl.ml_components.sarses_generator import regenerate_sarses
 from recommender.models import (
     AccessMode,
     Service,
@@ -67,6 +67,14 @@ def _seed_faker():
         dump_names(clazz)
 
     dump_taglines()
+
+
+def _regenerate_sarses():
+    """Regenerate SARSes"""
+
+    print("Regenerating SARSes...")
+    regenerate_sarses(multi_processing=True, verbose=True)
+    print("SARSes regenerated successfully!")
 
 
 def db_command(task):

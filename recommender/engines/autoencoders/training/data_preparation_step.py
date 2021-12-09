@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
 # pylint: disable=redefined-builtin, no-member, not-callable
-# pylint: disable=line-too-long, no-else-return
+# pylint: disable=line-too-long, no-else-return, too-many-branches
 
 """Autoencoder Data Preparation Step."""
 

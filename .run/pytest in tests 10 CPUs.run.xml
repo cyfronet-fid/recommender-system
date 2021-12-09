@@ -1,12 +1,12 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="pytest in tests on max CPUs" type="tests" factoryName="py.test">
+  <configuration default="false" name="Pytest on max CPUs" type="tests" factoryName="py.test">
     <module name="recommender-system" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
     <envs>
       <env name="FLASK_ENV" value="testing" />
     </envs>
-    <option name="SDK_HOME" value="$USER_HOME$/.local/share/virtualenvs/recommender-system-r71yvAN0/bin/python" />
+    <option name="SDK_HOME" value="$USER_HOME$/.local/share/virtualenvs/recommender-system-EpR-2lwc/bin/python" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -24,7 +24,7 @@
     </EXTENSION>
     <option name="_new_keywords" value="&quot;&quot;" />
     <option name="_new_parameters" value="&quot;&quot;" />
-    <option name="_new_additionalArguments" value="&quot;-n auto&quot;" />
+    <option name="_new_additionalArguments" value="&quot;-n auto --randomly-seed\u003d1234&quot;" />
     <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
     <option name="_new_targetType" value="&quot;PATH&quot;" />
     <method v="2" />

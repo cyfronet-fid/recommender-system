@@ -6,6 +6,7 @@ from mongoengine import (
     DateTimeField,
     EmbeddedDocumentField,
     UUIDField,
+    BooleanField,
 )
 
 from .action import Action
@@ -21,3 +22,14 @@ class UserAction(Document):
     source = EmbeddedDocumentField(Source)
     target = EmbeddedDocumentField(Target)
     action = EmbeddedDocumentField(Action)
+    processed = BooleanField(default=False)
+
+    meta = {
+        "indexes": [
+            ("source.visit_id", "source.root.service"),
+            "user",
+            "unique_id",
+            "timestamp",
+            "source.root.type",
+        ]
+    }

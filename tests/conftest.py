@@ -1,14 +1,17 @@
 # pylint: disable-all
 
 """Fixtures used by pytest shared across all tests"""
+import time
+import uuid
 from random import seed, randint
 
 import pytest
 import mongoengine
 import torch
+from mongoengine import disconnect, connect, DEFAULT_CONNECTION_NAME
+from pymongo import uri_parser
 from torch.nn import CosineEmbeddingLoss, BCELoss
 from torch.optim import Adam
-from pymongo import uri_parser
 
 from recommender import create_app, User
 from recommender.engines.autoencoders.inference.embedding_component import (
@@ -146,14 +149,75 @@ def client(_app):
 
 
 @pytest.fixture
-def mongo(_app):
-    """MongoDB fixture"""
+def original_mongo(_app):
+    """MongoDB mock fixture
+    Works wit multiproc/sequential tests but only with sequential code.
+    Uses mongomock so it's very fast.
+
+    WARNING:
+        already it shouldn't be used because settings.TestingConfig.MONGODB_HOST doesn't use mongomock anymore.
+    """
+
     with _app.app_context():
         yield db
-        uri = db.app.config["MONGODB_HOST"]
-        db_name = uri_parser.parse_uri(uri)["database"]
-        db.connection.drop_database(db_name)
         mongoengine.connection.disconnect_all()
+
+
+@pytest.fixture
+def singlemongo(_app):
+    """MongoDB mock fixture.
+    Works with sequential tests of the multicore code.
+
+    Multicore code can't use mongomock so it uses real testing mongo db
+    It can't be used with multicore tests (use sequential tests)
+    """
+
+    with _app.app_context():
+        yield db
+        mongoengine.connection.disconnect_all()
+
+
+@pytest.fixture
+def multimongo(_app):
+    """MongoDB mock fixture.
+    Works with multicore tests of the multicore code.
+
+    Multicore code can't use mongomock so it uses real testing mongo db
+    Multicore tests can't write to the same DB in the same time so this fixture create one mongo db instance for each test and it drops it on the teardown.
+    """
+
+    def _get_db_info(db):
+        uri = db.app.config["MONGODB_HOST"]
+        info_dict = uri_parser.parse_uri(uri)
+        db_name = info_dict["database"]
+        host = info_dict["nodelist"][0][0]
+        port = info_dict["nodelist"][0][1]
+
+        return db_name, host, port
+
+    with _app.app_context():
+        # alias = mongoengine.DEFAULT_CONNECTION_NAME = "default"
+        # alias has to have above value because all mongoengine models in the recommender assume it.
+        # Also connect and disconnect functions use "default" alias as a default argument
+
+        db_name, host, port = _get_db_info(db)
+        disconnect()
+        testing_db_name = db_name + "_" + str(uuid.uuid4())  # TODO: maybe pid?!
+        testing_db = connect(name=testing_db_name, host=host, port=port)
+        yield db
+        testing_db.drop_database(testing_db_name)
+        disconnect()
+
+
+@pytest.fixture
+def fast_multimongo(_app):
+    # TODO: maybe there is a way to force usage of mongomock in tests with no multiprocessing code
+    # TODO: while using multimongo for tests with multiprocessing code in the same time.
+
+    pass
+
+
+mongo = multimongo
 
 
 @pytest.fixture
