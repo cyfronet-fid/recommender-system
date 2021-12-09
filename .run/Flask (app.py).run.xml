@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Flask (app.py)" type="Python.FlaskServer" nameIsGenerated="true">
+  <configuration default="false" name="Flask (app.py:app)" type="Python.FlaskServer" nameIsGenerated="true">
+    <option name="application" value="app" />
     <option name="flaskDebug" value="true" />
     <module name="recommender-system" />
     <option name="target" value="$PROJECT_DIR$/app.py" />
@@ -9,9 +10,9 @@
     <envs>
       <env name="FLASK_ENV" value="development" />
     </envs>
-    <option name="SDK_HOME" value="$USER_HOME$/.local/share/virtualenvs/recommender-system-r71yvAN0/bin/python" />
+    <option name="SDK_HOME" value="" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-    <option name="IS_MODULE_SDK" value="false" />
+    <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />

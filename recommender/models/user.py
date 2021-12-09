@@ -23,3 +23,5 @@ class User(MarketplaceDocument):
     dataframe = BinaryField(blank=True)
     one_hot_tensor = ListField(IntField(), blank=True)
     dense_tensor = ListField(FloatField(), blank=True)
+
+    meta = {"indexes": ["id"]}

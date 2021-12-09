@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add MongoDB to CI and to testing environment [@wujuu]
 - Add adjustable min/max numerical boundaries on Actor output [@wujuu]
 - Add more tests to RLInferenceComponent [@wujuu]
+- Reimplementation SARSes (re)generation [@JanKapala]
+- DB indexes [@JanKapala]
+- Support for multiprocessing-capable code testing and parallel tests [@JanKapala]
+- Implement user journey creator for testing purposes [@JanKapala]
+- User user journey visualizer [@JanKapala]
+- Add pytest-randomly [@JanKapala]
 
 ### Changed
 

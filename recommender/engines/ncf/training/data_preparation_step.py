@@ -1,4 +1,4 @@
-# pylint: disable=too-many-arguments, fixme
+# pylint: disable=too-many-arguments, not-callable, fixme
 
 """Neural Collaborative Filtering Data Preparation Step."""
 

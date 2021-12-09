@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-member, redefined-outer-name, too-few-public-methods
+# pylint: disable=missing-function-docstring, no-member, redefined-outer-name, too-few-public-methods, not-callable
 
 """Implementation of the Reward Encoder"""
 

@@ -44,8 +44,8 @@ def _generate_tree(user_action: UserAction, graph: Digraph) -> Digraph:
 
     ua_svid, ua_tvid = _get_visit_ids(user_action)
 
-    graph.node(ua_svid, label=ua_svid[:3])
-    graph.node(ua_tvid, label=ua_tvid[:3])
+    graph.node(ua_svid, label=ua_svid[:5])
+    graph.node(ua_tvid, label=ua_tvid[:5])
     if user_action.action.order:
         color = "red"
         label = "Order"
@@ -53,7 +53,7 @@ def _generate_tree(user_action: UserAction, graph: Digraph) -> Digraph:
         color = "black"
         label = ""
 
-    if user_action.source.root is not None:
+    if user_action.source.root.type == "recommendation_panel":
         service_id = user_action.source.root.service.id
         label = f"service id: {service_id}"
         color = "green"

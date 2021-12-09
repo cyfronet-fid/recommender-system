@@ -1,4 +1,6 @@
-# pylint: disable=no-member, line-too-long, too-few-public-methods, fixme
+# pylint: disable=no-member, line-too-long, too-few-public-methods, invalid-name fixme
+
+# TODO: use logging rather than prints after merging #218
 
 """
 This module contains logic for composing marketplace DB dump,
@@ -16,9 +18,11 @@ It assumes that above data are stored in database before call.
 
 import itertools
 import multiprocessing
-from typing import List
+from typing import List, Union
 
 import torch
+from mongoengine import DoesNotExist
+from tqdm.auto import tqdm
 
 from recommender.models import User, UserAction, Recommendation, State, Sars, Service
 from recommender.engines.rl.ml_components.reward_mapping import ua_to_reward_id
@@ -29,9 +33,11 @@ from recommender.engines.rl.ml_components.services_history_generator import (
 RECOMMENDATION_PAGES_IDS = ("/services",)
 
 
-def _tree_collapse(user_action):
+def _tree_collapse(user_action, progress_bar=None):
     """Collapse tree of user actions rooted in user_action
     into list of reward ids"""
+    if progress_bar is not None:
+        progress_bar.update(1)
 
     # Accumulator
     rewards = [ua_to_reward_id(user_action)]
@@ -45,13 +51,15 @@ def _tree_collapse(user_action):
 
     target_id = user_action.target.visit_id
     children = list(UserAction.objects(source__visit_id=target_id))
-    rewards += list(itertools.chain(*[_tree_collapse(child) for child in children]))
+    rewards += list(
+        itertools.chain(*[_tree_collapse(child, progress_bar) for child in children])
+    )
 
     return rewards
 
 
 def _get_clicked_services_and_reward(
-    recommendation, root_uas
+    recommendation, root_uas, progress_bar=None
 ) -> (List[Service], List[List[str]]):
     """Collapse root user actions trees to:
     - clicked_services_after
@@ -68,7 +76,7 @@ def _get_clicked_services_and_reward(
         service_rewards = list(
             itertools.chain(
                 *[
-                    _tree_collapse(service_root_ua)
+                    _tree_collapse(service_root_ua, progress_bar)
                     for service_root_ua in service_root_uas
                 ]
             )
@@ -144,14 +152,27 @@ def _get_next_recommendation(recommendation):
     return next_recommendation
 
 
-def generate_sars(recommendation, root_uas):
+def missing_data_skipper(func):
+    """This decorator makes `generate_sars` function able to gracefully skip missing data in the DB"""
+
+    def skipable_func(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except DoesNotExist:
+            pass
+
+    return skipable_func
+
+
+@missing_data_skipper
+def generate_sars(recommendation, root_uas, progress_bar=None):
     """Generate sars for given recommendation and root user actions"""
 
     user = recommendation.user or _get_empty_user()
 
     # Create reward
     clicked_services_after, reward = _get_clicked_services_and_reward(
-        recommendation, root_uas
+        recommendation, root_uas, progress_bar
     )
 
     # Create state
@@ -171,6 +192,7 @@ def generate_sars(recommendation, root_uas):
     services_history_after = services_history_before + clicked_services_after
 
     next_recommendation = _get_next_recommendation(recommendation)
+
     if next_recommendation is None:
         return
 
@@ -181,7 +203,13 @@ def generate_sars(recommendation, root_uas):
     ).save()
 
     # Create SARS
-    Sars(state=state, action=action, reward=reward, next_state=next_state).save()
+    Sars(
+        state=state,
+        action=action,
+        reward=reward,
+        next_state=next_state,
+        source_recommendation=recommendation,
+    ).save()
 
 
 class Executor:
@@ -195,19 +223,104 @@ class Executor:
         generate_sars(recc, self.root_uas)
 
 
-def generate_sarses(multi_processing=True):
+def generate_sarses(
+    multi_processing: bool = True,
+    recommendations: Union[List[Recommendation], None] = None,
+    verbose=False,
+):
     """Use this method to generate SARSes in the database"""
 
     # Find all root user actions rooted in recommendation panel
     root_uas = UserAction.objects(source__root__type__="recommendation_panel")
 
+    if recommendations is None:
+        recommendations = list(Recommendation.objects)
+
     if multi_processing:
         executor = Executor(root_uas)
         cpu_n = multiprocessing.cpu_count()
         with multiprocessing.Pool(cpu_n) as pool:
-            pool.map(executor, list(Recommendation.objects))
+            # list(tqdm(pool.imap(executor, recommendations), total=len(recommendations), disable=not verbose))
+            pool.map(executor, recommendations)
     else:
-        for recommendation in Recommendation.objects:
-            generate_sars(recommendation, root_uas)
+        if verbose:
+            print("Regenerating SARS for each qualified recommendation...")
+        uas_p_bar = tqdm(
+            total=len(UserAction.objects), leave=False, disable=not verbose
+        )
+        for recommendation in tqdm(recommendations, disable=not verbose):
+            generate_sars(recommendation, root_uas, uas_p_bar)
 
     return Sars.objects
+
+
+def find_recs_based_on_uas(ua: UserAction) -> Union[Recommendation, None]:
+    """Find user action's source recommendation."""
+
+    while True:
+        prev_ua = ua
+        svid = prev_ua.source.visit_id
+        recommendation = Recommendation.objects(visit_id=svid).first()
+        if recommendation is not None:
+            return recommendation
+        ua = UserAction.objects(target__visit_id=svid).first()
+        if ua is None:
+            return None
+
+
+def get_recs_for_update(verbose=False) -> List[Recommendation]:
+    """Get recommendations that should be used to select SARSes for update"""
+
+    # Get recommendations that are not processed so far
+    # It takes care about recommendations that aren't root for any user actions
+    if verbose:
+        print("Processing not processed recommendations...")
+    recs_for_update_direct = set(Recommendation.objects(processed__in=[False, None]))
+    Recommendation.objects(processed__in=[False, None]).update(processed=True)
+
+    # Get recommendations based on user actions that are not processed so far
+    # It takes care about recommendations that have the processed flag set to True but
+    # they need to bee regenerated due to occurence(s) of new user actions in the
+    # user actions trees rooted in these recommendations.
+    if verbose:
+        print("Processing not processed user actions...")
+    not_processed_uas = set(UserAction.objects(processed__in=[False, None]))
+    UserAction.objects(processed__in=[False, None]).update(processed=True)
+
+    if verbose:
+        print("Finding recommendations with updated user actions trees...")
+    recs_for_update_from_uas = {
+        find_recs_based_on_uas(ua)
+        for ua in tqdm(not_processed_uas, disable=not verbose)
+    }
+
+    if verbose:
+        print("Merging all gathered recommendation sets...")
+    recs_for_update_from_uas = set(
+        filter(lambda x: x is not None, recs_for_update_from_uas)
+    )
+    recs_for_update = list(recs_for_update_from_uas | recs_for_update_direct)
+
+    if verbose:
+        print(
+            f"In general, there are {len(recs_for_update)} recommendations based on which SARSes will be regenerated."
+        )
+
+    return recs_for_update
+
+
+def regenerate_sarses(multi_processing=True, verbose=False):
+    """Based on new user actions add new sarses and regenerate existing ones that are deprecated"""
+
+    # TODO: paralellization of get_recs_for_update
+    recs_for_update = get_recs_for_update(verbose=verbose)
+    if verbose:
+        print("Removing SARSes that should be regenerated...")
+    Sars.objects(source_recommendation__in=([None] + recs_for_update)).delete()
+    sarses = generate_sarses(
+        multi_processing=multi_processing,
+        recommendations=recs_for_update,
+        verbose=verbose,
+    )
+
+    return sarses

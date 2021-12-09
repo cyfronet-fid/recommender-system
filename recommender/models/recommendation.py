@@ -7,6 +7,7 @@ from mongoengine import (
     StringField,
     ListField,
     UUIDField,
+    BooleanField,
 )
 
 from .user import User
@@ -24,3 +25,13 @@ class Recommendation(Document):
     engine_version = StringField()
     services = ListField(ReferenceField(Service))
     search_data = ReferenceField(SearchData)
+    processed = BooleanField(blank=True)
+
+    meta = {
+        "indexes": [
+            "visit_id",
+            "user",
+            "unique_id",
+            "timestamp",
+        ]
+    }

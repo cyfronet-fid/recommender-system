@@ -41,4 +41,4 @@ def test_pymongo_db_var(mongo, mock_migrations_dir):
     db_details = uri_parser.parse_uri(uri)["nodelist"][0]
 
     assert migration.pymongo_db.client.address == db_details
-    assert migration.pymongo_db.name == "test"
+    assert migration.pymongo_db.name[:4] == "test"

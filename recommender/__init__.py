@@ -41,7 +41,10 @@ def create_app():
 
 def _register_commands(app):
     @app.cli.command("db")
-    @click.argument("task", type=click.Choice(["seed", "drop_mp", "seed_faker"]))
+    @click.argument(
+        "task",
+        type=click.Choice(["seed", "drop_mp", "seed_faker", "regenerate_sarses"]),
+    )
     def tmp_db_command(task):
         db_command(task)
 

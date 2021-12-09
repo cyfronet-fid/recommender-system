@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, missing-class-docstring, invalid-name
+# pylint: disable=missing-module-docstring, missing-class-docstring, invalid-name, not-callable
 
 from time import time
 from typing import Tuple, List
@@ -12,7 +12,7 @@ from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
     RewardGeneration,
 )
 from recommender.models import Sars, UserAction, Recommendation
-from recommender.engines.rl.ml_components.sarses_generator import generate_sarses
+from recommender.engines.rl.ml_components.sarses_generator import regenerate_sarses
 from recommender.engines.rl.ml_components.synthetic_dataset.dataset import (
     generate_synthetic_sarses,
 )
@@ -63,7 +63,7 @@ class RLDataExtractionStep(DataExtractionStep):
             service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
             return generate_synthetic_sarses(service_embedder, **self.synthetic_params)
 
-        real_sarses = generate_sarses(multi_processing=False)
+        real_sarses = regenerate_sarses(multi_processing=True, verbose=False)
         real_sarses = real_sarses(__raw__={"action": {"$size": self.K}})
 
         return list(real_sarses)
