@@ -13,11 +13,14 @@ from bson import SON, ObjectId
 from mongoengine import Document
 from torch.utils.tensorboard import SummaryWriter
 
-from definitions import LOG_DIR
+from definitions import RUN_DIR
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.models import User
 from recommender.models import Service
 from recommender.services.fts import AVAILABLE_FOR_RECOMMENDATION
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def _son_to_dict(son_obj: SON) -> dict:
@@ -210,7 +213,7 @@ def timeit(func):
 
     if "writer" not in globals():
         global writer
-        writer = SummaryWriter(log_dir=LOG_DIR)
+        writer = SummaryWriter(log_dir=RUN_DIR)
 
     @functools.wraps(func)
     def newfunc(*args, **kwargs):
@@ -242,7 +245,9 @@ def show_times():
     for key, value in performance_measurements.items():
         records = len(value)
         mean = sum(value) / records
-        print(f"[{key}] Mean execution time: {mean}, records number: {records}")
+        logger.info(
+            "[%s] Mean execution time: %s, records number: %s", key, mean, records
+        )
 
     return performance_measurements
 

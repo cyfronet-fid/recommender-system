@@ -1,29 +1,16 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
-pytest-factoryboy = "*"
-factory-boy = "*"
-ipytest = "*"
-mongomock = "*"
-pytest = "*"
-black = "==20.8b1"
-pre-commit = "*"
-pylint = "*"
-graphviz = "*"
-jupyter = "*"
-jupyterlab = "*"
-pytest-xdist = "*"
+name = "pypi"
 
 [packages]
+pytest-factoryboy = "*"
 numpy = "*"
 pandas = "*"
 torch = "*"
 torchvision = "*"
 matplotlib = "*"
-Flask = "==1.1.4"
+flask = "==1.1.4"
 flask-restx = "==0.3.0"
 jsonref = "*"
 json-ref-dict = "*"
@@ -42,18 +29,27 @@ graphviz = "*"
 jupyterlab = "*"
 pytest-xdist = "*"
 gym = "*"
+coloredlogs = "*"
+blinker = "*"
+click = "==7.0.0"
+pytest-randomly = "*"
+sentry-sdk = {extras = ["flask"], version = "*"}
+ray = {version = "==1.7.0", extras = ["default"]}
+celery = {version = "==5.1.2", extras = ["redis"]}
+
+[dev-packages]
+pytest-factoryboy = "*"
+factory-boy = "*"
+ipytest = "*"
+mongomock = "*"
+pytest = "*"
+black = "*"
+pre-commit = "*"
+pylint = "*"
+graphviz = "*"
+jupyter = "*"
+jupyterlab = "*"
+pytest-xdist = "*"
 
 [requires]
 python_version = "3.7"
-
-[packages.sentry-sdk]
-extras = [ "flask",]
-version = "*"
-
-[packages.ray]
-extras = [ "default",]
-version = "==1.7.0"
-
-[packages.celery]
-extras = [ "redis",]
-version = "==5.1.2"

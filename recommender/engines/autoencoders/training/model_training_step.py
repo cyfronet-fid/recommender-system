@@ -27,6 +27,7 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     SERVICE_EMBEDDER,
     USER_EMBEDDER,
 )
+from logger_config import get_logger
 
 ENCODER_LAYER_SIZES = "encoder_layer_sizes"
 DECODER_LAYER_SIZES = "decoder_layer_sizes"
@@ -43,6 +44,8 @@ MODEL = "model"
 TRAINING_TIME = "training_time"
 LOSS = "loss"
 DATASET = "dataset"
+
+logger = get_logger(__name__)
 
 
 def get_train_and_valid_datasets(datasets, user_batch_size, service_batch_size):
@@ -82,7 +85,7 @@ def create_autoencoder_model(
             features_dim, embedding_dim, encoder_layer_sizes, decoder_layer_sizes
         ).to(device)
     else:
-        raise ValueError
+        raise ValueError(f"Collection name not in ({USERS, SERVICES})")
 
     if writer is not None and train_ds_dl is not None:
         batch = next(iter(train_ds_dl))
@@ -178,7 +181,7 @@ def train_autoencoder(
     timer = end - start
 
     if verbose:
-        print(f"Total training time: {end - start}")
+        logger.info("Total training time: %s", {end - start})
 
     return best_model, timer
 
@@ -232,7 +235,7 @@ def perform_training(
         device,
     )
 
-    print(f"User Autoencoder testing loss: {loss}")
+    logger.info("User Autoencoder testing loss: %s", {loss})
 
     return trained_autoencoder_model, loss, timer
 

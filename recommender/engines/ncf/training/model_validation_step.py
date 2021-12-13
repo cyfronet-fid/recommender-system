@@ -32,11 +32,14 @@ from recommender.engines.ncf.training.model_training_step import (
     MODEL,
 )
 from recommender.errors import InferenceTooSlowError, PerformanceTooLowError
+from logger_config import get_logger
 
 MAX_EXECUTION_TIME = "max_execution_time"
 MAX_ITEMSPACE_SIZE = "max_itemspace_size"
 MIN_WEIGHTED_AVG_F1_SCORE = "min_weighted_avg_f1_score"
 MODEL_IS_VALID = "model_is_valid"
+
+logger = get_logger(__name__)
 
 
 def prepare_testing_sample(

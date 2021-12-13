@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactoring neural network layer definitions across all pipelines [@Michal-Kolomanski]
 - Implement migration process [@wujuu]
 - Split validation in autoencoder's data preparation step [@Michal-Kolomanski]
+- Logging system [@Michal-Kolomanski]  
 - Bug fix: flask seed_faker command on an empty database [@Michal-Kolomanski]
 - Fix bug: Flask db seed [@Michal-Kolomanski]
 - Add MongoDB to CI and to testing environment [@wujuu]

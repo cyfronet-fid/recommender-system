@@ -14,6 +14,9 @@ from recommender.errors import (
 )
 from recommender.models import User, SearchData
 from recommender.services.fts import retrieve_services_for_recommendation
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class BaseInferenceComponent(ABC):
@@ -114,7 +117,7 @@ class BaseInferenceComponent(ABC):
 
         candidate_services = list(retrieve_services_for_recommendation(search_data))
         if len(candidate_services) < self.K:
-            raise InsufficientRecommendationSpace
+            raise InsufficientRecommendationSpace()
         recommended_services = random.sample(list(candidate_services), self.K)
         recommended_services_ids = [s.id for s in recommended_services]
 

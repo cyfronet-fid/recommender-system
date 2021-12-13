@@ -17,9 +17,12 @@ from recommender.engines.rl.utils import (
 from recommender.engines.persistent_mixin import Persistent
 from recommender.errors import MissingOneHotTensorError, MissingDenseTensorError
 from recommender.models import User, Service
+from logger_config import get_logger
 
 USER_EMBEDDER = "USER_EMBEDDER"
 SERVICE_EMBEDDER = "SERVICE_EMBEDDER"
+
+logger = get_logger(__name__)
 
 
 class Embedder(Persistent):
@@ -64,10 +67,10 @@ class Embedder(Persistent):
                 return dense_tensors_batch, index_id_map
         else:
             if use_cache:
-                raise MissingDenseTensorError
+                raise MissingDenseTensorError()
 
         if not self.one_hot_tensors_exist(objects):
-            raise MissingOneHotTensorError
+            raise MissingOneHotTensorError()
 
         one_hot_tensors = [obj.one_hot_tensor for obj in objects]
         one_hot_tensors_batch = torch.Tensor(one_hot_tensors)

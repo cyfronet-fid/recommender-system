@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
 # pylint: disable=redefined-builtin, no-member, not-callable
-# pylint: disable=line-too-long, no-else-return, fixme
+# pylint: disable=line-too-long, no-else-return
 
 """Autoencoder Data Preparation Step."""
 
@@ -31,6 +31,10 @@ from recommender.engines.autoencoders.training.data_extraction_step import (
 from recommender.engines.constants import DEVICE
 from recommender.models import User, Service
 from recommender.errors import InvalidDatasetSplit
+from logger_config import get_logger
+
+logger = get_logger(__name__)
+
 
 TRAIN = "training"
 VALID = "validation"
@@ -101,7 +105,7 @@ def create_transformer(name):
     elif name == SERVICES:
         return create_services_transformer()
 
-    raise ValueError
+    raise ValueError(f"Name not in ({USERS, SERVICES})")
 
 
 def service_to_df(service, save_df=False):
@@ -177,7 +181,7 @@ def object_to_df(object, save_df=False):
     elif collection_name == SERVICES:
         object_df = service_to_df(object, save_df=save_df)
     else:
-        raise InvalidObject
+        raise InvalidObject(f"Collection name not in ({USERS, SERVICES})")
 
     return object_df
 
@@ -203,7 +207,7 @@ def precalculate_tensors(objects, transformer, fit=True, verbose=False):
     objects = list(objects)
     collection_name = pluralize(objects[0].__class__.__name__.lower())
     if collection_name not in (USERS, SERVICES):
-        raise InvalidObject
+        raise InvalidObject(f"Collection name not in ({USERS, SERVICES})")
 
     # calculate and save dfs
     objects_df_rows = []
@@ -256,7 +260,7 @@ def precalc_users_and_service_tensors(collections: dict = None):
         elif name == SERVICES:
             tensors[SERVICES] = tensor
         else:
-            raise ValueError
+            raise ValueError(f"Name not in {(USERS, SERVICES)}")
 
     return tensors
 
@@ -290,9 +294,6 @@ def validate_split(datasets):
     """Train and valid datasets should always have at least one object"""
     for split in (TRAIN, VALID):
         if len(datasets[split]) < 1:
-            print(
-                f"{split} dataset of user or service is empty after the split"
-            )  # TODO logger
             raise InvalidDatasetSplit()
 
 

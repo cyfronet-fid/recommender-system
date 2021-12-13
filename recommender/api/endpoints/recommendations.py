@@ -24,11 +24,13 @@ from recommender.api.schemas.recommendation import (
     recommendation_context,
 )
 from recommender.services.deserializer import Deserializer
+from logger_config import get_logger
 
 NCF_ENGINE_NAME = "NCF"
 RL_ENGINE_NAME = "RL"
 
 api = Namespace("recommendations", "Endpoint used for getting recommendations")
+logger = get_logger(__name__)
 
 
 def get_K(context: Dict[str, Any]) -> int:
@@ -43,7 +45,7 @@ def get_K(context: Dict[str, Any]) -> int:
     """
     K = PANEL_ID_TO_K.get(context.get("panel_id"))
     if K is None:
-        raise InvalidRecommendationPanelIDError
+        raise InvalidRecommendationPanelIDError()
     return K
 
 
@@ -54,7 +56,7 @@ def get_default_recommendation_alg(env_variable: str = "DEFAULT_RECOMMENDATION_A
     Args:
         env_variable: the name of the default recommendation algorithm from .env
     """
-    recommendation_alg = os.environ.get(env_variable, "RL")
+    recommendation_alg = os.environ.get(env_variable, "RL").upper()
 
     if recommendation_alg == "NCF":
         return NCFInferenceComponent
@@ -105,6 +107,7 @@ class Recommendation(Resource):
 
             response = {"recommendations": services_ids}
         except InsufficientRecommendationSpace:
+            logger.error(InsufficientRecommendationSpace().message())
             response = {"recommendations": []}
 
         return response
