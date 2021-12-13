@@ -16,9 +16,12 @@ from recommender.errors import (
     ImbalancedDatasetError,
 )
 from recommender.models import Service, User
+from logger_config import get_logger
 
 DATA_IS_VALID = "data_is_valid"
 LEAST_N_ORDERS_PER_USER = "least_n_orders_per_user"
+
+logger = get_logger(__name__)
 
 
 def exist_user_that_has_at_least_n_ordered_services(

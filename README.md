@@ -55,7 +55,7 @@ NOTE: You can customize flask host and flask port by using `FLASK_RUN_HOST` and 
 To run background tasks you also need a celery worker running alongside your server. To run the worker:
 ```bash
 export FLASK_ENV=development
-pipenv run celery -A worker:app worker --loglevel=info
+pipenv run celery -A worker:app worker
 ```
 
 NOTE: Celery needs a running [redis](#redis) broker server in the background.

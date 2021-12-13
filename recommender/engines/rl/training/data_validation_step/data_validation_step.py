@@ -6,9 +6,12 @@ from typing import Tuple
 from recommender.engines.base.base_steps import DataValidationStep
 from recommender.errors import DataSetTooSmallError, ImbalancedDatasetError
 from recommender.models import Sars
+from logger_config import get_logger
 
 MIN_EMPTY_TO_NON_EMPTY_RATIO = "min_empty_to_non_empty_ratio"
 MIN_SARSES = "min_sarses"
+
+logger = get_logger(__name__)
 
 
 class RLDataValidationStep(DataValidationStep):
@@ -34,7 +37,7 @@ class RLDataValidationStep(DataValidationStep):
         ratio = empty / (non_empty + 1)
 
         if ratio > self.min_empty_to_non_empty_ratio:
-            raise ImbalancedDatasetError
+            raise ImbalancedDatasetError()
 
         return ratio
 

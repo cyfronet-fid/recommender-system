@@ -1,4 +1,4 @@
-# pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods, unused-argument
 
 """Flask recommender factory"""
 
@@ -10,12 +10,14 @@ import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
+from celery.signals import setup_logging
 
 from recommender.commands import migrate_command, train_command, db_command
 from recommender.extensions import db, celery
 from recommender.api import api
 from recommender.models import User
 from settings import config_by_name
+from logger_config import apply_logging_config
 
 
 def create_app():
@@ -26,11 +28,12 @@ def create_app():
 
     app = Flask(__name__)
     app.config.from_object(config_by_name[os.environ["FLASK_ENV"]])
+    if not os.environ["FLASK_ENV"] == "testing":
+        apply_logging_config()
 
     _register_extensions(app)
     api.init_app(app)
     init_celery(app)
-
     _register_commands(app)
 
     return app
@@ -101,3 +104,9 @@ def init_sentry_celery():
         integrations=[CeleryIntegration(), RedisIntegration()],
         traces_sample_rate=1.0,
     )
+
+
+@setup_logging.connect()
+def configurate_celery_task_logger(**kwargs):
+    """Celery won’t configure the loggers if this signal is connected,
+    allowing the logger to utilize our configuration"""

@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, fixme
 
 """Migration utility functions used in flask CLI commands"""
 
@@ -7,6 +7,9 @@ from importlib import import_module
 from definitions import ROOT_DIR, MIGRATIONS_DIR
 from recommender.migrate.base_migration import BaseMigration
 from recommender.models.migration import Migration
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def _get_names_from_migrations_dir():
@@ -25,7 +28,7 @@ def _get_migration_class(migration: Migration):
     try:
         import_module(import_string)
     except ModuleNotFoundError:
-        print(f"Missing migration module {import_string}... Aborting!")
+        logger.error("Missing migration module %s... Aborting!", import_string)
         return None
 
     migration_class = BaseMigration.migration_dict[migration.name]
@@ -38,39 +41,40 @@ def scan_for_migrations():
     then inserts newly found migrations into the Migration collection.
     """
 
-    print("Scanning for new migrations...")
+    logger.info("Scanning for new migrations...")
     names_from_migrations_dir = _get_names_from_migrations_dir()
     names_from_db = [migration.name for migration in Migration.objects()]
     missing_names = set(names_from_migrations_dir) - set(names_from_db)
 
     if len(missing_names) == 0:
-        print("\tFound no new migrations!")
+        logger.info("\tFound no new migrations!")
         return False
 
     for missing_name in missing_names:
-        print(
-            f"\tInserting new migration {missing_name} into the Migration collection..."
+        logger.info(
+            "\tInserting new migration %s into the Migration collection...",
+            missing_name,
         )
         new_migration_model = Migration(name=missing_name, applied=False)
         new_migration_model.save()
 
-    print("\tNew migrations acknowledged!")
+    logger.info("\tNew migrations acknowledged!")
     return True
 
 
 def apply_migrations():
     """Applies unapplied migrations"""
 
-    print("Applying migrations...")
+    logger.info("Applying migrations...")
 
     unapplied_migrations = Migration.objects(applied=False).order_by("+name")
 
     if len(unapplied_migrations) == 0:
-        print("\tNo unapplied migrations found!")
+        logger.info("\tNo unapplied migrations found!")
         return False
 
     for unapplied in unapplied_migrations:
-        print(f"\tApplying `{unapplied.name}` ...")
+        logger.info("\tApplying `%s` ...", unapplied.name)
 
         # Retrieve class
         migration_class = _get_migration_class(unapplied)
@@ -81,23 +85,23 @@ def apply_migrations():
         # Update migration document
         unapplied.update(applied=True)
 
-    print("\tDone applying migrations!")
+    logger.info("\tDone applying migrations!")
     return True
 
 
 def rollback_last_migration():
     """Rollbacks last applied migration"""
 
-    print("Rollbacking last applied migration...")
+    logger.info("Rollbacking last applied migration...")
 
     applied_migrations = Migration.objects(applied=True).order_by("-name")
 
     if len(applied_migrations) == 0:
-        print("\tThere are no applied migrations to rollback!")
+        logger.error("\tThere are no applied migrations to rollback!")
         return False
 
     last_applied = applied_migrations.first()
-    print(f"\tRollbacking `{last_applied.name}` ...")
+    logger.info("\tRollbacking `%s` ...", last_applied.name)
 
     # Retrieve class
     migration_class = _get_migration_class(last_applied)
@@ -106,30 +110,32 @@ def rollback_last_migration():
         # Rollback migration
         migration_class().down()
     except NotImplementedError:
-        print("f\t Cannot rollback migration, no 'down' method, aborting!")
+        logger.error("\t Cannot rollback migration, no 'down' method, aborting!")
         return False
 
     # Update migration document
     last_applied.update(applied=False)
 
-    print("\tDone rollbacking!")
+    logger.info("\tDone rollbacking!")
     return True
 
 
 def list_migrations():
     """Lists migrations along with their application status"""
 
-    print("Listing migrations...")
+    logger.info("Listing migrations...")
 
     migrations = Migration.objects().order_by("+name")
 
     if len(migrations) == 0:
-        print("\tNo migrations found!")
+        logger.info("\t No migrations found!")
         return False
 
     for migration in migrations:
-        print(
-            f"\t {migration.name} ... {'applied' if migration.applied else 'not applied'}"
+        logger.info(
+            "\t %s ... %s",
+            migration.name,
+            "applied" if migration.applied else "not applied",
         )
     return True
 
@@ -140,7 +146,7 @@ def check_migration_integrity():
     have file representations in the MIGRATE_DIR
     """
 
-    print("Checking migration integrity...")
+    logger.info("Checking migration integrity...")
 
     names_from_migrations_dir = set(_get_names_from_migrations_dir())
     names_from_db = [migration.name for migration in Migration.objects()]
@@ -148,22 +154,23 @@ def check_migration_integrity():
 
     for db_migration in names_from_db:
         if db_migration in names_from_migrations_dir:
-            print(f"\t{db_migration} ... OK")
+            logger.info("\t%s ... OK", db_migration)
         else:
-            print(f"\t{db_migration} ... FILE MISSING!")
+            logger.error("\t%s ... FILE MISSING!", db_migration)
             passed = False
 
-    print(f"\tIntegrity check {'passed' if passed else 'failed'}!")
+    logger.info("\tIntegrity check %s!", "passed" if passed else "failed")
+
     return passed
 
 
 def purge_migration_collection():
     """Deletes all migration document from the Migration collection"""
 
-    print("Purging the Migration collection...")
+    logger.info("Purging the Migration collection...")
 
-    print("\tDeleting all existing migration documents...")
+    logger.info("\tDeleting all existing migration documents...")
     Migration.objects().delete()
 
-    print("\tPurging complete!")
+    logger.info("\tPurging complete!")
     return True

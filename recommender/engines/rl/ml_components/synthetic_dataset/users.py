@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, no-member, missing-module-docstring
+# pylint: disable=invalid-name, no-member, missing-module-docstring, unspecified-encoding
 
 import json
 import os

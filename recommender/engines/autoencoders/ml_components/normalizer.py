@@ -1,4 +1,4 @@
-# pylint: disable=fixme, missing-module-docstring, missing-class-docstring, invalid-name, too-few-public-methods
+# pylint: disable=missing-module-docstring, missing-class-docstring, invalid-name, too-few-public-methods, fixme
 
 """Normalizer"""
 from enum import auto, Enum
@@ -14,6 +14,9 @@ from recommender.errors import (
     MissingDenseTensorError,
 )
 from recommender.models import User, Service
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class NormalizationMode(Enum):
@@ -70,10 +73,10 @@ class Normalizer:
         objects = list(objects)
 
         if not all(isinstance(obj, objects[0].__class__) for obj in objects):
-            raise DifferentTypeObjectsInCollectionError
+            raise DifferentTypeObjectsInCollectionError()
 
         if not Embedder.dense_tensors_exist(objects):
-            raise MissingDenseTensorError
+            raise MissingDenseTensorError()
 
         tensors = [obj.dense_tensor for obj in objects]
         batch = torch.Tensor(tensors)

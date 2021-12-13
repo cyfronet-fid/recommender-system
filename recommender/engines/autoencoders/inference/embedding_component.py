@@ -9,6 +9,9 @@ from recommender.engines.autoencoders.ml_components.embedder import (
 )
 from recommender.engines.autoencoders.ml_components.normalizer import Normalizer
 from recommender.models import User, Service
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class EmbeddingComponent:
@@ -22,11 +25,11 @@ class EmbeddingComponent:
     def __call__(self, use_cache=False, save_cache=True):
         """Performs embedding with normalization."""
 
-        print("Starting embedding...")
+        logger.info("Starting embedding...")
         self.user_embedder(User.objects, use_cache=use_cache, save_cache=save_cache)
         self.services_embedder(
             Service.objects, use_cache=use_cache, save_cache=save_cache
         )
         self.normalizer(User.objects, save_cache=save_cache)
         self.normalizer(Service.objects, save_cache=save_cache)
-        print("Finished embedding!")
+        logger.info("Finished embedding!")

@@ -10,9 +10,12 @@ from recommender.errors import (
     NotEnoughUsersOrServices,
     NoCategoriesScientificDomains,
 )
+from logger_config import get_logger
 
 DATA_IS_VALID = "data_is_valid"
 LEAST_NUM_OF_USR_SRV = "least_num_of_usr_srv"
+
+logger = get_logger(__name__)
 
 
 def valid_num_of_usr_and_srv(collection: list, least_num_of_usr_srv: int = 1):

@@ -1,7 +1,6 @@
-# pylint: disable=missing-function-docstring, fixme
+# pylint: disable=missing-function-docstring, broad-except, fixme
 
 """This module contain celery tasks"""
-
 from recommender.engines.autoencoders.inference.embedding_component import (
     EmbeddingComponent,
 )
@@ -13,18 +12,29 @@ from recommender.pipeline_configs import (
     RL_PIPELINE_CONFIG_V1,
 )
 from recommender.services.mp_dump import drop_mp_dump, load_mp_dump
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 @celery.task
 def update(data):
-    drop_mp_dump()
-    load_mp_dump(data)
-    AEPipeline(AUTOENCODERS_PIPELINE_CONFIG)()
-    EmbeddingComponent()()
+    try:
+        drop_mp_dump()
+        load_mp_dump(data)
+        AEPipeline(AUTOENCODERS_PIPELINE_CONFIG)()
+        EmbeddingComponent()()
 
-    # TODO: parallel computing algebra here to make it faster
-    # TODO: Commented unused pipelines to speed up the training
-    # NCFPipeline(NCF_PIPELINE_CONFIG)()
-    # RLPipeline(RL_PIPELINE_CONFIG_V2)()
+        # TODO: parallel computing algebra here to make it faster
+        # TODO: Commented unused pipelines to speed up the training
+        # NCFPipeline(NCF_PIPELINE_CONFIG)()
+        # RLPipeline(RL_PIPELINE_CONFIG_V2)()
 
-    RLPipeline(RL_PIPELINE_CONFIG_V1)()
+        RLPipeline(RL_PIPELINE_CONFIG_V1)()
+
+    except Exception:
+        logger.exception(
+            "Exception has been raised. Training was unsuccessful. Aborting..."
+        )
+    else:
+        logger.info("Training was successful")

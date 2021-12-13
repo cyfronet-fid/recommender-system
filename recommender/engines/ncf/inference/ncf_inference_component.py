@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument, too-few-public-methods, missing-class-docstring, missing-function-docstring
-# pylint: disable=no-self-use, superfluous-parens, no-else-return, no-member
+# pylint: disable=no-self-use, superfluous-parens, no-else-return, no-member, line-too-long
 
 """Neural Collaborative Filtering Inference Component"""
 
@@ -18,6 +18,9 @@ from recommender.errors import (
 )
 from recommender.models import User, SearchData
 from recommender.services.fts import retrieve_services_for_recommendation
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class NCFInferenceComponent(BaseInferenceComponent):
@@ -86,7 +89,7 @@ class NCFInferenceComponent(BaseInferenceComponent):
             retrieve_services_for_recommendation(search_data, user.accessed_services)
         )
         if len(candidate_services) < self.K:
-            raise InsufficientRecommendationSpace
+            raise InsufficientRecommendationSpace()
         candidate_services_ids = [s.id for s in candidate_services]
 
         (

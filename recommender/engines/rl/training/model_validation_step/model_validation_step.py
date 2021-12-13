@@ -1,4 +1,4 @@
-# pylint: disable=fixme, missing-module-docstring, missing-class-docstring, invalid-name
+# pylint: disable=missing-module-docstring, missing-class-docstring, invalid-name, fixme
 
 from typing import Tuple
 
@@ -6,9 +6,12 @@ import numpy as np
 
 from recommender.engines.base.base_steps import ModelValidationStep
 from recommender.errors import InferenceTooSlowError, MeanRewardTooLowError
+from logger_config import get_logger
 
 TIME_UPPER_BOUND = "time_upper_bound"
 REWARD_LOWER_BOUND = "reward_upper_bound"
+
+logger = get_logger(__name__)
 
 
 class RLModelValidationStep(ModelValidationStep):

@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name, unspecified-encoding
 
 """This module contains functions used for
 loading specific data from json files.

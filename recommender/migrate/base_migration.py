@@ -5,6 +5,9 @@
 from abc import ABC, abstractmethod
 
 from mongoengine import get_db
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class BaseMigration(ABC):

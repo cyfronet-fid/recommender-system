@@ -8,9 +8,12 @@ from recommender.engines.autoencoders.training.model_evaluation_step import (
     METRICS,
 )
 from recommender.errors import PerformanceTooLowError
+from logger_config import get_logger
 
 MODEL_IS_VALID = "model_is_valid"
 MAX_LOSS_SCORE = "max_loss_score"
+
+logger = get_logger(__name__)
 
 
 def check_performance(metrics, max_loss_score: int) -> None:
@@ -24,10 +27,10 @@ def check_performance(metrics, max_loss_score: int) -> None:
     for collection_name, metric in metrics.items():
         for split, loss in metric.items():
             if loss > max_loss_score:
-                print(
-                    f"Loss of the {collection_name} collection {split} was greater than {MAX_LOSS_SCORE}"
+                raise PerformanceTooLowError(
+                    f"Loss of the {collection_name} collection"
+                    f"{split} was greater than {MAX_LOSS_SCORE}"
                 )
-                raise PerformanceTooLowError()
 
 
 class AEModelValidationStep(ModelValidationStep):

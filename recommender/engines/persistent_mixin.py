@@ -6,6 +6,9 @@ from typing import Any
 
 from recommender.errors import NoSavedMLComponentError
 from recommender.models.ml_component import MLComponent
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class Persistent(ABC):
