@@ -158,6 +158,11 @@ Raise the amount of passed users/services or adjust the splitting ratio.
 """
 
 
+class NoObjectsInCollectionError(Exception):
+    def message(self):
+        return "There is no objects in the collection"
+
+
 class RangeOfCommonServicesError(Exception):
     def message(self):
         return (
