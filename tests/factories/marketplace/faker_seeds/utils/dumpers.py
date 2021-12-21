@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, no-member
+# pylint: disable=invalid-name, no-member, unspecified-encoding
 
 """This module contains functions used for
 saving specific data from the database
@@ -11,7 +11,7 @@ import os
 import json
 import inflection
 from recommender.models import Service
-
+from recommender.errors import NoObjectsInCollectionError
 from definitions import ROOT_DIR
 
 FAKER_SEEDS_PATH = "tests/factories/marketplace/faker_seeds"
@@ -28,6 +28,12 @@ def save_json_file(file_name, data):
 def dump_names_descs(Clazz):
     """It dumps names and descriptions of database instances of given
     Mongoengine class into json file. This file is used for seeding factories"""
+
+    if not Clazz.objects:
+        raise NoObjectsInCollectionError(
+            f"There is no objects in {Clazz.__name__} collection"
+        )
+
     data = {obj.name: obj.description for obj in Clazz.objects}
 
     formatted_clazz_name = inflection.underscore(Clazz.__name__)
@@ -38,6 +44,12 @@ def dump_names_descs(Clazz):
 def dump_names(Clazz):
     """It dumps names of database instances of given
     Mongoengine class into json file. This file is used for seeding factories"""
+
+    if not Clazz.objects:
+        raise NoObjectsInCollectionError(
+            f"There is no objects in {Clazz.__name__} collection"
+        )
+
     data = list({obj.name for obj in Clazz.objects})
     formatted_clazz_name = inflection.underscore(Clazz.__name__)
     file_name = f"{formatted_clazz_name}_names.json"
