@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bug fix: flask seed_faker command on an empty database [@Michal-Kolomanski]
 - Fix bug: Flask db seed [@Michal-Kolomanski]
 - Add MongoDB to CI and to testing environment [@wujuu]
+- Add adjustable min/max numerical boundaries on Actor output [@wujuu]
+- Add more tests to RLInferenceComponent [@wujuu]
 
 ### Changed
 

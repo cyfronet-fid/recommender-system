@@ -24,6 +24,8 @@ class Actor(Module, Persistent, BaseNeuralNetwork):
         I: int,
         history_embedder: HistoryEmbedder,
         layer_sizes: Tuple[int] = (256, 512, 256),
+        act_max: float = 1.0,
+        act_min: float = -1.0,
     ):
         """
         Args:
@@ -49,6 +51,8 @@ class Actor(Module, Persistent, BaseNeuralNetwork):
         )
 
         self.network = Sequential(*layers)
+        self.act_max = act_max
+        self.act_min = act_min
 
     def forward(self, state: Tuple[(torch.Tensor,) * 3]) -> torch.Tensor:
         """
@@ -76,4 +80,13 @@ class Actor(Module, Persistent, BaseNeuralNetwork):
 
         weights = x.reshape(-1, self.K, self.SE)
         weights = torch.tanh(weights)
-        return weights
+
+        # https://stackoverflow.com/questions/345187/math-mapping-numbers
+        # Mapping to range (self.act_min, self.act_max) using 'two-point form'
+        # linear transform.
+        # Old bounds are (-1, 1) since weights come from a hyperbolic tangent
+        scaled_weights = (
+            (weights + 1) * (self.act_max - self.act_min)
+        ) / 2 + self.act_min
+
+        return scaled_weights

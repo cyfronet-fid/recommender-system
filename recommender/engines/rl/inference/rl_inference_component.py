@@ -1,4 +1,4 @@
-# pylint: disable=fixme, missing-module-docstring, missing-class-docstring, too-few-public-methods
+# pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods
 # pylint: disable=too-many-instance-attributes, no-self-use
 
 from typing import Tuple
@@ -23,8 +23,6 @@ class RLInferenceComponent(BaseInferenceComponent):
     def __init__(self, K: int, exploration: bool = False, act_noise: float = 0.0):
         self.exploration = exploration
         self.act_noise = act_noise
-        self.act_max = 1.0  # TODO: Maybe this should be actor's parameter?
-        self.act_min = -1.0  # TODO: Maybe this should be actor's parameter?
         super().__init__(K)
 
     def _load_models(self) -> None:
@@ -63,4 +61,4 @@ class RLInferenceComponent(BaseInferenceComponent):
         noise = torch.randn_like(action)
         noise *= self.act_noise
         noised_action = action + noise
-        return noised_action.clamp(max=self.act_max, min=self.act_min)
+        return noised_action.clamp(max=self.actor.act_max, min=self.actor.act_min)
