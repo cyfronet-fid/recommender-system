@@ -115,6 +115,8 @@ class RLModelTrainingStep(ModelTrainingStep):
             self.I,
             MLPHistoryEmbedder(self.SE, self.N),
             layer_sizes,
+            self.act_max,
+            self.act_min,
         )
         actor = actor.to(self.device)
         optimizer = optimizer(actor.parameters(), **optimizer_params)
