@@ -15,7 +15,7 @@ def recommendation_data():
         "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
         "page_id": "some_page_identifier",
         "panel_id": "v1",
-        "engine_version": "pre_agent",
+        "engine_version": "NCF",
         "search_data": {
             "q": "Cloud GPU",
             "categories": [1],

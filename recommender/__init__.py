@@ -16,6 +16,7 @@ from recommender.commands import migrate_command, train_command, db_command
 from recommender.extensions import db, celery
 from recommender.api import api
 from recommender.models import User
+from recommender.services.metrics import calc_hitrate
 from settings import config_by_name
 from logger_config import apply_logging_config
 
@@ -40,6 +41,12 @@ def create_app():
 
 
 def _register_commands(app):
+    @app.cli.command("hitrate")
+    @click.argument("engine_version", required=False)
+    @click.argument("panel_id", required=False)
+    def tmp_hitrate_command(engine_version=None, panel_id=None):
+        calc_hitrate(engine_version, panel_id)
+
     @app.cli.command("db")
     @click.argument(
         "task",

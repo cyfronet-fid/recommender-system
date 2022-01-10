@@ -22,7 +22,7 @@ class Recommendation(Document):
     visit_id = UUIDField()
     page_id = StringField()
     panel_id = StringField()
-    engine_version = StringField()
+    engine_version = StringField(blank=True)
     services = ListField(ReferenceField(Service))
     search_data = ReferenceField(SearchData)
     processed = BooleanField(blank=True)

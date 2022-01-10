@@ -90,7 +90,7 @@ recommendation_context = api.model(
             required=False,  # TODO After changes on Marketplace side -> True
             title="Engine version",
             description="Version of the recommendation engine",
-            example="pre_agent",
+            example="NCF",
         ),
         "search_data": fields.Nested(search_data, required=True),
     },
