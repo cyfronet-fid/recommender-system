@@ -41,6 +41,9 @@ class Deserializer:
             unique_id=json_dict.get("unique_id"),
             timestamp=json_dict.get("timestamp"),
             visit_id=json_dict.get("visit_id"),
+            page_id=json_dict.get("page_id"),
+            panel_id=json_dict.get("panel_id"),
+            engine_version=json_dict.get("engine_version"),
             services=json_dict.get("services"),
             search_data=search_data,
         )
