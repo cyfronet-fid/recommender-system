@@ -7,6 +7,7 @@ import random
 from tqdm.auto import trange
 
 from tests.factories.marketplace import ServiceFactory, UserFactory
+from recommender.errors import RangeOfCommonServicesError
 
 
 def populate_users_and_services(
@@ -30,6 +31,8 @@ def populate_users_and_services(
         verbose:                be verbose?
         valid:                  should created users and services be valid (have categories and scientific domains)?
     """
+    if k_common_services_min > k_common_services_max:
+        raise RangeOfCommonServicesError()
 
     _unordered_services = [
         ServiceFactory()

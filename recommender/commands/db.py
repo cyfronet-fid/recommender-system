@@ -30,8 +30,8 @@ def _seed():
         common_services_num=30,
         unordered_services_num=70,
         users_num=100,
-        k_common_services_min=10,
-        k_common_services_max=1,
+        k_common_services_min=1,
+        k_common_services_max=10,
         verbose=True,
         valid=True,
     )

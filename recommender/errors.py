@@ -156,3 +156,10 @@ class InvalidDatasetSplit(Exception):
 At the very least, valid and train datasets should have at least one user/service object.
 Raise the amount of passed users/services or adjust the splitting ratio.
 """
+
+
+class RangeOfCommonServicesError(Exception):
+    def message(self):
+        return (
+            "Invalid range of common services. The minimum cannot exceed the maximum."
+        )
