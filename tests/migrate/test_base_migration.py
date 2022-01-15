@@ -2,6 +2,8 @@
 
 from importlib import import_module
 
+from pymongo import uri_parser
+
 from recommender.migrate.base_migration import BaseMigration
 
 
@@ -33,6 +35,10 @@ def test_pymongo_db_var(mongo, mock_migrations_dir):
     first_migration_class = getattr(first_migration_module, "FirstMigrationForTesting")
 
     migration = first_migration_class()
+    print(mongo)
 
-    assert migration.pymongo_db.client.address == ("localhost", 27017)
+    uri = mongo.app.config["MONGODB_HOST"]
+    db_details = uri_parser.parse_uri(uri)["nodelist"][0]
+
+    assert migration.pymongo_db.client.address == db_details
     assert migration.pymongo_db.name == "test"

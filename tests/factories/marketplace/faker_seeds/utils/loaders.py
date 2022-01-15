@@ -20,7 +20,7 @@ def load_json_file(file_name):
     """It is utility function used in load functions below"""
     file_path = os.path.join(ROOT_DIR, FAKER_SEEDS_PATH, file_name)
 
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 

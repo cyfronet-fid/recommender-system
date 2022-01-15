@@ -11,7 +11,7 @@ class ListColumnOneHotEncoder(BaseEstimator, TransformerMixin):
     unique value in all lists of the column"""
 
     def __init__(self):
-        self.unique_values = dict()
+        self.unique_values = {}
         self.old_columns = None
 
     def fit(self, X, y=None, *args, **kwargs):

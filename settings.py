@@ -48,7 +48,7 @@ class TestingConfig(Config):
     """Testing config"""
 
     TESTING = True
-    MONGODB_HOST = "mongomock://localhost/test"
+    MONGODB_HOST = f"mongodb://{os.environ.get('MONGODB_HOST', '127.0.0.1:27017')}/test"
 
 
 config_by_name = dict(

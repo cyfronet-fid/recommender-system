@@ -10,7 +10,7 @@ from mongoengine import get_db
 class BaseMigration(ABC):
     """Interface for implementing migrations"""
 
-    migration_dict = dict()
+    migration_dict = {}
 
     def __init__(self):
         """Prepares the pymongo adapter for migration"""

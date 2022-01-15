@@ -8,6 +8,7 @@ import mongoengine
 import torch
 from torch.nn import CosineEmbeddingLoss, BCELoss
 from torch.optim import Adam
+from pymongo import uri_parser
 
 from recommender import create_app, User
 from recommender.engines.autoencoders.inference.embedding_component import (
@@ -143,9 +144,12 @@ def client(_app):
 
 @pytest.fixture
 def mongo(_app):
-    """MongoDB mock fixture"""
+    """MongoDB fixture"""
     with _app.app_context():
         yield db
+        uri = db.app.config["MONGODB_HOST"]
+        db_name = uri_parser.parse_uri(uri)["database"]
+        db.connection.drop_database(db_name)
         mongoengine.connection.disconnect_all()
 
 

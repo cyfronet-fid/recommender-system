@@ -105,10 +105,10 @@ def synthesize_users(
         cluster_distributions: an array of length == len(CLUSTER_NAMES), defines
             the desired distribution of the user clusters. Must sum to 1.
     """
-    with open(CATEGORY_CLUSTERS_PATH) as f:
+    with open(CATEGORY_CLUSTERS_PATH, encoding="utf-8") as f:
         category_clusters = json.load(f)
 
-    with open(SCIENTIFIC_DOMAIN_CLUSTERS_PATH) as f:
+    with open(SCIENTIFIC_DOMAIN_CLUSTERS_PATH, encoding="utf-8") as f:
         scientific_domain_clusters = json.load(f)
 
     relevant_categories = _filter_relevant(Category)

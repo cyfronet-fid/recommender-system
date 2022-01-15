@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
-- Add the AI docs, describing the training, data and algorithm evaluation
+- Add the AI docs, describing the training, data and algorithm evaluation [@wujuu, @JanKapala, @Michal-Kolomanski]
 - Flask CLI commands (testing db seed, execution of individual AI pipelines and more) [@wujuu]
 - Unit and integration tests for each pipeline step of the autoencoders [@Michal-Kolomanski]
 - New ENV variable, which points to default recommendation algorithm [@Michal-Kolomanski]
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implement migration process [@wujuu]
 - Split validation in autoencoder's data preparation step [@Michal-Kolomanski]
 - Fix bug: Flask db seed [@Michal-Kolomanski]
+- Add MongoDB to CI and to testing environment [@wujuu]
 
 ### Changed
 
