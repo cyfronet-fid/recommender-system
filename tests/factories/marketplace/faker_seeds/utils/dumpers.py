@@ -21,7 +21,7 @@ def save_json_file(file_name, data):
     """It is utility function used in dump functions below"""
     file_path = os.path.join(ROOT_DIR, FAKER_SEEDS_PATH, file_name)
 
-    with open(file_path, "w") as file:
+    with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, indent=4, sort_keys=True)
 
 

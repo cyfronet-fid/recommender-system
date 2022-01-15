@@ -17,6 +17,9 @@ jobs:
       FLASK_ENV: testing
 
     steps:
+    - name: Run MongoDB
+      uses: supercharge/mongodb-github-action@1.7.0
+
     - name: Checkout repo
       uses: actions/checkout@v2
 
@@ -33,7 +36,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        pipenv run pytest -n auto
+        pipenv run pytest tests/
 
     - name: Lint with pylint
       run: |

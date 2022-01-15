@@ -206,7 +206,7 @@ def load_examples() -> Dict:
 def timeit(func):
     if "performance_measurements" not in globals():
         global performance_measurements
-        performance_measurements = dict()
+        performance_measurements = {}
 
     if "writer" not in globals():
         global writer
@@ -237,7 +237,7 @@ def timeit(func):
 def show_times():
     if "performance_measurements" not in globals():
         global performance_measurements
-        performance_measurements = dict()
+        performance_measurements = {}
 
     for key, value in performance_measurements.items():
         records = len(value)
@@ -250,4 +250,4 @@ def show_times():
 def clear_times():
     if "performance_measurements" not in globals():
         global performance_measurements
-    performance_measurements = dict()
+    performance_measurements = {}
