@@ -6,22 +6,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+### Changed
+### Fixed
+- Details in the AE data preparation step 
+### Removed
+
+## [3.1.0] - 2022-01-17
+### Added
 - Add the AI docs, describing the training, data and algorithm evaluation [@wujuu, @JanKapala, @Michal-Kolomanski]
 - Flask CLI commands (testing db seed, execution of individual AI pipelines and more) [@wujuu]
 - Unit and integration tests for each pipeline step of the autoencoders [@Michal-Kolomanski]
 - New ENV variable, which points to default recommendation algorithm [@Michal-Kolomanski]
-- Methods refactoring in the AEDataPreparationStep [@Michal-Kolomanski]
 - The ability to modify the sizes and number of layers in the autoencoders networks.[@Michal-Kolomanski]
-- Refactoring neural network layer definitions across all pipelines [@Michal-Kolomanski]
 - Implement migration process [@wujuu]
 - Split validation in autoencoder's data preparation step [@Michal-Kolomanski]
-- Logging system [@Michal-Kolomanski]  
-- Bug fix: flask seed_faker command on an empty database [@Michal-Kolomanski]
-- Fix bug: Flask db seed [@Michal-Kolomanski]
+- Logging system [@Michal-Kolomanski]
 - Add MongoDB to CI and to testing environment [@wujuu]
 - Add adjustable min/max numerical boundaries on Actor output [@wujuu]
 - Add more tests to RLInferenceComponent [@wujuu]
-- Reimplementation SARSes (re)generation [@JanKapala]
 - DB indexes [@JanKapala]
 - Support for multiprocessing-capable code testing and parallel tests [@JanKapala]
 - Implement user journey creator for testing purposes [@JanKapala]
@@ -29,9 +31,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add pytest-randomly [@JanKapala]
 
 ### Changed
-
+- Methods refactoring in the AEDataPreparationStep [@Michal-Kolomanski]
+- Refactoring neural network layer definitions across all pipelines [@Michal-Kolomanski]
+- Reimplementation SARSes (re)generation [@JanKapala]
 ### Fixed
-
+- Flask seed_faker command on an empty database [@Michal-Kolomanski]
+- Flask db seed command [@Michal-Kolomanski]
 ### Removed
 
 ## [3.0.1] - 2021-11-05

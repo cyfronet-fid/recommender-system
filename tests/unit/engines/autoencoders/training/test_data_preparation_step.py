@@ -256,9 +256,21 @@ def test_create_details(simulate_data_preparation_step):
 
     _, details = simulate_data_preparation_step
 
-    for datasets in details.values():
+    # Check how many users and services were generated
+    population = users_services_args(valid=True)
+    services = population["common_services_num"] + population["unordered_services_num"]
+    users = population["users_num"]
+    objects_generated = {USERS: users, SERVICES: services}
+
+    # Check how many users and services are in the details
+    objects_sum = {USERS: 0, SERVICES: 0}
+
+    for collection, datasets in details.items():
         assert TRAIN and VALID and TEST in datasets
         assert len(datasets) == 3
 
         for num_of_objects in datasets.values():
             assert isinstance(num_of_objects, int)
+            objects_sum[collection] += num_of_objects
+
+        assert objects_generated[collection] == objects_sum[collection]
