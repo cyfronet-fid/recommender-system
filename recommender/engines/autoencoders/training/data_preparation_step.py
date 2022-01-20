@@ -303,8 +303,8 @@ def create_details(data):
     data = data[AUTOENCODERS]
 
     for collection, datasets in data.items():
-        for split in datasets:
-            details[collection][split] = len(split)
+        for split, dataset in datasets.items():
+            details[collection][split] = len(dataset)
 
     return details
 
