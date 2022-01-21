@@ -88,7 +88,7 @@ User Journey:
   - root:
     - type: recommendation_panel
     - panel_id: v1
-    - service: 312
+    - service: 1234
   - action: click a service on the recommendation panel
   - target
     - page_id: marketplace_domain/services/1234
@@ -147,7 +147,7 @@ User action:
 - root:
   - type: recommendation_panel
   - panel_id: v1
-  - service: 312
+  - service: 1234
 - action:
   - type: browser_action
   - text: click a service on the recommendation panel
@@ -205,7 +205,7 @@ The process of formation of SARSes out of the recommendations, user actions and 
 
 # SARSes generator
 
-As we could see earlier, the user actions can form a tree. Each such tree has a root in the visit on the page with the recommendation panel. Because recommendation visit IDs are compatible with user action visit IDs, if the source visit ID of a user action is the same as the visit ID of a recommendation, it indicates that the user performed this user action after seeing the recommendation. It is a user reaction to the recommendation. It will be used to measure user interest in the recommendation. If he has done more user actions that followed the first one, all of them are important. The whole user actions tree is a reaction to the recommendation. Where does it end? It ends when all branches of the given user action tree end. When the branch of the user action tree ends? It ends at the moment of seeing the next recommendation by the user (then the whole process starts again but for the next recommendation and SARS) or when the user orders a service or when there is no next user action.
+As we could see earlier, the user actions can form a tree. Each such a tree has a root in the visit on the page with the recommendation panel. If the source visit ID of a user-action is the same as the visit ID of a recommendation, it means that the user performed this user-action right after seeing that recommendation. This in turn means that it is a direct user reaction to the recommendation. It will be used to measure user interest in the recommendation. If he has done more user-actions that followed the first one, all of them are important. The whole user actions tree is a reaction to the recommendation. Where does it end? It ends when all branches of the given user action tree end. When the branch of the user action tree ends? It ends at the moment of seeing the next recommendation by the user (then the whole process starts again but for the next recommendation and SARS) or when the user orders a service or when there is no next user action.
 Of course, if there are two branches in the user actions tree rooted in some recommendation A and after some user actions in the first branch there occurs a next recommendation B and after that, there are new user actions on the second branch - they aren't taken into consideration while generating the SARS associated with the recommendation A.
 
 The user actions (done by the user as an aftermath of seeing a recommendation) have assigned proper values (by the recommendation algorithm) and they are all collected and mapped into the overall reward value that represents the user's interest in the services recommended in the recommendation panel. The maximum interest of the user occurs when he ordered all services that he has seen in the recommendation panel. The minimum is when he doesn't click any of these services. If the user clicks some of the recommended services and optionally click some next links associated with these services, then he shows a partial interest.
