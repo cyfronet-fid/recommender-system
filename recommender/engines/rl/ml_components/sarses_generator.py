@@ -1,6 +1,4 @@
-# pylint: disable=no-member, line-too-long, too-few-public-methods, invalid-name fixme
-
-# TODO: use logging rather than prints after merging #218
+# pylint: disable=no-member, line-too-long, too-few-public-methods, invalid-name, fixme
 
 """
 This module contains logic for composing marketplace DB dump,
@@ -29,8 +27,21 @@ from recommender.engines.rl.ml_components.reward_mapping import ua_to_reward_id
 from recommender.engines.rl.ml_components.services_history_generator import (
     concat_histories,
 )
+from logger_config import get_logger
 
 RECOMMENDATION_PAGES_IDS = ("/services",)
+logger = get_logger(__name__)
+
+
+class Executor:
+    """Executor needed for mapping sars generation over recommendations and
+    processes pool"""
+
+    def __init__(self, root_uas):
+        self.root_uas = root_uas
+
+    def __call__(self, recc):
+        generate_sars(recc, self.root_uas)
 
 
 def _tree_collapse(user_action, progress_bar=None):
@@ -87,7 +98,7 @@ def _get_clicked_services_and_reward(
 
 
 def _find_root_uas_before(root_uas, recommendation):
-    """Find all user's root actions that has been taken before
+    """Find all user's root actions that have been taken before
     current recommendation"""
 
     if recommendation.user is not None:
@@ -105,9 +116,8 @@ def _find_root_uas_before(root_uas, recommendation):
 def _get_empty_user() -> User:
     """
     This function get empty user with id=-1 from the database or create one.
-    It fill its tensors with zeros to simulate tensor precalculation.
-    It is used as a anonymous user and it has no categories or scientific
-     domains.
+    It fills its tensors with zeros to simulate tensor precalculation.
+    It is used as an anonymous user, and it has no categories or scientific domains.
     """
 
     assert len(User.objects) >= 1  # Necessary assumption
@@ -132,8 +142,8 @@ def _get_empty_user() -> User:
 
 def _get_next_recommendation(recommendation):
     """Given recommendation, this function determine if it's for logged or
-    anonymous user and then it find the first next recommendation (in the
-     chronological order) for this user.
+    anonymous user, and then it finds the first next recommendation (in the
+    chronological order) for this user.
     """
 
     if recommendation.user is not None:
@@ -150,6 +160,70 @@ def _get_next_recommendation(recommendation):
     )
 
     return next_recommendation
+
+
+def find_recs_based_on_uas(ua: UserAction) -> Union[Recommendation, None]:
+    """Find user action's source recommendation."""
+
+    while True:
+        prev_ua = ua
+        svid = prev_ua.source.visit_id
+        recommendation = Recommendation.objects(visit_id=svid).first()
+        if recommendation is not None:
+            return recommendation
+        ua = UserAction.objects(target__visit_id=svid).first()
+        if ua is None:
+            return None
+
+
+def get_recs_for_update(verbose=True) -> List[Recommendation]:
+    """Get recommendations that should be used to select SARSes for update"""
+
+    # Get recommendations that are not processed so far
+    # It takes care about recommendations that aren't root for any user actions
+    if verbose:
+        logger.info("Processing not processed recommendations...")
+    recs_for_update = Recommendation.objects(processed__in=[False, None])
+    recs_for_update_direct = set(recs_for_update)
+    recs_for_update.update(processed=True)
+
+    # Get recommendations based on user actions that are not processed so far
+    # It takes care about recommendations that have the processed flag set to True, but
+    # they need to be regenerated due to occurrence(s) of new user actions in the
+    # user actions trees rooted in these recommendations.
+
+    if verbose:
+        logger.info("Processing not processed user actions...")
+    not_processed_uas = UserAction.objects(processed__in=[False, None])
+    not_processed_uas_direct = set(not_processed_uas)
+    not_processed_uas.update(processed=True)
+
+    if verbose:
+        logger.info("Associating users actions with recommendations...")
+    recs_for_update_from_uas = {
+        find_recs_based_on_uas(ua)
+        for ua in tqdm(
+            not_processed_uas_direct, disable=not verbose, desc="User actions"
+        )
+    }
+
+    if verbose:
+        logger.info("Merging all gathered recommendation sets...")
+    recs_for_update_from_uas = set(
+        filter(lambda x: x is not None, recs_for_update_from_uas)
+    )
+    recs_for_update = list(recs_for_update_from_uas | recs_for_update_direct)
+
+    if verbose:
+        logger.info(
+            "In general, there are %s recommendations based on which SARSes will be generated.",
+            len(recs_for_update),
+        )
+        logger.info("Removing SARSes that should be regenerated...")
+
+    Sars.objects(source_recommendation__in=([None] + recs_for_update)).delete()
+
+    return recs_for_update
 
 
 def missing_data_skipper(func):
@@ -212,21 +286,10 @@ def generate_sars(recommendation, root_uas, progress_bar=None):
     ).save()
 
 
-class Executor:
-    """Executor needed for mapping sars generation over recommendations and
-    processes pool"""
-
-    def __init__(self, root_uas):
-        self.root_uas = root_uas
-
-    def __call__(self, recc):
-        generate_sars(recc, self.root_uas)
-
-
 def generate_sarses(
     multi_processing: bool = True,
     recommendations: Union[List[Recommendation], None] = None,
-    verbose=False,
+    verbose=True,
 ):
     """Use this method to generate SARSes in the database"""
 
@@ -244,79 +307,29 @@ def generate_sarses(
             pool.map(executor, recommendations)
     else:
         if verbose:
-            print("Regenerating SARS for each qualified recommendation...")
+            logger.info("Regenerating SARS for each qualified recommendation...")
         uas_p_bar = tqdm(
-            total=len(UserAction.objects), leave=False, disable=not verbose
+            total=len(UserAction.objects),
+            leave=True,
+            disable=not verbose,
+            desc="User Actions",
         )
-        for recommendation in tqdm(recommendations, disable=not verbose):
+        for recommendation in tqdm(
+            recommendations,
+            disable=not verbose,
+            desc="Generating SARSes from recommendations",
+        ):
             generate_sars(recommendation, root_uas, uas_p_bar)
 
     return Sars.objects
 
 
-def find_recs_based_on_uas(ua: UserAction) -> Union[Recommendation, None]:
-    """Find user action's source recommendation."""
-
-    while True:
-        prev_ua = ua
-        svid = prev_ua.source.visit_id
-        recommendation = Recommendation.objects(visit_id=svid).first()
-        if recommendation is not None:
-            return recommendation
-        ua = UserAction.objects(target__visit_id=svid).first()
-        if ua is None:
-            return None
-
-
-def get_recs_for_update(verbose=False) -> List[Recommendation]:
-    """Get recommendations that should be used to select SARSes for update"""
-
-    # Get recommendations that are not processed so far
-    # It takes care about recommendations that aren't root for any user actions
-    if verbose:
-        print("Processing not processed recommendations...")
-    recs_for_update_direct = set(Recommendation.objects(processed__in=[False, None]))
-    Recommendation.objects(processed__in=[False, None]).update(processed=True)
-
-    # Get recommendations based on user actions that are not processed so far
-    # It takes care about recommendations that have the processed flag set to True but
-    # they need to bee regenerated due to occurence(s) of new user actions in the
-    # user actions trees rooted in these recommendations.
-    if verbose:
-        print("Processing not processed user actions...")
-    not_processed_uas = set(UserAction.objects(processed__in=[False, None]))
-    UserAction.objects(processed__in=[False, None]).update(processed=True)
-
-    if verbose:
-        print("Finding recommendations with updated user actions trees...")
-    recs_for_update_from_uas = {
-        find_recs_based_on_uas(ua)
-        for ua in tqdm(not_processed_uas, disable=not verbose)
-    }
-
-    if verbose:
-        print("Merging all gathered recommendation sets...")
-    recs_for_update_from_uas = set(
-        filter(lambda x: x is not None, recs_for_update_from_uas)
-    )
-    recs_for_update = list(recs_for_update_from_uas | recs_for_update_direct)
-
-    if verbose:
-        print(
-            f"In general, there are {len(recs_for_update)} recommendations based on which SARSes will be regenerated."
-        )
-
-    return recs_for_update
-
-
-def regenerate_sarses(multi_processing=True, verbose=False):
-    """Based on new user actions add new sarses and regenerate existing ones that are deprecated"""
+def regenerate_sarses(multi_processing=False, verbose=True):
+    """Based on new user actions add new SARSes and regenerate existing ones that are deprecated"""
 
     # TODO: paralellization of get_recs_for_update
-    recs_for_update = get_recs_for_update(verbose=verbose)
-    if verbose:
-        print("Removing SARSes that should be regenerated...")
-    Sars.objects(source_recommendation__in=([None] + recs_for_update)).delete()
+    recs_for_update = get_recs_for_update(verbose=True)
+
     sarses = generate_sarses(
         multi_processing=multi_processing,
         recommendations=recs_for_update,

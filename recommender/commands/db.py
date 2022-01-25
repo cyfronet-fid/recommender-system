@@ -21,6 +21,9 @@ from tests.factories.marketplace.faker_seeds.utils.dumpers import (
     dump_taglines,
 )
 from tests.factories.populate_database import populate_users_and_services
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def _seed():
@@ -72,9 +75,9 @@ def _seed_faker():
 def _regenerate_sarses():
     """Regenerate SARSes"""
 
-    print("Regenerating SARSes...")
+    logger.info("Regenerating SARSes...")
     regenerate_sarses(multi_processing=True, verbose=True)
-    print("SARSes regenerated successfully!")
+    logger.info("SARSes regenerated successfully!")
 
 
 def db_command(task):

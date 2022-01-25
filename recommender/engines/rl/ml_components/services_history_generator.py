@@ -82,11 +82,11 @@ def _list_difference(minuend: List[Any], subtrahend: List[Any]) -> List[Any]:
 def concat_histories(accessed_services, root_uas):
     """
     This function get user's accessed services (from the DB dump) and combine
-     it with clicked services that correspond to root user actions.
+    it with clicked services that correspond to root user actions.
 
     Essentially it appends accessed services on the beginning of the list of
-     services from root user actions but it filter ordered services
-     duplicates out of it.
+    services from root user actions, but it filters ordered services
+    duplicates out of it.
 
     Args:
         accessed_services: User's accessed services (from DB dump)

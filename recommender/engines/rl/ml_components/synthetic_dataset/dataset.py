@@ -193,7 +193,7 @@ def generate_synthetic_sarses(
     interactions_range: Tuple[int, int] = (3, 10),
     reward_generation_mode: RewardGeneration = RewardGeneration.COMPLEX,
     simple_reward_threshold: int = 0.5,
-) -> Tuple[List[Sars]]:
+) -> List[Sars]:
     """
     Generates artificial SARS dataset that will be used for training
     and benchmarking the RL agent.
