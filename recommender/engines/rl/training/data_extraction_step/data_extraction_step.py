@@ -44,11 +44,12 @@ class RLDataExtractionStep(DataExtractionStep):
 
     def __call__(self, data=None) -> Tuple[List[Sars], dict]:
         start = time()
-        sarses = self._generate_proper_sarses()
+        sarses = self._generate_sarses()
         end = time()
-        return sarses, {"sarses_generation_duration": end - start}
+        return sarses, {"sarses_generation_duration": f"{end - start}s"}
 
-    def _generate_synthetic(self):
+    def _need_to_generate_sarses(self) -> bool:
+        """Is there a need to generate synthetic sarses?"""
         no_of_user_actions = len(UserAction.objects)
         no_of_recommendations = len(Recommendation.objects)
         return (
@@ -56,14 +57,13 @@ class RLDataExtractionStep(DataExtractionStep):
             and no_of_recommendations < self.min_recommendations
         )
 
-    def _generate_proper_sarses(self):
-        Sars.objects(__raw__={"action": {"$size": self.K}}).delete()
-
-        if self._generate_synthetic():
+    def _generate_sarses(self) -> List[Sars]:
+        """Generate real and synthetic (if needed) sarses"""
+        if self._need_to_generate_sarses():
             service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
             return generate_synthetic_sarses(service_embedder, **self.synthetic_params)
 
-        real_sarses = regenerate_sarses(multi_processing=True, verbose=False)
+        real_sarses = regenerate_sarses(multi_processing=False, verbose=True)
         real_sarses = real_sarses(__raw__={"action": {"$size": self.K}})
 
         return list(real_sarses)

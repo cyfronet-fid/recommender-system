@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - YYYY-MM-DD
 ### Added
 - User actions documentation [@JanKapala, @Michal-Kolomanski]
+- Logging in generation of SARSes [@Michal-Kolomanski]
 ### Changed
+- Limited SARSes deletion in the RL data extraction step [@Michal-Kolomanski]
 ### Fixed
 - Details in the AE data preparation step [@Michal-Kolomanski]
 ### Removed
