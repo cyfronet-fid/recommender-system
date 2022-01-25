@@ -63,7 +63,7 @@ class RLDataExtractionStep(DataExtractionStep):
             service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
             return generate_synthetic_sarses(service_embedder, **self.synthetic_params)
 
-        real_sarses = regenerate_sarses(multi_processing=False, verbose=True)
+        real_sarses = regenerate_sarses(multi_processing=True, verbose=True)
         real_sarses = real_sarses(__raw__={"action": {"$size": self.K}})
 
         return list(real_sarses)

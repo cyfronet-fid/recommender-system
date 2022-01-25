@@ -1,6 +1,7 @@
 # pylint: disable-all
 
 """Fixtures used by pytest shared across all tests"""
+import random
 import time
 import uuid
 from random import seed, randint
@@ -132,7 +133,8 @@ from recommender.engines.rl.training.model_validation_step.model_validation_step
     REWARD_LOWER_BOUND,
 )
 from recommender.extensions import db
-from recommender.models import Service
+from recommender.models import Service, Recommendation
+from tests.services.user_journey import UserJourney
 from tests.factories.populate_database import populate_users_and_services
 
 
@@ -625,3 +627,24 @@ def user_action_json_dict():
         },
         "action": {"type": "button", "text": "Details", "order": True},
     }
+
+
+@pytest.fixture
+def generate_uas_and_recs(mongo):
+    for i in range(2):
+        if i % 2 == 0:
+            anonymous = True
+        else:
+            anonymous = False
+        j = UserJourney(anonymous=anonymous)
+        r = Recommendation.objects(visit_id=j.lluj.last_visit_id).first()
+        for _ in range(5):
+            ua = j.lluj.click_random_ua_from_rec_tree(r, n=6)
+            j.lluj.go_to_rec_page(ua)
+            js = [j.service() for _ in range(3)]
+            j2 = js[0].next(random.randint(1, 4)).order().go_to_panel()
+            j3 = js[1].next(random.randint(1, 4)).go_to_panel()
+            j.next(1).order().go_to_panel()
+            j.next(2).order().next(1).go_to_panel()
+            j.next(3).order().next(1)
+        j.lluj.go_to_rec_page(start_ua=ua)

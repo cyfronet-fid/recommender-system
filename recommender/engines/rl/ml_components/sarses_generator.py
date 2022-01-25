@@ -15,10 +15,9 @@ It assumes that above data are stored in database before call.
 """
 
 import itertools
-import multiprocessing
 import time
 from typing import List, Union
-
+import billiard
 import torch
 from mongoengine import DoesNotExist
 from mongoengine.errors import NotUniqueError
@@ -138,7 +137,7 @@ def _get_empty_user() -> User:
                 dense_tensor=torch.zeros(dt_shape),
             )
             user.save()
-        # Multiprocessing may try to save multiple users with ID = -1
+        # Billiard may try to save multiple users with ID = -1
         except NotUniqueError as e:
             while not User.objects(id=-1):
                 time.sleep(0.05)
@@ -312,8 +311,8 @@ def generate_sarses(
 
     if multi_processing:
         executor = Executor(root_uas)
-        cpu_n = multiprocessing.cpu_count()
-        with multiprocessing.Pool(cpu_n) as pool:
+        cpu_n = billiard.cpu_count()
+        with billiard.Pool(cpu_n) as pool:
             # list(tqdm(pool.imap(executor, recommendations), total=len(recommendations), disable=not verbose))
             pool.map(executor, recommendations)
     else:
