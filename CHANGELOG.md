@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - User actions documentation [@JanKapala, @Michal-Kolomanski]
 - Logging in generation of SARSes [@Michal-Kolomanski]
+- SARS generator - saving users with ID -1 to the database while they are not logged in [@Michal-Kolomanski]
 ### Changed
 - Limited SARSes deletion in the RL data extraction step [@Michal-Kolomanski]
 ### Fixed
 - Details in the AE data preparation step [@Michal-Kolomanski]
 ### Removed
-
+- Invalid user actions progress bar [@Michal-Kolomanski]
 ## [3.1.0] - 2022-01-17
 ### Added
 - Add the AI docs, describing the training, data and algorithm evaluation [@wujuu, @JanKapala, @Michal-Kolomanski]

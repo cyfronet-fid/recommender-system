@@ -46,7 +46,7 @@ class RLDataExtractionStep(DataExtractionStep):
         start = time()
         sarses = self._generate_sarses()
         end = time()
-        return sarses, {"sarses_generation_duration": f"{end - start}s"}
+        return sarses, {"sarses_generation_duration": f"{round(end - start, 2)}s"}
 
     def _need_to_generate_sarses(self) -> bool:
         """Is there a need to generate synthetic sarses?"""
