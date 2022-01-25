@@ -16,10 +16,12 @@ It assumes that above data are stored in database before call.
 
 import itertools
 import multiprocessing
+import time
 from typing import List, Union
 
 import torch
 from mongoengine import DoesNotExist
+from mongoengine.errors import NotUniqueError
 from tqdm.auto import tqdm
 
 from recommender.models import User, UserAction, Recommendation, State, Sars, Service
@@ -27,6 +29,7 @@ from recommender.engines.rl.ml_components.reward_mapping import ua_to_reward_id
 from recommender.engines.rl.ml_components.services_history_generator import (
     concat_histories,
 )
+from recommender.errors import NotEnoughUsersOrServices
 from logger_config import get_logger
 
 RECOMMENDATION_PAGES_IDS = ("/services",)
@@ -44,12 +47,9 @@ class Executor:
         generate_sars(recc, self.root_uas)
 
 
-def _tree_collapse(user_action, progress_bar=None):
+def _tree_collapse(user_action):
     """Collapse tree of user actions rooted in user_action
     into list of reward ids"""
-    if progress_bar is not None:
-        progress_bar.update(1)
-
     # Accumulator
     rewards = [ua_to_reward_id(user_action)]
 
@@ -62,15 +62,13 @@ def _tree_collapse(user_action, progress_bar=None):
 
     target_id = user_action.target.visit_id
     children = list(UserAction.objects(source__visit_id=target_id))
-    rewards += list(
-        itertools.chain(*[_tree_collapse(child, progress_bar) for child in children])
-    )
+    rewards += list(itertools.chain(*[_tree_collapse(child) for child in children]))
 
     return rewards
 
 
 def _get_clicked_services_and_reward(
-    recommendation, root_uas, progress_bar=None
+    recommendation, root_uas
 ) -> (List[Service], List[List[str]]):
     """Collapse root user actions trees to:
     - clicked_services_after
@@ -87,7 +85,7 @@ def _get_clicked_services_and_reward(
         service_rewards = list(
             itertools.chain(
                 *[
-                    _tree_collapse(service_root_ua, progress_bar)
+                    _tree_collapse(service_root_ua)
                     for service_root_ua in service_root_uas
                 ]
             )
@@ -119,8 +117,9 @@ def _get_empty_user() -> User:
     It fills its tensors with zeros to simulate tensor precalculation.
     It is used as an anonymous user, and it has no categories or scientific domains.
     """
-
-    assert len(User.objects) >= 1  # Necessary assumption
+    if not User.objects:
+        logger.error("There is no users in the database. Aborting...")
+        raise NotEnoughUsersOrServices()
 
     true_user = User.objects.first()
     oht_shape = len(true_user.one_hot_tensor)
@@ -128,14 +127,26 @@ def _get_empty_user() -> User:
 
     user = User.objects(id=-1).first()
     if user is None:
-        user = User(
-            id=-1,
-            # Here is an assumption that anonymous user should be empty and
-            # therefore its tensors should be zeros.
-            # TODO: maybe Embedder should be used?
-            one_hot_tensor=torch.zeros(oht_shape),
-            dense_tensor=torch.zeros(dt_shape),
-        )
+        start = time.time()
+        try:
+            user = User(
+                id=-1,
+                # Here is an assumption that anonymous user should be empty and
+                # therefore its tensors should be zeros.
+                # TODO: maybe Embedder should be used?
+                one_hot_tensor=torch.zeros(oht_shape),
+                dense_tensor=torch.zeros(dt_shape),
+            )
+            user.save()
+        # Multiprocessing may try to save multiple users with ID = -1
+        except NotUniqueError as e:
+            while not User.objects(id=-1):
+                time.sleep(0.05)
+                # Give 2 seconds to successfully obtain the user
+                if time.time() - start > 2:
+                    raise TimeoutError(e) from e
+
+            user = User.objects(id=-1).first()
 
     return user
 
@@ -239,14 +250,14 @@ def missing_data_skipper(func):
 
 
 @missing_data_skipper
-def generate_sars(recommendation, root_uas, progress_bar=None):
+def generate_sars(recommendation, root_uas):
     """Generate sars for given recommendation and root user actions"""
 
     user = recommendation.user or _get_empty_user()
 
     # Create reward
     clicked_services_after, reward = _get_clicked_services_and_reward(
-        recommendation, root_uas, progress_bar
+        recommendation, root_uas
     )
 
     # Create state
@@ -308,18 +319,13 @@ def generate_sarses(
     else:
         if verbose:
             logger.info("Regenerating SARS for each qualified recommendation...")
-        uas_p_bar = tqdm(
-            total=len(UserAction.objects),
-            leave=True,
-            disable=not verbose,
-            desc="User Actions",
-        )
+
         for recommendation in tqdm(
             recommendations,
             disable=not verbose,
             desc="Generating SARSes from recommendations",
         ):
-            generate_sars(recommendation, root_uas, uas_p_bar)
+            generate_sars(recommendation, root_uas)
 
     return Sars.objects
 
