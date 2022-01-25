@@ -3,11 +3,13 @@ import random
 
 from dotenv import load_dotenv
 
+from recommender.engines.rl.training.pipeline import RLPipeline
+
 load_dotenv()
 import pytest
 from tqdm.auto import trange
 
-from recommender import User
+from recommender import User, celery
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.utils import visualize_uas
 from tests.services.user_journey import UserJourney
@@ -316,6 +318,7 @@ class TestGenerateSarses:
         assert sars.next_state.services_history == clicked_before + clicked_after
 
 
+@pytest.mark.skip(reason="Those tests tend to freeze.")
 class TestRegenerateSarses:
     @pytest.mark.parametrize("multi_processing", [True, False])
     def test_zero_case(self, mongo, multi_processing):
@@ -505,3 +508,21 @@ class TestRegenerateSarses:
             j.lluj.go_to_rec_page(start_ua=ua)
 
         regenerate_sarses(multi_processing=multi_processing, verbose=False)
+
+
+def test_regenerate_sarses_in_rl_pipeline(
+    client,
+    generate_users_and_services,
+    generate_uas_and_recs,
+    rl_pipeline_v1_config,
+    embedding_exec,
+):
+    # WARNING: due to setting task_always_eager=True in the init_celery in the recommender/__init__.py
+    # This test isn't actually check if billard multiprocessing is properly handled
+    # TODO: celery tasks testing should be rethought in the whole project.
+
+    @celery.task
+    def training_for_tests():
+        RLPipeline(rl_pipeline_v1_config)()
+
+    training_for_tests.delay()

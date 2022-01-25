@@ -11,8 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SARS generator - saving users with ID -1 to the database while they are not logged in [@Michal-Kolomanski]
 ### Changed
 - Limited SARSes deletion in the RL data extraction step [@Michal-Kolomanski]
+- Test for regenerate SARSes are disabled due to the fact that they tend to freeze [@Michal-Kolomanski]
 ### Fixed
 - Details in the AE data preparation step [@Michal-Kolomanski]
+- Multiprocessing in Celery task. Transition to billiard [@JanKapala, @Michal-Kolomanski]
 ### Removed
 - Invalid user actions progress bar [@Michal-Kolomanski]
 ## [3.1.0] - 2022-01-17
