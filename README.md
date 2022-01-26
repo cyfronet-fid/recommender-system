@@ -183,6 +183,10 @@ present in the project root directory. Details:
 - `SENTRY_RELEASE` - human-readable release name - it's optional and it can be a free-form string. If not specified, Sentry automatically set it based on the commit revision number.
 - `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in Jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
 - `DEFAULT_RECOMMENDATION_ALG` - the version of the recommender engine (one of `NCF`, `RL`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
+- `JMS_HOST` - the address of your JMS provider (optional)
+- `JMS_PORT` - the port of your JMS provider (optional)
+- `JMS_LOGIN` - your login to the JMS provider (optional)
+- `JMS_PASSWORD` - your password to the JMS provider (optional)
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 

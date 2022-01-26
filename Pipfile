@@ -36,6 +36,7 @@ pytest-randomly = "*"
 sentry-sdk = {extras = ["flask"], version = "*"}
 ray = {version = "==1.7.0", extras = ["default"]}
 celery = {version = "==5.1.2", extras = ["redis"]}
+"stomp.py" = "==7.0.0"
 
 [dev-packages]
 pytest-factoryboy = "*"
@@ -43,13 +44,13 @@ factory-boy = "*"
 ipytest = "*"
 mongomock = "*"
 pytest = "*"
-black = "*"
 pre-commit = "*"
 pylint = "*"
 graphviz = "*"
 jupyter = "*"
 jupyterlab = "*"
 pytest-xdist = "*"
+black = "==20.8b0"
 
 [requires]
 python_version = "3.7"

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- JMS connection [@Michal-Kolomanski]
+### Changed
+- Black version = 20.8b0 - click dependency [@Michal-Kolomanski]
+### Fixed
+### Removed
+
+## [3.1.1] - 2022-01-31
+### Added
 - User actions documentation [@JanKapala, @Michal-Kolomanski]
 - Logging in generation of SARSes [@Michal-Kolomanski]
 - SARS generator - saving users with ID -1 to the database while they are not logged in [@Michal-Kolomanski]
