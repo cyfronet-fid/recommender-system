@@ -6,7 +6,7 @@ import torch
 from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.engines.rl.ml_components.service_selector import ServiceSelector
-from recommender.errors import InsufficientRecommendationSpace
+from recommender.errors import InsufficientRecommendationSpaceError
 from tests.factories.marketplace import ServiceFactory
 
 
@@ -120,6 +120,6 @@ def test_raise_insufficient_recommendation_space(
     service_embedder = Embedder(AutoEncoder(FEATURES_DIM, SE))
     service_selector = ServiceSelector(service_embedder)
 
-    with pytest.raises(InsufficientRecommendationSpace):
+    with pytest.raises(InsufficientRecommendationSpaceError):
         service_selector(weights, mask=torch.zeros(len(services)))
         service_selector(weights, mask=torch.Tensor([0, 0, 0, 1]))

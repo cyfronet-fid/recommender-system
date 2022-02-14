@@ -16,7 +16,7 @@ from recommender.engines.ncf.inference.ncf_inference_component import (
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.engines.rl.inference.rl_inference_component import RLInferenceComponent
 from recommender.errors import (
-    InsufficientRecommendationSpace,
+    InsufficientRecommendationSpaceError,
     InvalidRecommendationPanelIDError,
 )
 from recommender.api.schemas.recommendation import (
@@ -106,8 +106,8 @@ class Recommendation(Resource):
             Deserializer.deserialize_recommendation(json_dict_with_services).save()
 
             response = {"recommendations": services_ids}
-        except InsufficientRecommendationSpace:
-            logger.error(InsufficientRecommendationSpace().message())
+        except InsufficientRecommendationSpaceError:
+            logger.error(InsufficientRecommendationSpaceError().message())
             response = {"recommendations": []}
 
         return response

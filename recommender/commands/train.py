@@ -47,7 +47,6 @@ def _all():
     EmbeddingComponent()()
     NCFPipeline(NCF_PIPELINE_CONFIG)()
     RLPipeline(RL_PIPELINE_CONFIG_V1)()
-    RLPipeline(RL_PIPELINE_CONFIG_V2)()
 
 
 def train_command(task):

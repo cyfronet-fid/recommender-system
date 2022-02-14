@@ -1,4 +1,4 @@
-# pylint: disable=no-member, invalid-name, missing-module-docstring, too-many-locals, too-many-arguments
+# pylint: disable=no-member, invalid-name, missing-module-docstring, too-many-locals, too-many-arguments, line-too-long
 import random
 from typing import List, Dict, Tuple
 
@@ -197,7 +197,7 @@ def generate_synthetic_sarses(
     """
     Generates artificial SARS dataset that will be used for training
     and benchmarking the RL agent.
-    It generates users belonging to a predefined category and scientific domain clusters
+    It generates users who belong to a predefined category and scientific domain clusters
     and for each one generates specified number of SARSes by:
         - choosing an action randomly (LIRD is a off-policy RL algorithm)
         - approximating heuristically the engagement of a user in a given service
