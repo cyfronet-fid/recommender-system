@@ -12,6 +12,7 @@ from recommender.services.fts import retrieve_forbidden_services, filter_service
 from recommender.engines.rl.ml_components.services_history_generator import (
     get_ordered_services,
 )
+from recommender.errors import SizeOfUsersAndSearchDataError
 
 
 class SearchDataEncoder:
@@ -30,8 +31,9 @@ class SearchDataEncoder:
     def __call__(
         self, users: List[User], search_data: List[SearchData]
     ) -> torch.Tensor:
+        if not len(users) == len(search_data):
+            raise SizeOfUsersAndSearchDataError()
 
-        assert len(users) == len(search_data)
         batch_size = len(users)
 
         mask = torch.zeros(batch_size, self.I)
@@ -43,6 +45,7 @@ class SearchDataEncoder:
             filtered_service_indices = get_service_indices(
                 self.index_id_map, filtered_services.distinct("id")
             )
+
             ordered_service_indices = get_service_indices(
                 self.index_id_map, [s.id for s in ordered_services]
             )

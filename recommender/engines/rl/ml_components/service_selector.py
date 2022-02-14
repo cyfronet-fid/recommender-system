@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
-from recommender.errors import InsufficientRecommendationSpace
+from recommender.errors import InsufficientRecommendationSpaceError
 from recommender.models import Service
 from logger_config import get_logger
 
@@ -59,7 +59,7 @@ class ServiceSelector:
         K = weights.shape[0]
 
         if (mask > 0).sum() < K:
-            raise InsufficientRecommendationSpace()
+            raise InsufficientRecommendationSpaceError()
 
         engagement_values = F.softmax(weights @ self.itemspace.T, dim=1)
 

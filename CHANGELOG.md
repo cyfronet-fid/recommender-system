@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Black version = 20.8b0 - click dependency [@Michal-Kolomanski]
 ### Fixed
+- InsufficientRecommendationSpace in RL model evaluation step [@Michal-Kolomanski]
 ### Removed
+- RL v2 training in flask train all [@Michal-Kolomanski]
 
 ## [3.1.1] - 2022-01-31
 ### Added

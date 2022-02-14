@@ -1,5 +1,5 @@
 # pylint: disable=fixme, missing-module-docstring, missing-class-docstring
-# pylint: disable= invalid-name, too-many-locals, too-many-instance-attributes
+# pylint: disable= invalid-name, too-many-locals, too-many-instance-attributes, line-too-long
 
 import random
 from time import time
@@ -32,9 +32,12 @@ from recommender.models import Service, SearchData
 from recommender.engines.rl.ml_components.synthetic_dataset.service_engagement import (
     approx_service_engagement,
 )
+from recommender.errors import InsufficientRecommendationSpaceError
+from logger_config import get_logger
 
 
 TIME_MEASUREMENT_SAMPLES = "time_measurement_samples"
+logger = get_logger(__name__)
 
 
 # TODO: Purge all database accesses and replace
@@ -76,12 +79,22 @@ class RLModelEvaluationStep(ModelEvaluationStep):
     def _evaluate_reward(self, actor, sarses):
         # TODO: Later add more than 1 step per episode for evaluation
         rewards = []
+        invalid_sars_ctr = 0
 
         simulation_start = time()
         for sars in sarses:
             state = sars.state
             user = state.user
-            service_ids = self._get_recommendation(actor, state)
+
+            try:
+                service_ids = self._get_recommendation(actor, state)
+            except InsufficientRecommendationSpaceError as e:
+                logger.debug(
+                    "SARS with ID %s is invalid due to error '%s'", sars.id, e.message()
+                )
+                invalid_sars_ctr += 1
+                continue
+
             services = Service.objects(id__in=service_ids)
             service_engagements = [
                 approx_service_engagement(
@@ -102,7 +115,7 @@ class RLModelEvaluationStep(ModelEvaluationStep):
             rewards.append(encoded_reward[0].item())
         simulation_end = time()
 
-        return rewards, simulation_end - simulation_start
+        return rewards, simulation_end - simulation_start, invalid_sars_ctr
 
     def _evaluate_recommendation_time(self, actor, sarses):
         recommendation_durations = []
@@ -122,33 +135,23 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         weights = actor(encoded_state).squeeze(0)
         mask = encoded_state[-1][0]
         chosen_services = self.service_selector(weights, mask)
+
         return chosen_services
 
     def __call__(self, data=None) -> Tuple[dict, dict]:
         actor, sarses = data
         actor.eval()
 
-        rewards, simulation_duration = self._evaluate_reward(actor, sarses)
+        rewards, simulation_duration, invalid_sars_ctr = self._evaluate_reward(
+            actor, sarses
+        )
         recommendation_durations = self._evaluate_recommendation_time(actor, sarses)
 
         return {
             "recommendation_durations": recommendation_durations,
             "rewards": rewards,
         }, {
-            "simulation_duration": simulation_duration,
+            "simulation_duration": f"{round(simulation_duration, 3)}s",
+            "invalid_sarses": invalid_sars_ctr,
+            "invalid_sarses/valid_sarses": f"{round(invalid_sars_ctr/len(sarses), 3) * 100}%",
         }
-
-
-# if __name__ == '__main__':
-# connect(host=DevelopmentConfig.MONGODB_HOST)
-# actor = Actor(3, )
-# config = {
-#     ModelEvaluationStep.__name__: {
-#         TIME_MEASUREMENT_SAMPLES: 50
-#     },
-# }
-#
-# x = RLModelEvaluationStep(config)
-# print(x())
-#
-# disconnect()

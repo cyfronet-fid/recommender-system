@@ -9,7 +9,7 @@ from typing import Dict, Any, List
 
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.errors import (
-    InsufficientRecommendationSpace,
+    InsufficientRecommendationSpaceError,
     InvalidRecommendationPanelIDError,
 )
 from recommender.models import User, SearchData
@@ -117,7 +117,7 @@ class BaseInferenceComponent(ABC):
 
         candidate_services = list(retrieve_services_for_recommendation(search_data))
         if len(candidate_services) < self.K:
-            raise InsufficientRecommendationSpace()
+            raise InsufficientRecommendationSpaceError()
         recommended_services = random.sample(list(candidate_services), self.K)
         recommended_services_ids = [s.id for s in recommended_services]
 

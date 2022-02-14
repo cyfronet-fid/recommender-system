@@ -13,7 +13,7 @@ from recommender.engines.ncf.ml_components.neural_collaborative_filtering import
     NEURAL_CF,
 )
 from recommender.errors import (
-    InsufficientRecommendationSpace,
+    InsufficientRecommendationSpaceError,
     NoPrecalculatedTensorsError,
 )
 from recommender.models import User, SearchData
@@ -89,7 +89,7 @@ class NCFInferenceComponent(BaseInferenceComponent):
             retrieve_services_for_recommendation(search_data, user.accessed_services)
         )
         if len(candidate_services) < self.K:
-            raise InsufficientRecommendationSpace()
+            raise InsufficientRecommendationSpaceError()
         candidate_services_ids = [s.id for s in candidate_services]
 
         (

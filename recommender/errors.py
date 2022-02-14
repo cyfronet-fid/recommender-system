@@ -46,7 +46,7 @@ class MissingComponentError(RecommendationEngineError):
     pass
 
 
-class InsufficientRecommendationSpace(RecommendationEngineError):
+class InsufficientRecommendationSpaceError(RecommendationEngineError):
     def message(self):  # pragma: no cover
         return (
             "The required number of services to recommend exceed the"
@@ -168,3 +168,8 @@ class RangeOfCommonServicesError(Exception):
         return (
             "Invalid range of common services. The minimum cannot exceed the maximum."
         )
+
+
+class SizeOfUsersAndSearchDataError(Exception):
+    def message(self):
+        return "Length of users and search data is not equal"
