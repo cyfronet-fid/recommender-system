@@ -109,26 +109,6 @@ docker-compose -f docker-compose.yml -f jupyter.yml up
 NOTE: The URL of the Jupyter server will be displayed in the docker-compose output 
 (default: `http://127.0.0.1:8888/?token=SOME_JUPYTER_TOKEN`) (you can customize Jupyter port and host using [env](#env-variables) variables)
 
-### Training
-
-Recommender system can use one of two recommendation engines implemented:
-- `NCF` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
-- `RL` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
-
-To specify from which engine the recommendations are requested, provide an optional `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine.
-It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
-(look into [ENV variables](#env-variables) section).
-
-The simplest way to train a chosen agent is using `./bin/rails recommender:update` task on the Marketplace side. It sends a request to the `/update` endpoint of the Recommender System. It automatically sends the most recent training data, preprocesses and uses it to train needed models.
-
-If you want to have more fine-grained control, you can split this process into two parts:
-- sending the most recent data from MP to Recommender System `/database_dumps` endpoint (using `./bin/rails recommender:serialize_db` task on the MP side)
-- triggering training by sending a request to the Recommender System `/training` endpoint (after the process described above finished)
-
-GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section), but for now, it doesn't work in the dev/test/prod environments due to the fact that celery uses `fork` rather than `spawn` multiprocessing method - it is incompatible with `CUDA`. Fix will be available soon.
-
-After training is finished, the system is immediately ready for serving recommendations (no manual reloading is needed).
-
 ### Tests
 To run all the tests in our app run:
 ```bash
@@ -139,6 +119,40 @@ pipenv run pytest ./tests
 ```bash
 docker-compose -f docker-compose.testing.yml up && docker-compose -f docker-compose.testing.yml down
 ```
+
+### Training
+
+Recommender system can use one of two recommendation engines implemented:
+- `NCF` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
+- `RL` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
+
+There are two ways in which the recommender system can be trained. 
+1) First method is to send a database dump to the RS `/update` endpoint.
+It may be done, for example, by triggering `./bin/rails recommender:update` task on the Marketplace side. It sends a database dump to the `/update` endpoint of the Recommender System. It sends the most current training data, preprocesses it, and utilizes it to train the models that are required.
+
+2) The second method is to use Flask commands: 
+- `flask train all` - the equivalent of training via endpoint `/update` - triggers the training of each pipeline apart from RL in version 2,
+- `flask train ae` - triggers the training of autoencoders pipeline,
+- `flask train embedding` - triggers the training of embeddings,
+- `flask train ncf` - triggers the training of NCF pipeline,
+- `flask train rl_v1` - triggers the training of RL pipeline in version 1 (currently used, it provides 3 recommendations),
+- `flask train rl_v2` - triggers the training of RL pipeline in version 2 (method in process of aborting, it provides 2 recommendations).
+
+GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section).
+
+After training is finished, the system is immediately ready for serving recommendations (no manual reloading is needed).
+
+To specify from which engine the recommendations are requested, provide an optional `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine.
+It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
+(look into [ENV variables](#env-variables) section).
+
+### Generating DB entries for development
+Our recommender, like other systems, requires data to perform properly. Several prepared commands can be used to generate such data:
+- `flask db seed` - it allows to seed a database with any number of synthetic users and services. The exact number can be adjusted here [seed](https://github.com/cyfronet-fid/recommender-system/blob/040a41725f7a1f5ef1a7ea060744a18cd0b6fc7a/recommender/commands/db.py#L29),
+- `flask db seed_faker` - analysis the users and services from a current database and produces some documents which later on will enable to generate more realistic synthetic users and services,
+- `flask db drop_mp` - drops the documents from the RS database which were sent by the MP database dump,
+- `flask db drop_models` - drops machine learning models from m_l_component collection,
+- `flask db regenerate_sarses` - based on new user actions - add new SARSes and regenerate existing ones that are deprecated.
 
 ### Migrations
 We are using MongoDB as our database, which is a NoSQL, schema-less, document-based DB. However, we are also using `mongoengine` - an
@@ -165,6 +179,12 @@ To create a new migration:
 
 (If you performed any of those actions, run `flask migrate check` to determine what went wrong.)
 
+### Documentation
+The essential components of the recommendation system are also documented in our repository:
+- [Data](https://github.com/cyfronet-fid/recommender-system/blob/main/docs/data.md),
+- [Training](https://github.com/cyfronet-fid/recommender-system/blob/main/docs/training.md),
+- [Evaluation](https://github.com/cyfronet-fid/recommender-system/blob/main/docs/evaluation.md),
+- [User session gathering](https://github.com/cyfronet-fid/recommender-system/blob/main/docs/session_gathering/session_gathering.md)
 
 ### ENV variables
 We are using .env to store instance-specific constants or secrets. This file is not tracked by git and it needs to be 
