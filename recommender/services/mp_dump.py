@@ -17,7 +17,7 @@ def load_mp_dump(data):
 
 
 def drop_mp_dump():
-    """Drops part of mongodb which consits of classes sent by Marketplace"""
+    """Drops part of mongodb which consists of classes sent by Marketplace"""
 
     for model in MP_DUMP_MODEL_CLASSES:
         for obj in model.objects:

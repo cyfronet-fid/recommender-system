@@ -15,6 +15,7 @@ from recommender.models import (
     ScientificDomain,
 )
 from recommender.services.mp_dump import drop_mp_dump
+from recommender.services.drop_ml_models import drop_ml_models
 from tests.factories.marketplace.faker_seeds.utils.dumpers import (
     dump_names_descs,
     dump_names,
@@ -43,6 +44,11 @@ def _seed():
 def _drop_mp():
     """Drops the documents sent by the MP Database dump"""
     drop_mp_dump()
+
+
+def _drop_models():
+    """Drops the documents sent by the MP Database dump"""
+    drop_ml_models()
 
 
 def _seed_faker():

@@ -19,6 +19,7 @@ from .trl import Trl
 from .user import User
 from .user_action import UserAction
 from .search_data import SearchData
+from .ml_component import MLComponent
 
 MP_DUMP_MODEL_CLASSES = [
     Category,
@@ -32,4 +33,8 @@ MP_DUMP_MODEL_CLASSES = [
     LifeCycleStatus,
     User,
     Service,
+]
+
+ML_MODELS = [
+    MLComponent,
 ]

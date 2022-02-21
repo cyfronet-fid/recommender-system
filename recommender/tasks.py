@@ -1,6 +1,6 @@
 # pylint: disable=missing-function-docstring, broad-except, fixme
 
-"""This module contain celery tasks"""
+"""This module contains celery tasks"""
 from recommender.engines.autoencoders.inference.embedding_component import (
     EmbeddingComponent,
 )
@@ -14,6 +14,7 @@ from recommender.pipeline_configs import (
     RL_PIPELINE_CONFIG_V1,
 )
 from recommender.services.mp_dump import drop_mp_dump, load_mp_dump
+from recommender.services.drop_ml_models import drop_ml_models
 from logger_config import get_logger
 
 logger = get_logger(__name__)
@@ -24,14 +25,13 @@ def update(data):
     try:
         drop_mp_dump()
         load_mp_dump(data)
+        drop_ml_models()
+
         AEPipeline(AUTOENCODERS_PIPELINE_CONFIG)()
         EmbeddingComponent()()
-
         # TODO: parallel computing algebra here to make it faster
         # TODO: Commented unused pipelines to speed up the training
         NCFPipeline(NCF_PIPELINE_CONFIG)()
-        # RLPipeline(RL_PIPELINE_CONFIG_V2)()
-
         RLPipeline(RL_PIPELINE_CONFIG_V1)()
 
     except Exception:

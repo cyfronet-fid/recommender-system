@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - YYYY-MM-DD
 ### Added
 - JMS connection [@Michal-Kolomanski]
+- Models from m_l_component collection are deleted when necessary (/update, flask command) [@Michal-Kolomanski]
+- Flask command to delete models from m_l_component collection [@Michal-Kolomanski]
 - Flask train, db command and docs in the README [@Michal-Kolomanski]
 - If requested recommendation model (in /recommendation body request) does not exist try to use another model [@Michal-Kolomanski]
 ### Changed
