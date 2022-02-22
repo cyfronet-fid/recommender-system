@@ -179,7 +179,7 @@ def load_examples() -> Dict:
 
     examples = {
         "categories": [1, 2, 3],
-        "geographical_availabilities": [1, 2, 3],
+        "geographical_availabilities": ["WW"],
         "providers": [1, 2, 3],
         "related_platforms": [1, 2, 3],
         "scientific_domains": [1, 2, 3],
@@ -313,5 +313,5 @@ def visualize_uas(filename=None, view=True, save=False):
 
         graph.edge(ua_svid, ua_tvid, color=action_color, label=action_label)
 
-    print("Rendering graph into SVG file...")
+    logger.info("Rendering graph into SVG file...")
     graph.render(filename=filename, format="svg", view=view)

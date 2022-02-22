@@ -2,7 +2,7 @@
 
 """Select proper recommendation engine"""
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 from recommender.engines.base.base_inference_component import BaseInferenceComponent
 from recommender.engines.ncf.inference.ncf_inference_component import (
@@ -86,7 +86,7 @@ def engine_loader(
     engine_names: List[str],
     engines: Dict[str, Any],
     K: int,
-) -> BaseInferenceComponent:
+) -> Tuple[BaseInferenceComponent, str]:
     """
     Try loading engines in the right order to maximize the availability of recommendations
 
@@ -96,22 +96,25 @@ def engine_loader(
         K - number of requested recommendations
     """
     engine = None
+    eg_name = None
 
     while not engine:
         for engine_name in engine_names:
             try:
                 engine = engines.get(engine_name)(K)
                 if engine:
+                    eg_name = engine_name
                     break
             except NoSavedMLComponentError:
                 pass
 
         if not engine:
             raise NoSavedMLComponentError()
-    return engine
+
+    return engine, eg_name
 
 
-def load_engine(json_dict: dict) -> BaseInferenceComponent:
+def load_engine(json_dict: dict) -> Tuple[BaseInferenceComponent, str]:
     """
     Load the engine based on 'engine_version' parameter from a query
 
@@ -133,6 +136,6 @@ def load_engine(json_dict: dict) -> BaseInferenceComponent:
     engine_names = get_engine_names(
         engine_from_req, default_engine, list(engines.keys())
     )
-    engine = engine_loader(engine_names, engines, K)
+    engine, engine_name = engine_loader(engine_names, engines, K)
 
-    return engine
+    return engine, engine_name

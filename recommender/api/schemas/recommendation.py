@@ -20,7 +20,7 @@ search_data = api.model(
             fields.Integer(title="Category"), example=examples["categories"]
         ),
         "geographical_availabilities": fields.List(
-            fields.String(title="Countries", example="PL"),
+            fields.String(title="Countries", example="WW"),
             example=examples["geographical_availabilities"],
         ),
         "order_type": fields.String(title="Order type", example="open_access"),
@@ -90,7 +90,7 @@ recommendation_context = api.model(
             required=False,  # TODO After changes on Marketplace side -> True
             title="Engine version",
             description="Version of the recommendation engine",
-            example="NCF",
+            example="RL",
         ),
         "search_data": fields.Nested(search_data, required=True),
     },

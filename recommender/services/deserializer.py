@@ -1,7 +1,8 @@
 # pylint: disable=no-member, line-too-long
 
 """Implementation of the user activity stub - for development purpose"""
-
+import copy
+from typing import List
 from recommender.models import (
     Recommendation,
     UserAction,
@@ -86,3 +87,11 @@ class Deserializer:
         )
 
         return user_action
+
+
+def deserialize_recommendation(body_request, services_ids: List, engine_name: str):
+    """Enhance recommendation body request and save it to the DB"""
+    rec_to_save = copy.deepcopy(body_request)
+    rec_to_save["services"] = services_ids
+    rec_to_save["engine_version"] = engine_name
+    Deserializer.deserialize_recommendation(rec_to_save).save()
