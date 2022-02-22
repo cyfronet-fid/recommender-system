@@ -147,12 +147,14 @@ def test_engine_loader(
     K = 3
 
     # 1. case RL and NCF engines are saved to the DB
-    engine = engine_loader(engine_names, engines, K)
+    engine, engine_name = engine_loader(engine_names, engines, K)
     assert type(engine) == RLInferenceComponent
+    assert engine_name == "RL"
 
     engine_names = ["NCF", "RL"]
-    engine = engine_loader(engine_names, engines, K)
+    engine, engine_name = engine_loader(engine_names, engines, K)
     assert type(engine) == NCFInferenceComponent
+    assert engine_name == "NCF"
 
     # 2. case no engine is saved
     MLComponent.drop_collection()
@@ -169,8 +171,9 @@ def test_engine_loader2(
     engines = get_engines
     K = 3
 
-    engine = engine_loader(engine_names, engines, K)
+    engine, engine_name = engine_loader(engine_names, engines, K)
     assert type(engine) == RLInferenceComponent
+    assert engine_name == "RL"
 
 
 def test_engine_loader3(
@@ -183,8 +186,9 @@ def test_engine_loader3(
     engines = get_engines
     K = 3
 
-    engine = engine_loader(engine_names, engines, K)
+    engine, engine_name = engine_loader(engine_names, engines, K)
     assert type(engine) == NCFInferenceComponent
+    assert engine_name == "NCF"
 
 
 def test_load_engine(
@@ -198,9 +202,11 @@ def test_load_engine(
     Return engine
     """
     recommendation_data["engine_version"] = "NCF"
-    engine = load_engine(recommendation_data)
+    engine, engine_name = load_engine(recommendation_data)
     assert type(engine) == NCFInferenceComponent
+    assert engine_name == "NCF"
 
     recommendation_data["engine_version"] = "RL"
-    engine = load_engine(recommendation_data)
+    engine, engine_name = load_engine(recommendation_data)
     assert type(engine) == RLInferenceComponent
+    assert engine_name == "RL"

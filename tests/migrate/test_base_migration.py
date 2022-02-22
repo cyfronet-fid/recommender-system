@@ -35,7 +35,6 @@ def test_pymongo_db_var(mongo, mock_migrations_dir):
     first_migration_class = getattr(first_migration_module, "FirstMigrationForTesting")
 
     migration = first_migration_class()
-    print(mongo)
 
     uri = mongo.app.config["MONGODB_HOST"]
     db_details = uri_parser.parse_uri(uri)["nodelist"][0]

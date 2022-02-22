@@ -3,13 +3,14 @@
 from copy import deepcopy
 from recommender.models import UserAction
 from recommender.models import Recommendation
-from recommender.services.deserializer import Deserializer
+from recommender.services.deserializer import Deserializer, deserialize_recommendation
 from tests.factories.marketplace import UserFactory, ServiceFactory
 from tests.factories.marketplace.category import CategoryFactory
 from tests.factories.marketplace.platform import PlatformFactory
 from tests.factories.marketplace.provider import ProviderFactory
 from tests.factories.marketplace.scientific_domain import ScientificDomainFactory
 from tests.factories.marketplace.target_user import TargetUserFactory
+from tests.endpoints.test_recommendations import recommendation_data
 
 
 def test_recommendation_deserialization(mongo, recommendation_json_dict):
@@ -108,3 +109,24 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
     assert ua.action.type == user_action_json_dict.get("action").get("type")
     assert ua.action.text == user_action_json_dict.get("action").get("text")
     assert ua.action.order == user_action_json_dict.get("action").get("order")
+
+
+def test_deserialize_recommendation(mongo, recommendation_data):
+    """
+    Expected behaviour:
+    - No recommendation objects
+    - Save recommendation object
+    - There is a proper recommendation object in the DB
+    """
+    service_ids = [1, 2, 3]
+    engine_name = "RL"
+
+    assert len(Recommendation.objects) == 0
+    deserialize_recommendation(recommendation_data, service_ids, engine_name)
+    assert len(Recommendation.objects) == 1
+    assert Recommendation.objects.first().engine_version == engine_name
+
+    rec_obj_services = Recommendation.objects.first().services
+    for rec_service, service_id in zip(rec_obj_services, service_ids):
+        assert rec_service.collection == "service"
+        assert rec_service.id == service_id

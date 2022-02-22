@@ -1,8 +1,6 @@
 # pylint: disable=no-self-use
 
 """Recommendations endpoint definition"""
-import copy
-
 from flask import request
 from flask_restx import Resource, Namespace
 
@@ -13,7 +11,7 @@ from recommender.api.schemas.recommendation import (
     recommendation,
     recommendation_context,
 )
-from recommender.services.deserializer import Deserializer
+from recommender.services.deserializer import deserialize_recommendation
 from recommender.services.rec_engine_selector import load_engine
 from logger_config import get_logger
 
@@ -31,15 +29,13 @@ class Recommendation(Resource):
         """Returns list of ids of recommended scientific services"""
 
         json_dict = request.get_json()
-        agent = load_engine(json_dict)
+        engine, engine_name = load_engine(json_dict)
         try:
-            services_ids = agent(json_dict)
-
-            json_dict_with_services = copy.deepcopy(json_dict)
-            json_dict_with_services["services"] = services_ids
-            Deserializer.deserialize_recommendation(json_dict_with_services).save()
+            services_ids = engine(json_dict)
+            deserialize_recommendation(json_dict, services_ids, engine_name)
 
             response = {"recommendations": services_ids}
+
         except InsufficientRecommendationSpaceError:
             logger.error(InsufficientRecommendationSpaceError().message())
             response = {"recommendations": []}
