@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+### Changed
+- engine_version field in recommendation request is required [@Michal-Kolomanski]
+### Fixed
+### Removed
+
+## [3.1.2] - 2022-03-02
+### Added
 - JMS connection [@Michal-Kolomanski]
 - Models from m_l_component collection are deleted when necessary (/update, flask command) [@Michal-Kolomanski]
 - Flask command to delete models from m_l_component collection [@Michal-Kolomanski]
@@ -32,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiprocessing in Celery task. Transition to billiard [@JanKapala, @Michal-Kolomanski]
 ### Removed
 - Invalid user actions progress bar [@Michal-Kolomanski]
+
 ## [3.1.0] - 2022-01-17
 ### Added
 - Add the AI docs, describing the training, data and algorithm evaluation [@wujuu, @JanKapala, @Michal-Kolomanski]

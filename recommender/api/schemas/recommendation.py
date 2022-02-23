@@ -87,7 +87,7 @@ recommendation_context = api.model(
             example="v1",
         ),
         "engine_version": fields.String(
-            required=False,  # TODO After changes on Marketplace side -> True
+            required=True,
             title="Engine version",
             description="Version of the recommendation engine",
             example="RL",
