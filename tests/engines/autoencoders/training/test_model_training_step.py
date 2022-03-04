@@ -1,7 +1,6 @@
 # pylint: disable-all
 
-import pytest
-from random import randint, uniform
+from random import randint
 
 import torch
 from torch.utils.tensorboard import SummaryWriter
@@ -42,7 +41,7 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     AutoEncoder,
 )
 from recommender.engines.constants import DEVICE, WRITER, VERBOSE
-from tests.unit.engines.autoencoders.conftest import (
+from tests.engines.autoencoders.conftest import (
     USER_FEATURES_DIM,
     SERVICE_FEATURES_DIM,
 )
