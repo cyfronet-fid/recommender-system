@@ -1,7 +1,7 @@
 # pylint: disable-all
 import pytest
 
-from tests.unit.engines.autoencoders.conftest import get_empty_data_and_details
+from tests.engines.autoencoders.conftest import get_empty_data_and_details
 from recommender.engines.autoencoders.training.data_validation_step import (
     AEDataValidationStep,
     DataValidationStep,

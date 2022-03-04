@@ -9,7 +9,7 @@ from recommender.engines.autoencoders.training.model_validation_step import (
     MODEL_IS_VALID,
     MAX_LOSS_SCORE,
 )
-from tests.unit.engines.autoencoders.training.test_model_evaluation_step import METRICS
+from tests.engines.autoencoders.training.test_model_evaluation_step import METRICS
 from recommender.engines.autoencoders.training.model_training_step import (
     MODEL,
     EMBEDDER,

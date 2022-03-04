@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 - engine_version field in recommendation request is required [@Michal-Kolomanski]
+- Structure of the tests in the tests folder [@Michal-Kolomanski]
 ### Fixed
 ### Removed
 
