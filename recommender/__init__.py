@@ -1,4 +1,5 @@
-# pylint: disable=too-few-public-methods, unused-argument, unused-variable
+# pylint: disable=too-few-public-methods, unused-argument, line-too-long, expression-not-assigned
+# pylint: disable=unused-variable
 
 """Flask recommender factory"""
 
@@ -59,13 +60,15 @@ def _register_commands(app):
         db_command(task)
 
     @app.cli.command("train", help="Run training routine.")
-    @click.argument(
-        "task", type=click.Choice(["ae", "ncf", "rl_v1", "rl_v2", "embedding", "all"])
-    )
-    @app.cli.command("train")
     @click.argument("task", type=click.Choice(["ae", "embedding", "ncf", "rl", "all"]))
     def tmp_train_command(task):
-        train_command(task)
+        agreed = True
+        if task == "all":
+            agreed = click.confirm(
+                "Calling this command will delete all of the existing ML models, do you agree?"
+            )
+
+        train_command(task) if agreed else print("Aborting...")
 
     # pylint: disable=too-many-arguments
     @app.cli.command("migrate", help="Migrate database.")

@@ -13,6 +13,7 @@ from recommender.pipeline_configs import (
     NCF_PIPELINE_CONFIG,
     RL_PIPELINE_CONFIG,
 )
+from recommender.commands.db import drop_ml_models
 
 
 def _ae():
@@ -36,7 +37,8 @@ def _rl():
 
 
 def _all():
-    """Run all training pipelines"""
+    """Delete all old ML models and run all training pipelines"""
+    drop_ml_models()
     AEPipeline(AUTOENCODERS_PIPELINE_CONFIG)()
     EmbeddingComponent()()
     NCFPipeline(NCF_PIPELINE_CONFIG)()
