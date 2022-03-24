@@ -1,8 +1,10 @@
 # pylint: disable-all
+import pytest
 
 from recommender.models import Service, SearchData
 from recommender.services.fts import (
     retrieve_services_for_recommendation,
+    retrieve_services_for_synthetic_sarses,
     retrieve_forbidden_services,
     filter_services,
 )
@@ -12,6 +14,19 @@ from tests.factories.marketplace.platform import PlatformFactory
 from tests.factories.marketplace.provider import ProviderFactory
 from tests.factories.marketplace.scientific_domain import ScientificDomainFactory
 from tests.factories.marketplace.target_user import TargetUserFactory
+
+
+@pytest.fixture
+def create_services(mongo):
+    services = [
+        ServiceFactory(status="published"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="errored"),
+        ServiceFactory(status="deleted"),
+        ServiceFactory(status="draft"),
+    ]
+    return services
 
 
 def test_filter_services(mongo, mocker):
@@ -102,32 +117,32 @@ def test_filter_services(mongo, mocker):
     ) == [s1]
 
 
-def test_retrieve_forbidden_services(mongo):
-    services = [
-        ServiceFactory(status="published"),
-        ServiceFactory(status="unverified"),
-        ServiceFactory(status="errored"),
-        ServiceFactory(status="deleted"),
-        ServiceFactory(status="draft"),
-        ServiceFactory(status="unverified"),
-    ]
+def test_retrieve_forbidden_services(create_services):
+    services = create_services
 
-    assert list(retrieve_forbidden_services()) == services[2:5]
+    assert list(retrieve_forbidden_services()) == services[3:6]
 
 
-def test_retrieve_services_for_recommendations(mongo):
-    services = [
-        ServiceFactory(status="published"),
-        ServiceFactory(status="published"),
-        ServiceFactory(status="unverified"),
-        ServiceFactory(status="unverified"),
-        ServiceFactory(status="deleted"),
-        ServiceFactory(status="draft"),
-    ]
+def test_retrieve_services_for_recommendation(create_services):
+    services = create_services
+    services_id = []
 
-    assert list(retrieve_services_for_recommendation(SearchData())) == services[:4]
+    [services_id.append(service.id) for service in services]
+
+    assert list(retrieve_services_for_recommendation(services_id)) == services[:3]
     assert list(
         retrieve_services_for_recommendation(
+            services_id, accessed_services=[services[0], services[2]]
+        )
+    ) == [services[1]]
+
+
+def test_retrieve_services_for_synthetic_sarses(create_services):
+    services = create_services
+
+    assert list(retrieve_services_for_synthetic_sarses(SearchData())) == services[:3]
+    assert list(
+        retrieve_services_for_synthetic_sarses(
             SearchData(), accessed_services=[services[0], services[2]]
         )
-    ) == [services[1], services[3]]
+    ) == [services[1]]

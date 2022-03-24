@@ -3,7 +3,7 @@
 
 """Neural Collaborative Filtering Inference Component"""
 
-from typing import List
+from typing import List, Tuple
 
 import torch
 
@@ -73,11 +73,14 @@ class NCFInferenceComponent(BaseInferenceComponent):
 
         return users_ids, users_tensor, services_ids, services_tensor
 
-    def _for_logged_user(self, user: User, search_data: SearchData) -> List[int]:
+    def _for_logged_user(
+        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+    ) -> List[int]:
         """Generate recommendation for logged user.
 
         Args:
             user: user for whom recommendation will be generated.
+            elastic_services: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
@@ -86,7 +89,9 @@ class NCFInferenceComponent(BaseInferenceComponent):
         """
 
         candidate_services = list(
-            retrieve_services_for_recommendation(search_data, user.accessed_services)
+            retrieve_services_for_recommendation(
+                elastic_services, user.accessed_services
+            )
         )
         if len(candidate_services) < self.K:
             raise InsufficientRecommendationSpaceError()

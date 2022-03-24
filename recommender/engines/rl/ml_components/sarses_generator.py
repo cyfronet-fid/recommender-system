@@ -17,6 +17,7 @@ It assumes that above data are stored in database before call.
 import itertools
 import time
 from typing import List, Union
+from copy import deepcopy
 import billiard
 import torch
 from mongoengine import DoesNotExist
@@ -252,6 +253,7 @@ def missing_data_skipper(func):
 def generate_sars(recommendation, root_uas):
     """Generate sars for given recommendation and root user actions"""
 
+    rec = deepcopy(recommendation)  # elastic_services memory leak
     user = recommendation.user or _get_empty_user()
 
     # Create reward
@@ -266,6 +268,7 @@ def generate_sars(recommendation, root_uas):
     state = State(
         user=user,
         services_history=services_history_before,
+        elastic_services=rec.elastic_services,
         search_data=recommendation.search_data,
     ).save()
 
@@ -283,6 +286,7 @@ def generate_sars(recommendation, root_uas):
     next_state = State(
         user=user,
         services_history=services_history_after,
+        elastic_services=rec.elastic_services,
         search_data=next_recommendation.search_data,
     ).save()
 

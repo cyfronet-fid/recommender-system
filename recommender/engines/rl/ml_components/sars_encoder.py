@@ -62,8 +62,8 @@ class SarsEncoder:
         states = [SARS.state for SARS in SARSes]
         next_states = [SARS.next_state for SARS in SARSes]
         all_states = states + next_states
-        all_states_tensors = self.state_encoder(all_states)
 
+        all_states_tensors = self.state_encoder(all_states, verbose=True)
         states_tensors = tuple(t[: len(states)] for t in all_states_tensors)
         next_states_tensors = tuple(t[len(states) :] for t in all_states_tensors)
 

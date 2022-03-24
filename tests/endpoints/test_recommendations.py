@@ -16,6 +16,7 @@ def recommendation_data():
         "page_id": "some_page_identifier",
         "panel_id": "v1",
         "engine_version": "NCF",
+        "elastic_services": [1, 2, 3],
         "search_data": {
             "q": "Cloud GPU",
             "categories": [1],

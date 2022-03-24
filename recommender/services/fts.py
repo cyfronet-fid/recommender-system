@@ -2,7 +2,7 @@
 
 """Mongo FTS Operations module"""
 
-from typing import Iterable, Optional
+from typing import Iterable, Optional, List, Tuple
 from mongoengine import QuerySet
 from recommender.models import Service, SearchData
 
@@ -44,6 +44,32 @@ def filter_services(search_data: SearchData) -> QuerySet:
 
 
 def retrieve_services_for_recommendation(
+    elastic_services: Tuple[int], accessed_services: Optional[Iterable] = None
+) -> QuerySet:
+    """
+    Selecting candidates for recommendation
+
+    Args:
+        elastic_services: Marketplace's context
+        accessed_services: Services that user accessed
+    """
+    q = list(elastic_services)
+    q = filter_available_and_recommendable_services(q)
+    q = q(id__nin=[s.id for s in accessed_services]) if accessed_services else q
+    return q
+
+
+def filter_available_and_recommendable_services(q: List[int]) -> QuerySet:
+    """
+    - Check if services exist in the RS database.
+    - Check if the status of a service allows the service to be recommended
+    """
+    q = Service.objects(id__in=q)
+    q = q(status__in=AVAILABLE_FOR_RECOMMENDATION)
+    return q
+
+
+def retrieve_services_for_synthetic_sarses(
     search_data: SearchData, accessed_services: Optional[Iterable] = None
 ):
     """Applies search info from MP and filters MongoDB by them"""

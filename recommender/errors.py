@@ -170,6 +170,6 @@ class RangeOfCommonServicesError(Exception):
         )
 
 
-class SizeOfUsersAndSearchDataError(Exception):
+class SizeOfUsersAndElasticServicesError(Exception):
     def message(self):
-        return "Length of users and search data is not equal"
+        return "Length of users and elastic_services is not equal"

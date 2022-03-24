@@ -92,6 +92,15 @@ recommendation_context = api.model(
             description="Version of the recommendation engine",
             example="RL",
         ),
+        "elastic_services": fields.List(
+            fields.Integer(
+                title="Service ID", description="The unique identifier of the service"
+            ),
+            required=True,
+            title="ElasticSearch services list",
+            description="List of services IDs from ElasticSearch",
+            example=[1, 2, 3, 4],
+        ),
         "search_data": fields.Nested(search_data, required=True),
     },
 )

@@ -37,15 +37,18 @@ class RLInferenceComponent(BaseInferenceComponent):
         )
         self.service_selector = ServiceSelector(self.service_embedder)
 
-    def _for_logged_user(self, user: User, search_data: SearchData) -> Tuple[int]:
-        state = create_state(user, search_data)
+    def _for_logged_user(
+        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+    ) -> Tuple[int]:
+        state = create_state(user, elastic_services, search_data)
         state_tensors = self.state_encoder([state])
         weights_tensor = self._get_weights(state_tensors)
-        search_data_mask = self._get_search_data_mask(state_tensors)
-        service_ids = self.service_selector(weights_tensor, search_data_mask)
+        services_mask = self._get_service_mask(state_tensors)
+        service_ids = self.service_selector(weights_tensor, services_mask)
         return service_ids
 
-    def _get_search_data_mask(self, state_tensors):
+    @staticmethod
+    def _get_service_mask(state_tensors):
         return state_tensors[2][0]
 
     def _get_weights(self, state_tensors):
