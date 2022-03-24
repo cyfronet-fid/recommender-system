@@ -4,16 +4,16 @@
 
 """Implementation of the State Encoder"""
 from typing import Tuple, List
-
 import torch
 from torch.nn.utils.rnn import pad_sequence
-
-from recommender.engines.rl.ml_components.search_data_encoder import (
-    SearchDataEncoder,
+from recommender.engines.rl.ml_components.service_encoder import (
+    ServiceEncoder,
 )
 from recommender.engines.autoencoders.ml_components.embedder import Embedder
-from recommender.models import Service
-from recommender.models import State
+from recommender.models import Service, State
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class StateEncoder:
@@ -30,9 +30,11 @@ class StateEncoder:
         self.service_embedder = service_embedder
         self.use_cached_embeddings = use_cached_embeddings
         self.save_cached_embeddings = save_cached_embeddings
-        self.search_data_encoder = SearchDataEncoder()
+        self.service_encoder = ServiceEncoder()
 
-    def __call__(self, states: List[State]) -> Tuple[(torch.Tensor,) * 3]:
+    def __call__(
+        self, states: List[State], verbose: bool = False
+    ) -> Tuple[(torch.Tensor,) * 3]:
         """
         Encode given states to the tuple of tensors using appropriate encoders
          and embedders as follows:
@@ -43,8 +45,8 @@ class StateEncoder:
                 -> services_one_hot_tensors
                 --(service_embedder)--> services_dense_tensors
                 --(concat)--> services_histories_tensor
-            - state.search_data
-                --(search_data_encoder)--> search_data_tensor (mask)
+            - state.elastic_services
+                --(service encoder)--> service_tensor (mask)
 
 
         It makes batches from parts of states whenever it is possible to
@@ -52,13 +54,14 @@ class StateEncoder:
 
         Args:
             states: List of state objects. Each of them contains information
-             about user, user's services history and search data.
+             about user, user's services history and elastic services.
+            verbose: be verbose?
 
         Returns:
             Tuple of following tensors (in this order):
                 - user of shape [B, UE]
                 - service_histories_batch of shape [B, N, SE]
-                - search_data_mask of shape [B, I]
+                - service_mask of shape [B, I]
 
                 where:
                     - B is the batch_size and it is equal to len(states)
@@ -69,10 +72,14 @@ class StateEncoder:
                     - K is the first mask dim
                     - I is equal to itemspace size
         """
-
+        if verbose:
+            logger.info("Getting all users from states")
         users = [state.user for state in states]
+
+        if verbose:
+            logger.info("Getting all services_histories from states")
         services_histories = [state.services_history for state in states]
-        search_data_list = [state.search_data for state in states]
+
         with torch.no_grad():
             users_batch, _ = self.user_embedder(
                 users,
@@ -82,9 +89,10 @@ class StateEncoder:
             service_histories_batch = self._create_service_histories_batch(
                 services_histories
             )
-            search_data_masks_batch = self.search_data_encoder(users, search_data_list)
 
-        encoded_states = users_batch, service_histories_batch, search_data_masks_batch
+            service_masks_batch = self.service_encoder(users, states, verbose=verbose)
+
+        encoded_states = users_batch, service_histories_batch, service_masks_batch
 
         return encoded_states
 

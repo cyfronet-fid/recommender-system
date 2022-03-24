@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- Integrate elastic_search results from the Marketplace [@Michal-Kolomanski]
 - JMS Subscriber for user actions and flask cli for it [@michal-szostak]
 - search_data migration [@Michal-Kolomanski]
 - tqdm and logging in embedding pipeline [@Michal-Kolomanski]

@@ -24,6 +24,7 @@ class Recommendation(Document):
     panel_id = StringField()
     engine_version = StringField(blank=True)
     services = ListField(ReferenceField(Service))
+    elastic_services = ListField(ReferenceField(Service))
     search_data = ReferenceField(SearchData)
     processed = BooleanField(blank=True)
 

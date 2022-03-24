@@ -5,7 +5,6 @@
 
 import json
 import random
-import functools
 from time import time
 from datetime import datetime
 from typing import Dict, List, Union, Optional, Any
@@ -14,10 +13,9 @@ from uuid import UUID
 import graphviz
 from bson import SON, ObjectId
 from mongoengine import Document
-from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm
 
-from definitions import ROOT_DIR, RUN_DIR
+from definitions import ROOT_DIR
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.engines.rl.utils import _get_visit_ids
 from recommender.models import User, Service, UserAction, Recommendation
@@ -208,58 +206,6 @@ def load_examples() -> Dict:
     # disconnect()
 
     return examples
-
-
-def timeit(func):
-    if "performance_measurements" not in globals():
-        global performance_measurements
-        performance_measurements = {}
-
-    if "writer" not in globals():
-        global writer
-        writer = SummaryWriter(log_dir=RUN_DIR)
-
-    @functools.wraps(func)
-    def newfunc(*args, **kwargs):
-        start = time()
-        ret_val = func(*args, **kwargs)
-        end = time()
-        elapsed = end - start
-
-        key = f"{func.__name__}"
-        if isinstance(performance_measurements.get(key), list):
-            performance_measurements[key].append(elapsed)
-        elif performance_measurements.get(key) is None:
-            performance_measurements[key] = [elapsed]
-
-        step = len(performance_measurements[key])
-        writer.add_scalars("Performance", {key: elapsed}, step)
-        writer.flush()
-
-        return ret_val
-
-    return newfunc
-
-
-def show_times():
-    if "performance_measurements" not in globals():
-        global performance_measurements
-        performance_measurements = {}
-
-    for key, value in performance_measurements.items():
-        records = len(value)
-        mean = sum(value) / records
-        logger.info(
-            "[%s] Mean execution time: %s, records number: %s", key, mean, records
-        )
-
-    return performance_measurements
-
-
-def clear_times():
-    if "performance_measurements" not in globals():
-        global performance_measurements
-    performance_measurements = {}
 
 
 def visualize_uas(filename=None, view=True, save=False):

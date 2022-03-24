@@ -46,6 +46,7 @@ class Deserializer:
             panel_id=json_dict.get("panel_id"),
             engine_version=json_dict.get("engine_version"),
             services=json_dict.get("services"),
+            elastic_services=json_dict.get("elastic_services"),
             search_data=search_data,
         )
 

@@ -15,5 +15,6 @@ from .user import User
 class State(Document):
     user = ReferenceField(User, blank=True)
     services_history = ListField(ReferenceField(Service))
+    elastic_services = ListField(ReferenceField(Service))
     search_data = ReferenceField(SearchData)
     synthetic = BooleanField(default=False)

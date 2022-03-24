@@ -5,7 +5,7 @@
 
 from abc import ABC, abstractmethod
 import random
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Tuple
 
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.errors import (
@@ -46,11 +46,13 @@ class BaseInferenceComponent(ABC):
         """
 
         user = self._get_user(context)
-        search_data = self._get_search_data(context)
+        elastic_services, search_data = self._get_elastic_services_and_search_data(
+            context
+        )
 
         if user is not None:
-            return self._for_logged_user(user, search_data)
-        return self._for_anonymous_user(search_data)
+            return self._for_logged_user(user, elastic_services, search_data)
+        return self._for_anonymous_user(elastic_services)
 
     @abstractmethod
     def _load_models(self) -> None:
@@ -76,26 +78,22 @@ class BaseInferenceComponent(ABC):
 
         return user
 
-    def _get_search_data(self, context: Dict[str, Any]) -> SearchData:
-        search_data = context.get("search_data")
-        search_data.pop(
-            "rating", None
-        )  # We don't and we shouldn't take rating into consideration
-
-        # To prevent q being None (for SearchPhraseEncoder it must be a string)
-        search_data["q"] = search_data.get("q", "")
-
-        search_data = SearchData(**search_data)
-
-        return search_data
+    @staticmethod
+    def _get_elastic_services_and_search_data(
+        context: Dict[str, Any]
+    ) -> [Tuple[int], SearchData]:
+        return tuple(context.get("elastic_services")), context.get("search_data")
 
     @abstractmethod
-    def _for_logged_user(self, user: User, search_data: SearchData) -> List[int]:
+    def _for_logged_user(
+        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+    ) -> List[int]:
         """
         Generate recommendation for logged user
 
         Args:
             user: user for whom recommendation will be generated.
+            elastic_services: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
@@ -103,19 +101,20 @@ class BaseInferenceComponent(ABC):
             recommended_services_ids: List of recommended services ids.
         """
 
-    def _for_anonymous_user(self, search_data: SearchData) -> List[int]:
+    def _for_anonymous_user(self, elastic_services: Tuple[int]) -> List[int]:
         """
         Generate recommendation for anonymous user
 
         Args:
-            search_data: search phrase and filters information for narrowing
-             down an item space.
+            elastic_services: item space from the Marketplace.
 
         Returns:
             recommended_services_ids: List of recommended services ids.
         """
 
-        candidate_services = list(retrieve_services_for_recommendation(search_data))
+        candidate_services = list(
+            retrieve_services_for_recommendation(elastic_services)
+        )
         if len(candidate_services) < self.K:
             raise InsufficientRecommendationSpaceError()
         recommended_services = random.sample(list(candidate_services), self.K)

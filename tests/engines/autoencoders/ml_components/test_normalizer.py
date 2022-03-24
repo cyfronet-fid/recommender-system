@@ -83,7 +83,6 @@ def test_normalizer_call_on_tensors_dim_wise(batch):
 def test_normalizer_call_on_tensors_norm_wise(batch):
     normalizer = Normalizer(mode=NormalizationMode.NORM_WISE)
     output, _ = normalizer(batch)
-    print(output)
     desired = torch.Tensor(
         [
             [0.2411, -0.1002, -0.2520],

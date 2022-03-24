@@ -15,7 +15,6 @@ markupsafe = "==2.0.1"
 flask-restx = "==0.3.0"
 jsonref = "*"
 json-ref-dict = "*"
-pymongo = "*"
 mongoengine = "*"
 flask-mongoengine = "*"
 inflection = "*"
@@ -38,6 +37,7 @@ sentry-sdk = {extras = ["flask"], version = "*"}
 ray = {version = "==1.7.0", extras = ["default"]}
 celery = {version = "==5.1.2", extras = ["redis"]}
 "stomp.py" = "==7.0.0"
+pymongo = "==3.12"
 pydantic = "*"
 
 [dev-packages]

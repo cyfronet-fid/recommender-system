@@ -38,10 +38,3 @@ def test__normalize_embedded_services(service_embeddings, normalized_embedded_se
         normalized_embedded_services,
         atol=10e-5,
     )
-
-
-@pytest.mark.skip(
-    reason="no way of currently testing this as it requires infeasible amount of setup"
-)
-def test_generate_dataset():
-    pass
