@@ -1,14 +1,13 @@
-# pylint: disable=too-few-public-methods, fixme
+# pylint: disable=too-few-public-methods, too-many-arguments, fixme
 
 """Embedder"""
 
 from copy import deepcopy
 from typing import Iterable, Union
-
+from tqdm import tqdm
 import pandas as pd
 import torch
 from mongoengine import QuerySet
-from tqdm.auto import tqdm
 
 from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
 from recommender.engines.rl.utils import (
@@ -29,7 +28,6 @@ class Embedder(Persistent):
     """User or Services Embedder"""
 
     def __init__(self, autoencoder: AutoEncoder):
-        self.disable_tqdm = True
         self.network = deepcopy(autoencoder.encoder)
         # self.network.eval() # TODO: find out why this breaks the embedder test
         self.one_hot_dim = self.network[0].in_features
@@ -43,6 +41,8 @@ class Embedder(Persistent):
         objects: Union[Iterable[Union[User, Service]], QuerySet],
         use_cache: bool = True,
         save_cache: bool = False,
+        version: str = None,
+        verbose: bool = False,
     ) -> (torch.Tensor, pd.DataFrame):
         """Embed objects one hot tensors into dense tensors.
 
@@ -53,6 +53,8 @@ class Embedder(Persistent):
              returned in a batch
             save_cache: Flag deciding whether to save dense tensors into
              objects.
+            version: Type of objects.
+            verbose: Be verbose?
         Returns:
             dense_tensors_batch: Batch of objects' dense tensors.
             index_id_map: Pandas Dataframe with index to id mapping.
@@ -62,7 +64,12 @@ class Embedder(Persistent):
 
         if self.dense_tensors_exist(objects):
             if use_cache:
-                dense_tensors = [obj.dense_tensor for obj in objects]
+                if verbose:
+                    logger.info("Collecting dense_tensors from %s objects", version)
+                dense_tensors = [
+                    obj.dense_tensor
+                    for obj in tqdm(objects, desc=version, disable=not verbose)
+                ]
                 dense_tensors_batch = torch.Tensor(dense_tensors)
                 return dense_tensors_batch, index_id_map
         else:
@@ -72,16 +79,26 @@ class Embedder(Persistent):
         if not self.one_hot_tensors_exist(objects):
             raise MissingOneHotTensorError()
 
-        one_hot_tensors = [obj.one_hot_tensor for obj in objects]
+        if verbose:
+            logger.info("Collecting one_hot_tensors from %s objects", version)
+        one_hot_tensors = [
+            obj.one_hot_tensor
+            for obj in tqdm(objects, desc=version, disable=not verbose)
+        ]
         one_hot_tensors_batch = torch.Tensor(one_hot_tensors)
 
+        if verbose:
+            logger.info("Calculating dense_tensors for %s objects", version)
         dense_tensors_batch = self.network(one_hot_tensors_batch)
 
         if save_cache:
+            if verbose:
+                logger.info("Saving dense_tensors for %s objects", version)
             for obj, dense_tensor in tqdm(
                 zip(objects, dense_tensors_batch),
                 total=len(objects),
-                disable=self.disable_tqdm,
+                desc=version,
+                disable=not verbose,
             ):
                 obj.dense_tensor = dense_tensor.tolist()
                 obj.save()

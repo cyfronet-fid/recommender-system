@@ -23,7 +23,7 @@ def _ae():
 
 def _embedding():
     """Embed User and Services and save dense_tensors to cache"""
-    EmbeddingComponent()()
+    EmbeddingComponent()(verbose=True)
 
 
 def _ncf():
@@ -40,7 +40,7 @@ def _all():
     """Delete all old ML models and run all training pipelines"""
     drop_ml_models()
     AEPipeline(AUTOENCODERS_PIPELINE_CONFIG)()
-    EmbeddingComponent()()
+    EmbeddingComponent()(verbose=True)
     NCFPipeline(NCF_PIPELINE_CONFIG)()
     RLPipeline(RL_PIPELINE_CONFIG)()
 
