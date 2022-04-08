@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - JMS Subscriber for user actions and flask cli for it [@michal-szostak]
 - search_data migration [@Michal-Kolomanski]
+- tqdm and logging in embedding pipeline [@Michal-Kolomanski]
 ### Changed
 - engine_version field in recommendation request is required [@Michal-Kolomanski]
 - Structure of the tests in the tests folder [@Michal-Kolomanski]
