@@ -184,7 +184,7 @@ NCF_PIPELINE_CONFIG = {
     },
 }
 
-RL_PIPELINE_CONFIG = {
+RL_PIPELINE_CONFIG_BASE = {
     SERVICE_EMBEDDING_DIM: SE,
     USER_EMBEDDING_DIM: UE,
     DEVICE: COMPUTING_DEVICE,
@@ -222,7 +222,7 @@ RL_PIPELINE_CONFIG = {
     },
 }
 
-RL_PIPELINE_CONFIG_V1 = {
+RL_PIPELINE_CONFIG = {
     **{
         K: 3,
         SYNTHETIC_PARAMS: {
@@ -231,17 +231,5 @@ RL_PIPELINE_CONFIG_V1 = {
             REWARD_GENERATION_MODE: RewardGeneration.COMPLEX,
         },
     },
-    **RL_PIPELINE_CONFIG,
-}
-
-RL_PIPELINE_CONFIG_V2 = {
-    **{
-        K: 2,
-        SYNTHETIC_PARAMS: {
-            K: 2,
-            INTERACTIONS_RANGE: (1, 2),
-            REWARD_GENERATION_MODE: RewardGeneration.COMPLEX,
-        },
-    },
-    **RL_PIPELINE_CONFIG,
+    **RL_PIPELINE_CONFIG_BASE,
 }

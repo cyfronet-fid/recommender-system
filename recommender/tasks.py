@@ -11,7 +11,7 @@ from recommender.extensions import celery
 from recommender.pipeline_configs import (
     AUTOENCODERS_PIPELINE_CONFIG,
     NCF_PIPELINE_CONFIG,
-    RL_PIPELINE_CONFIG_V1,
+    RL_PIPELINE_CONFIG,
 )
 from recommender.services.mp_dump import drop_mp_dump, load_mp_dump
 from recommender.services.drop_ml_models import drop_ml_models
@@ -32,7 +32,7 @@ def update(data):
         # TODO: parallel computing algebra here to make it faster
         # TODO: Commented unused pipelines to speed up the training
         NCFPipeline(NCF_PIPELINE_CONFIG)()
-        RLPipeline(RL_PIPELINE_CONFIG_V1)()
+        RLPipeline(RL_PIPELINE_CONFIG)()
 
     except Exception:
         logger.exception(

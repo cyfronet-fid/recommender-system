@@ -58,9 +58,7 @@ def _register_commands(app):
         db_command(task)
 
     @app.cli.command("train")
-    @click.argument(
-        "task", type=click.Choice(["ae", "ncf", "rl_v1", "rl_v2", "embedding", "all"])
-    )
+    @click.argument("task", type=click.Choice(["ae", "embedding", "ncf", "rl", "all"]))
     def tmp_train_command(task):
         train_command(task)
 

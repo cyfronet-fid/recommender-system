@@ -131,12 +131,11 @@ There are two ways in which the recommender system can be trained.
 It may be done, for example, by triggering `./bin/rails recommender:update` task on the Marketplace side. It sends a database dump to the `/update` endpoint of the Recommender System. It sends the most current training data, preprocesses it, and utilizes it to train the models that are required.
 
 2) The second method is to use Flask commands: 
-- `flask train all` - the equivalent of training via endpoint `/update` - triggers the training of each pipeline apart from RL in version 2,
+- `flask train all` - the equivalent of training via endpoint `/update` - triggers the training of each pipeline,
 - `flask train ae` - triggers the training of autoencoders pipeline,
 - `flask train embedding` - triggers the training of embeddings,
-- `flask train ncf` - triggers the training of NCF pipeline,
-- `flask train rl_v1` - triggers the training of RL pipeline in version 1 (currently used, it provides 3 recommendations),
-- `flask train rl_v2` - triggers the training of RL pipeline in version 2 (method in process of aborting, it provides 2 recommendations).
+- `flask train ncf` - triggers the training of NCF pipeline (provides 3 recommendations),
+- `flask train rl` - triggers the training of RL pipeline (provides 3 recommendations),
 
 GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (look into [ENV variables](#env-variables) section).
 
