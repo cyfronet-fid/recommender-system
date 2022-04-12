@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - engine_version field in recommendation request is required [@Michal-Kolomanski]
 - Structure of the tests in the tests folder [@Michal-Kolomanski]
+- There is no version specified in flask command for RL training. Use: flask train rl [@Michal-Kolomanski]
 ### Fixed
 ### Removed
+- v2 configuration of RL pipeline removed [@Michal-Kolomanski]
 
 ## [3.1.2] - 2022-03-02
 ### Added
