@@ -202,12 +202,38 @@ present in the project root directory. Details:
 - `SENTRY_RELEASE` - human-readable release name - it's optional and it can be a free-form string. If not specified, Sentry automatically set it based on the commit revision number.
 - `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in Jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
 - `DEFAULT_RECOMMENDATION_ALG` - the version of the recommender engine (one of `NCF`, `RL`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
-- `JMS_HOST` - the address of your JMS provider (optional)
-- `JMS_PORT` - the port of your JMS provider (optional)
-- `JMS_LOGIN` - your login to the JMS provider (optional)
-- `JMS_PASSWORD` - your password to the JMS provider (optional)
+- `RS_SUBSCRIBER_HOST` - the address of your JMS provider (optional)
+- `RS_SUBSCRIBER_PORT` - the port of your JMS provider (optional)
+- `RS_SUBSCRIBER_USERNAME` - your login to the JMS provider (optional)
+- `RS_SUBSCRIBER_PASSWORD` - your password to the JMS provider (optional)
+- `RS_SUBSCRIBER_TOPIC` - topic on which subscriber listens to jms (optional)
+- `RS_SUBSCRIBER_SUBSCRIPTION_ID` - subscription id of the jms subscriber (optional)
+- `RS_SUBSCRIBER_SSL` - whether to use ssl when connecting to jms (optional) (accepted values `0` or `1`, `yes` or `no`)
+- `TEST_RS_SUBSCRIBER_HOST` - same as `RS_SUBSCRIBER_HOST` but used when testing via `pytest`  (default: `127.0.0.1`)
+- `TEST_RS_SUBSCRIBER_PORT` - same as `RS_SUBSCRIBER_PORT` but used when testing via `pytest` (default: `61613`)
+- `TEST_RS_SUBSCRIBER_USERNAME` - same as `RS_SUBSCRIBER_USERNAME` but used when testing via `pytest` (default: `guest`)
+- `TEST_RS_SUBSCRIBER_PASSWORD` - same as `RS_SUBSCRIBER_PASSWORD` but used when testing via `pytest` (default: `guest`)
+- `TEST_RS_SUBSCRIBER_TOPIC` - same as `RS_SUBSCRIBER_TOPIC` but used when testing via `pytest` (default: `topic/user_actions_test`)
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
+
+### JMS Subscriber
+
+There is flask cli command to run JMS subscription which connects to databus and consumes user actions. It can be run
+with following command
+
+```shell
+flask subscribe --host 127.0.0.1 --port 61613 --username guest --password guest 
+```
+
+For all available options run
+
+```shell
+flask subscribe --help
+```
+
+All arguments to subscribe can be read from environmental variables (see section about env variables above)
+
 
 ### Pre-commit
 To activate pre-commit run:

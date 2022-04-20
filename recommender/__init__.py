@@ -1,4 +1,4 @@
-# pylint: disable=too-few-public-methods, unused-argument
+# pylint: disable=too-few-public-methods, unused-argument, unused-variable
 
 """Flask recommender factory"""
 
@@ -13,6 +13,7 @@ from sentry_sdk.integrations.redis import RedisIntegration
 from celery.signals import setup_logging
 
 from recommender.commands import migrate_command, train_command, db_command
+from recommender.commands.subscriber import subscribe
 from recommender.extensions import db, celery
 from recommender.api import api
 from recommender.models import User
@@ -47,7 +48,7 @@ def _register_commands(app):
     def tmp_hitrate_command(engine_version=None, panel_id=None):
         calc_hitrate(engine_version, panel_id)
 
-    @app.cli.command("db")
+    @app.cli.command("db", help="Database related tasks (seed, drop, etc).")
     @click.argument(
         "task",
         type=click.Choice(
@@ -57,17 +58,76 @@ def _register_commands(app):
     def tmp_db_command(task):
         db_command(task)
 
+    @app.cli.command("train", help="Run training routine.")
+    @click.argument(
+        "task", type=click.Choice(["ae", "ncf", "rl_v1", "rl_v2", "embedding", "all"])
+    )
     @app.cli.command("train")
     @click.argument("task", type=click.Choice(["ae", "embedding", "ncf", "rl", "all"]))
     def tmp_train_command(task):
         train_command(task)
 
-    @app.cli.command("migrate")
+    # pylint: disable=too-many-arguments
+    @app.cli.command("migrate", help="Migrate database.")
     @click.argument(
         "task", type=click.Choice(["apply", "rollback", "list", "repopulate", "check"])
     )
     def tmp_migrate_command(task):
         migrate_command(task)
+
+    @app.cli.command(
+        "subscribe", help="Subscribe to databus for events (like user actions)."
+    )
+    @click.option(
+        "--host",
+        envvar="RS_SUBSCRIBER_HOST",
+        required=True,
+        show_default=True,
+        show_envvar=True,
+    )
+    @click.option(
+        "--port",
+        default=61613,
+        envvar="RS_SUBSCRIBER_PORT",
+        show_default=True,
+        show_envvar=True,
+    )
+    @click.option(
+        "--username",
+        default="guest",
+        envvar="RS_SUBSCRIBER_USERNAME",
+        show_default=True,
+        show_envvar=True,
+    )
+    @click.option(
+        "--password",
+        default="guest",
+        envvar="RS_SUBSCRIBER_PASSWORD",
+        show_default=True,
+        show_envvar=True,
+    )
+    @click.option(
+        "--topic",
+        default="/topic/user_actions",
+        envvar="RS_SUBSCRIBER_TOPIC",
+        show_default=True,
+        show_envvar=True,
+    )
+    @click.option(
+        "--subscription-id",
+        envvar="RS_SUBSCRIBER_SUBSCRIPTION_ID",
+        help="Subscription id should be unique. "
+        "If not specified random string will be generated",
+        show_envvar=True,
+    )
+    @click.option(
+        "--ssl/--no-ssl",
+        default=True,
+        envvar="RS_SUBSCRIBER_SSL",
+        show_envvar=True,
+    )
+    def tmp_subscribe(host, port, username, password, topic, subscription_id, ssl):
+        subscribe(host, port, username, password, topic, subscription_id, ssl)
 
 
 def _register_extensions(app):
