@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, no-member, unspecified-encoding
+# pylint: disable=invalid-name, no-member
 
 """This module contains functions used for
 saving specific data from the database

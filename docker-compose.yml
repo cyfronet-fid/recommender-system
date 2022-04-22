@@ -15,6 +15,11 @@ services:
     volumes:
     - redis:/data
 
+  rabbitmq:
+    image: itzg/rabbitmq-stomp:latest
+    ports:
+      - ${RABBIT_HOST:-127.0.0.1:61613}:61613
+
 volumes:
   redis:
   mongo:
