@@ -25,6 +25,7 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     AutoEncoder,
 )
 from recommender.errors import PerformanceTooLowError
+from recommender.engines.constants import LOSS, ACCURACY
 
 
 def test_model_validation_step(
@@ -70,8 +71,8 @@ def test_model_validation_step(
 
     random_collection = random.choice(list(data_model_eval[METRICS]))
     random_split = random.choice(list(data_model_eval[METRICS][random_collection]))
-    data_model_eval[METRICS][random_collection][
-        random_split
+    data_model_eval[METRICS][random_collection][random_split][
+        LOSS
     ] = max_loss_score + random.uniform(0.001, 1)
 
     with pytest.raises(PerformanceTooLowError):

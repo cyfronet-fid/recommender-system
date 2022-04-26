@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 - Cleaning up the main conftest [@Michal-Kolomanski]
+- More metadata in autoencoders pipeline [@Michal-Kolomanski]
 - Pandas warnings in the AE pipline [@Michal-Kolomanski]
 ### Fixed
 ### Removed
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python version: 3.10 [@Michal-Kolomanski]
 - Updating and cleaning up packages [@Michal-Kolomanski]
 ### Fixed
+- Dependabot alerts [@Michal-Kolomanski]
 ### Removed
 
 ## [3.2.0] - 2022-04-26

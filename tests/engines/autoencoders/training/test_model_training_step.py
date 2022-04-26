@@ -45,6 +45,7 @@ from tests.engines.autoencoders.conftest import (
     USER_FEATURES_DIM,
     SERVICE_FEATURES_DIM,
 )
+from recommender.engines.metadata_creators import accuracy_function
 
 
 def test_model_training_step(simulate_data_preparation_step, ae_pipeline_config):
@@ -109,7 +110,7 @@ def test_perform_training(training_data):
             embedding_dim = data[SERVICE_EMBEDDING_DIM]
             features_dim = data[SERVICE_FEATURES_DIM]
 
-        model, loss, timer = perform_training(
+        model, loss, acc, timer = perform_training(
             collection_name=collection,
             train_ds_dl=data[collection][TRAIN],
             valid_ds_dl=data[collection][VALID],
@@ -126,6 +127,7 @@ def test_perform_training(training_data):
 
         assert isinstance(model, AutoEncoder)
         assert isinstance(loss, float)
+        assert isinstance(acc, float)
         assert isinstance(timer, float)
         assert timer > 0
 
@@ -218,13 +220,15 @@ def test_evaluate_autoencoder(training_data, get_autoencoder_models):
         valid_ds_dl = data[USERS][VALID] if col == USERS else data[SERVICES][VALID]
         ae_model = ae_model.to(device)
 
-        val_loss = evaluate_autoencoder(
+        val_loss, val_acc = evaluate_autoencoder(
             model=ae_model,
             dataloader=valid_ds_dl,
             loss_function=autoencoder_loss_function,
+            acc_function=accuracy_function,
             device=device,
         )
         assert isinstance(val_loss, float)
+        assert isinstance(val_acc, float)
 
 
 def test_get_train_and_valid_datasets(simulate_data_preparation_step):

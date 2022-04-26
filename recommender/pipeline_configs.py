@@ -1,4 +1,4 @@
-# pylint: disable=fixme, line-too-long
+# pylint: disable=line-too-long, fixme
 
 """This file contains all pipelines' configs"""
 
