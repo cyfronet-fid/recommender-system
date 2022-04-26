@@ -26,6 +26,7 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     Embedder,
     AutoEncoder,
 )
+from recommender.engines.constants import LOSS, ACCURACY
 
 
 def test_model_evaluation_step(
@@ -77,5 +78,7 @@ def test_model_evaluation_step(
             )
 
             for metric in (data_model_eval_step, details_model_eval_step):
-                loss = metric[collection][split]
+                loss = metric[collection][split][LOSS]
                 assert isinstance(loss, float)
+                acc = metric[collection][split][ACCURACY]
+                assert isinstance(acc, float)

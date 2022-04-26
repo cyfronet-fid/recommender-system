@@ -4,9 +4,7 @@
 from typing import Tuple
 
 from recommender.engines.base.base_steps import ModelValidationStep
-from recommender.engines.autoencoders.training.model_evaluation_step import (
-    METRICS,
-)
+from recommender.engines.constants import LOSS, METRICS
 from recommender.errors import PerformanceTooLowError
 from logger_config import get_logger
 
@@ -16,16 +14,16 @@ MAX_LOSS_SCORE = "max_loss_score"
 logger = get_logger(__name__)
 
 
-def check_performance(metrics, max_loss_score: int) -> None:
+def check_performance(metrics: dict, max_loss_score: int) -> None:
     """
     Check if the losses of the models are below certain threshold.
     Args:
         metrics: data from the AEModelEvaluationStep,
         max_loss_score: threshold used for validation.
     """
-
     for collection_name, metric in metrics.items():
-        for split, loss in metric.items():
+        for split, data in metric.items():
+            loss = data[LOSS]
             if loss > max_loss_score:
                 raise PerformanceTooLowError(
                     f"Loss of the {collection_name} collection"
@@ -46,7 +44,6 @@ class AEModelValidationStep(ModelValidationStep):
         -> model performance regarding chosen metric.
         """
         metrics = data[METRICS]
-
         details = {MODEL_IS_VALID: False}
         check_performance(metrics, self.max_loss_score)
         details[MODEL_IS_VALID] = True

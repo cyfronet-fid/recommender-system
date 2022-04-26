@@ -11,7 +11,6 @@ from torch.optim import Adam
 
 from torch.utils.data import DataLoader
 
-from recommender import User
 from recommender.engines.autoencoders.inference.embedding_component import (
     EmbeddingComponent,
 )
@@ -26,8 +25,6 @@ from recommender.engines.base.base_steps import (
     ModelTrainingStep,
     DataExtractionStep,
     DataValidationStep,
-    DataPreparationStep,
-    ModelEvaluationStep,
     ModelValidationStep,
 )
 
@@ -57,7 +54,6 @@ from recommender.engines.autoencoders.training.model_training_step import (
     SERVICE_EMBEDDING_DIM,
     LR,
     EPOCHS,
-    LOSS,
     TRAINING_TIME,
     MODEL,
     EMBEDDER,
@@ -77,6 +73,8 @@ from recommender.engines.autoencoders.training.model_evaluation_step import (
     BATCH_SIZE,
     ModelEvaluationStep,
 )
+from recommender.engines.constants import LOSS, ACCURACY
+from recommender.engines.metadata_creators import accuracy_function
 from recommender.engines.autoencoders.ml_components.embedder import (
     Embedder,
     USER_EMBEDDER,
@@ -310,7 +308,7 @@ def simulate_model_training_step(training_data, simulate_data_preparation_step):
             else data[SERVICE_EMBEDDING_DIM]
         )
 
-        model, loss, timer = perform_training(
+        model, loss, acc, timer = perform_training(
             collection_name=collection,
             train_ds_dl=data[collection][TRAIN],
             valid_ds_dl=data[collection][VALID],
@@ -331,6 +329,7 @@ def simulate_model_training_step(training_data, simulate_data_preparation_step):
         ][collection]
 
         details[collection][LOSS] = loss
+        details[collection][ACCURACY] = acc
         details[collection][TRAINING_TIME] = timer
 
     return data_model_train_step, details
@@ -353,10 +352,11 @@ def simulate_model_evaluation_step(simulate_model_training_step, ae_pipeline_con
 
         for split, dataset in datasets[DATASET].items():
             dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-            loss = evaluate_autoencoder(
-                model, dataloader, autoencoder_loss_function, device
+            loss, acc = evaluate_autoencoder(
+                model, dataloader, autoencoder_loss_function, accuracy_function, device
             )
-            metrics[collection_name][split] = loss
+            metrics[collection_name][split][LOSS] = loss
+            metrics[collection_name][split][ACCURACY] = acc
 
     details = {METRICS: metrics}
     data[METRICS] = metrics

@@ -24,10 +24,7 @@ from recommender.engines.ncf.training.data_preparation_step import (
 from recommender.engines.ncf.ml_components.tensor_dict_dataset import (
     TensorDictDataset,
 )
-from recommender.engines.ncf.training.model_evaluation_step import (
-    METRICS,
-    CLASSIFICATION_REPORT,
-)
+from recommender.engines.constants import METRICS, CLASSIFICATION_REPORT
 from recommender.engines.ncf.training.model_training_step import (
     MODEL,
 )

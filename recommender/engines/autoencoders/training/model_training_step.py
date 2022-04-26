@@ -4,17 +4,18 @@
 
 import time
 from copy import deepcopy
-from typing import Tuple
+from typing import Tuple, Callable
 from tqdm.auto import tqdm
 
 import torch
+from torch import Tensor
 from torch.nn.utils import clip_grad_norm_
 from torch.nn import CosineEmbeddingLoss
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 
 from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
-from recommender.engines.constants import WRITER, VERBOSE, DEVICE
+from recommender.engines.constants import WRITER, VERBOSE, DEVICE, ACCURACY, LOSS
 from recommender.engines.base.base_steps import ModelTrainingStep
 from recommender.engines.autoencoders.training.data_preparation_step import TRAIN, VALID
 from recommender.engines.autoencoders.training.data_extraction_step import (
@@ -27,6 +28,7 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     SERVICE_EMBEDDER,
     USER_EMBEDDER,
 )
+from recommender.engines.metadata_creators import accuracy_function
 from logger_config import get_logger
 
 ENCODER_LAYER_SIZES = "encoder_layer_sizes"
@@ -42,7 +44,6 @@ EPOCHS = "epochs"
 EMBEDDER = "embedder"
 MODEL = "model"
 TRAINING_TIME = "training_time"
-LOSS = "loss"
 DATASET = "dataset"
 
 logger = get_logger(__name__)
@@ -104,16 +105,24 @@ def autoencoder_loss_function(reconstructions, features):
     return cos_emb_loss(reconstructions, features, ones)
 
 
-def evaluate_autoencoder(model, dataloader, loss_function, device):
+def evaluate_autoencoder(
+    model: AutoEncoder,
+    dataloader: DataLoader,
+    loss_function: Callable[[Tensor, Tensor], Tensor],
+    acc_function: Callable[[Tensor, Tensor, bool], float],
+    device: torch.device = torch.device("cpu"),
+) -> Tuple[float, float]:
     """Evaluate autoencoder"""
-
+    model = model.to(device)
     model.eval()
     with torch.no_grad():
         for batch in dataloader:
             features = batch[0].float().to(device)
-            preds = model(features).to(device)
-            loss = loss_function(features, preds)
-        return loss.item()
+            reconstructions = model(features).to(device)
+
+            loss = loss_function(features, reconstructions)
+            acc = acc_function(features, reconstructions, True)
+        return round(loss.item(), 3), round(acc, 3)
 
 
 def train_autoencoder(
@@ -139,6 +148,7 @@ def train_autoencoder(
 
     start = time.time()
     for epoch in range(epochs):
+        epoch_start = time.time()
         with tqdm(train_ds_dl, unit="batch", disable=(not verbose)) as tepoch:
             model.train()
             for batch in tepoch:
@@ -146,7 +156,9 @@ def train_autoencoder(
 
                 features = batch[0].float().to(device)
                 reconstructions = model(features).to(device)
+
                 loss = loss_function(reconstructions, features)
+                acc = accuracy_function(reconstructions, features, labels_rounding=True)
                 loss.backward()
 
                 clip_grad_norm_(model.parameters(), 0.3)
@@ -154,9 +166,11 @@ def train_autoencoder(
                 optimizer.zero_grad()
 
                 loss = loss.item()
-                tepoch.set_postfix(loss=loss)
+                tepoch.set_postfix(loss=loss, acc=acc, time=time.time() - epoch_start)
 
-            val_loss = evaluate_autoencoder(model, valid_ds_dl, loss_function, device)
+            val_loss, val_acc = evaluate_autoencoder(
+                model, valid_ds_dl, loss_function, accuracy_function, device
+            )
 
             best_model_flag = False
             if epoch % save_period == 0:
@@ -171,37 +185,42 @@ def train_autoencoder(
                     {"train": loss, "valid": val_loss},
                     epoch,
                 )
+                writer.add_scalars(
+                    f"Accuracy/{model.__class__.__name__}",
+                    {"train": acc, "valid": val_acc},
+                    epoch,
+                )
                 writer.flush()
 
             tepoch.set_postfix(
-                loss=loss, val_loss=val_loss, best_model=str(best_model_flag)
+                loss=loss,
+                acc=acc,
+                val_loss=val_loss,
+                val_acc=val_acc,
+                best_model=str(best_model_flag),
             )
 
     end = time.time()
-    timer = end - start
-
-    if verbose:
-        logger.info("Total training time: %s", {end - start})
+    timer = round(end - start, 3)
 
     return best_model, timer
 
 
 def perform_training(
-    collection_name,
     encoder_layer_sizes,
     decoder_layer_sizes,
-    train_ds_dl,
-    valid_ds_dl,
-    embedding_dim,
-    features_dim,
     writer,
     device,
     learning_rate,
     epochs,
     verbose,
+    collection_name,
+    train_ds_dl,
+    valid_ds_dl,
+    embedding_dim,
+    features_dim,
 ):
     """Perform training"""
-
     autoencoder_model = create_autoencoder_model(
         collection_name,
         encoder_layer_sizes=encoder_layer_sizes,
@@ -228,16 +247,26 @@ def perform_training(
         device=device,
     )
 
-    loss = evaluate_autoencoder(
+    loss, acc = evaluate_autoencoder(
         trained_autoencoder_model,
         train_ds_dl,
         autoencoder_loss_function,
+        accuracy_function,
         device,
     )
 
-    logger.info("User Autoencoder testing loss: %s", {loss})
+    if verbose:
+        logger.info(
+            "Total training time of %s autoencoder: %ss", collection_name, timer
+        )
+        logger.info(
+            "%s autoencoder stats: {loss: %s, accuracy: %s}",
+            collection_name.capitalize(),
+            loss,
+            acc,
+        )
 
-    return trained_autoencoder_model, loss, timer
+    return trained_autoencoder_model, loss, acc, timer
 
 
 class AEModelTrainingStep(ModelTrainingStep):
@@ -272,43 +301,39 @@ class AEModelTrainingStep(ModelTrainingStep):
         service_features_dim = len(raw_data[SERVICES][TRAIN][0][0])
 
         # Users
-        user_model, user_loss, user_timer = perform_training(
+        user_model, user_loss, user_acc, user_timer = perform_training(
+            *self.basic_training_conf(),
             collection_name=USERS,
             train_ds_dl=training_datasets[USERS][TRAIN],
             valid_ds_dl=training_datasets[USERS][VALID],
-            encoder_layer_sizes=self.encoder_layer_sizes,
-            decoder_layer_sizes=self.decoder_layer_sizes,
             embedding_dim=self.user_embedding_dim,
             features_dim=user_features_dim,
-            writer=self.writer,
-            device=self.device,
-            learning_rate=self.learning_rate,
-            epochs=self.epochs,
-            verbose=self.verbose,
         )
 
         # Services
-        service_model, service_loss, service_timer = perform_training(
+        service_model, service_loss, service_acc, service_timer = perform_training(
+            *self.basic_training_conf(),
             collection_name=SERVICES,
             train_ds_dl=training_datasets[SERVICES][TRAIN],
             valid_ds_dl=training_datasets[SERVICES][VALID],
-            encoder_layer_sizes=self.encoder_layer_sizes,
-            decoder_layer_sizes=self.decoder_layer_sizes,
             embedding_dim=self.service_embedding_dim,
             features_dim=service_features_dim,
-            writer=self.writer,
-            device=self.device,
-            learning_rate=self.learning_rate,
-            epochs=self.epochs,
-            verbose=self.verbose,
         )
 
         self.trained_user_embedder = Embedder(user_model)
         self.trained_service_embedder = Embedder(service_model)
 
         details = {}
-        user_autoencoder_details = {LOSS: user_loss, TRAINING_TIME: user_timer}
-        service_autoencoder_details = {LOSS: service_loss, TRAINING_TIME: service_timer}
+        user_autoencoder_details = {
+            LOSS: user_loss,
+            ACCURACY: user_acc,
+            TRAINING_TIME: user_timer,
+        }
+        service_autoencoder_details = {
+            LOSS: service_loss,
+            ACCURACY: service_acc,
+            TRAINING_TIME: service_timer,
+        }
 
         details[USERS] = user_autoencoder_details
         details[SERVICES] = service_autoencoder_details
@@ -331,7 +356,20 @@ class AEModelTrainingStep(ModelTrainingStep):
 
         return data, details
 
-    def save(self):
+    def basic_training_conf(self) -> Tuple:
+        """Return a basic training configuration"""
+        params = (
+            self.encoder_layer_sizes,
+            self.decoder_layer_sizes,
+            self.writer,
+            self.device,
+            self.learning_rate,
+            self.epochs,
+            self.verbose,
+        )
+        return params
+
+    def save(self) -> None:
         """Save a model"""
         self.trained_user_embedder.save(version=USER_EMBEDDER)
         self.trained_service_embedder.save(version=SERVICE_EMBEDDER)

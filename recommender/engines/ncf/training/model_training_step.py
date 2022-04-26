@@ -8,7 +8,6 @@ from copy import deepcopy
 from typing import Tuple, Dict, Callable
 
 import torch
-from numpy import ndarray
 from torch import Tensor
 from torch.nn import BCELoss
 from torch.optim import Adam, Optimizer
@@ -21,6 +20,7 @@ from recommender.engines.autoencoders.training.model_training_step import (
     SERVICE_EMBEDDING_DIM,
 )
 from recommender.engines.base.base_steps import ModelTrainingStep
+from recommender.engines.metadata_creators import accuracy_function
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
     NeuralCollaborativeFilteringModel,
     NEURAL_CF,
@@ -40,9 +40,6 @@ from recommender.engines.ncf.training.data_preparation_step import (
     VALID,
 )
 from recommender.engines.constants import WRITER, VERBOSE, DEVICE
-from recommender.engines.ncf.ml_components.tensor_dict_dataset import (
-    TensorDictDataset,
-)
 
 BATCH_SIZE = "batch_size"
 MF_EMBEDDING_DIM = "mf_embedding_dim"
@@ -58,22 +55,11 @@ LOSS_FUNCTION = "loss_function"
 TRAINING_TIME = "training_time"
 
 
-def accuracy_function(preds: Tensor, labels: Tensor) -> float:
-    """Calculate accuracy for given predictions and labels tensors."""
-
-    rounded_preds = torch.round(torch.reshape(preds, (-1,)))
-    reshaped_labels = torch.reshape(labels, (-1,))
-    all = len(reshaped_labels)
-    matching = torch.sum(rounded_preds == reshaped_labels).item()
-
-    return matching / all
-
-
 def evaluate_ncf(
     model: NeuralCollaborativeFilteringModel,
     dataloader: DataLoader,
     loss_function: Callable[[Tensor, Tensor], Tensor],
-    accuracy_function: Callable[[Tensor, Tensor], float],
+    acc_function: Callable[[Tensor, Tensor, bool], float],
     device: torch.device = torch.device("cpu"),
 ) -> Tuple[float, float]:
     """Evaluate Neural Collaborative Filtering Model"""
@@ -90,7 +76,7 @@ def evaluate_ncf(
 
             preds = model(users_ids, users_contents, services_ids, services_contents)
             loss = loss_function(preds, labels)
-            acc = accuracy_function(preds, labels)
+            acc = acc_function(preds, labels, False)
         return loss.item(), acc
 
 
@@ -132,7 +118,7 @@ def train_ncf(
                 )
 
                 loss = loss_function(preds, labels)
-                acc = accuracy_function(preds, labels)
+                acc = accuracy_function(preds, labels, False)
 
                 loss.backward()
 
@@ -171,30 +157,6 @@ def train_ncf(
     execution_time = end - start
 
     return best_model, execution_time
-
-
-def get_preds_for_ds(
-    model: NeuralCollaborativeFilteringModel,
-    dataset: TensorDictDataset,
-    device: torch.device = torch.device("cpu"),
-) -> Tuple[ndarray, ndarray]:
-    """Used for getting predictions on pytorch dataset."""
-
-    model = model.to(device)
-
-    all_samples = dataset[:]
-
-    users_ids = all_samples[USERS_IDS].to(device)
-    users_contents = all_samples[USERS].to(device)
-    services_ids = all_samples[SERVICES_IDS].to(device)
-    services_contents = all_samples[SERVICES].to(device)
-    labels = all_samples[LABELS].to(device)
-    preds = model(users_ids, users_contents, services_ids, services_contents)
-
-    labels = labels.detach().numpy()
-    preds = preds.detach().numpy()
-
-    return labels, preds
 
 
 class NCFModelTrainingStep(ModelTrainingStep):

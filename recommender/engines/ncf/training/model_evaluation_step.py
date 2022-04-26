@@ -5,33 +5,68 @@
 from typing import Tuple, Dict
 
 import torch
+from numpy import ndarray
 from sklearn.metrics import classification_report
 from torch.nn import BCELoss
 from torch.utils.data import DataLoader
 
 from recommender.engines.base.base_steps import ModelEvaluationStep
-from recommender.engines.constants import DEVICE
+from recommender.engines.constants import (
+    DEVICE,
+    METRICS,
+    LOSS,
+    ACCURACY,
+    CLASSIFICATION_REPORT,
+)
+from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
+    NeuralCollaborativeFilteringModel,
+)
+from recommender.engines.ncf.ml_components.tensor_dict_dataset import TensorDictDataset
 from recommender.engines.ncf.training.data_preparation_step import (
     DATASETS,
     TRAIN,
     VALID,
     TEST,
+    USERS_IDS,
+    USERS,
+    SERVICES_IDS,
+    SERVICES,
+    LABELS,
 )
 from recommender.engines.ncf.training.model_training_step import (
     evaluate_ncf,
-    accuracy_function,
     LOSS_FUNCTION,
     BATCH_SIZE,
     MODEL,
-    get_preds_for_ds,
 )
+from recommender.engines.metadata_creators import accuracy_function
 
-METRICS = "metrics"
-LOSS = "loss"
-ACCURACY = "accuracy"
-CLASSIFICATION_REPORT = "classification_report"
 ORDERED = "ordered"
 NOT_ORDERED = "not_ordered"
+
+
+def get_preds_for_ds(
+    model: NeuralCollaborativeFilteringModel,
+    dataset: TensorDictDataset,
+    device: torch.device = torch.device("cpu"),
+) -> Tuple[ndarray, ndarray]:
+    """Used for getting predictions on pytorch dataset."""
+
+    model = model.to(device)
+
+    all_samples = dataset[:]
+
+    users_ids = all_samples[USERS_IDS].to(device)
+    users_contents = all_samples[USERS].to(device)
+    services_ids = all_samples[SERVICES_IDS].to(device)
+    services_contents = all_samples[SERVICES].to(device)
+    labels = all_samples[LABELS].to(device)
+    preds = model(users_ids, users_contents, services_ids, services_contents)
+
+    labels = labels.detach().numpy()
+    preds = preds.detach().numpy()
+
+    return labels, preds
 
 
 class NCFModelEvaluationStep(ModelEvaluationStep):
@@ -60,7 +95,7 @@ class NCFModelEvaluationStep(ModelEvaluationStep):
                 model=model,
                 dataloader=dataloader,
                 loss_function=self.loss_function,
-                accuracy_function=accuracy_function,
+                acc_function=accuracy_function,
                 device=self.device,
             )
             metrics[ds_name][LOSS] = loss
