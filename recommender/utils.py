@@ -4,6 +4,7 @@
 """Project Utilities"""
 
 import json
+import pickle
 import random
 from time import time
 from datetime import datetime
@@ -11,7 +12,7 @@ from typing import Dict, List, Union, Optional, Any
 from uuid import UUID
 
 import graphviz
-from bson import SON, ObjectId
+from bson import SON, ObjectId, Binary
 from mongoengine import Document
 from tqdm.auto import tqdm
 
@@ -41,6 +42,8 @@ def _son_to_dict(son_obj: SON) -> dict:
             dictionary[key] = _son_to_dict(value)
         if isinstance(value, (ObjectId, UUID, datetime)):
             dictionary[key] = str(value)
+        if isinstance(value, Binary):
+            dictionary[key] = str(pickle.loads(value))
     if "_cls" in dictionary.keys():
         dictionary.pop("_cls")
     return dictionary
