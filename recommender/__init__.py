@@ -1,5 +1,5 @@
 # pylint: disable=too-few-public-methods, unused-argument, line-too-long, expression-not-assigned
-# pylint: disable=unused-variable
+# pylint: disable=unused-variable, abstract-class-instantiated
 
 """Flask recommender factory"""
 
