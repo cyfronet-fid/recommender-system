@@ -53,4 +53,4 @@ class RewardEncoder:
     def _combine_rewards(rewards: List[float]) -> torch.Tensor:
         # Root mean squared error
         rewards_tensor = torch.tensor(rewards)
-        return (rewards_tensor ** 2).mean().sqrt()
+        return (rewards_tensor**2).mean().sqrt()

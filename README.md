@@ -16,7 +16,7 @@ The inner structure can be described as two elements:
 
 ### Requirements
 - [Git](https://git-scm.com/)
-- [Python 3.7.x](https://www.python.org/downloads/release/python-370/)
+- [Python 3.10.x](https://www.python.org/downloads/release/python-3104/)
 - [Pipenv](https://pypi.org/project/pipenv/)
 - [MongoDB](https://www.mongodb.com/)
 - [Redis](https://redis.io/)
