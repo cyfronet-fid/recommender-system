@@ -13,7 +13,12 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 from celery.signals import setup_logging
 
-from recommender.commands import migrate_command, train_command, db_command
+from recommender.commands import (
+    migrate_command,
+    train_command,
+    db_command,
+    seed_command,
+)
 from recommender.commands.subscriber import subscribe
 from recommender.extensions import db, celery
 from recommender.api import api
@@ -26,38 +31,47 @@ from logger_config import apply_logging_config
 def create_app():
     """Creates the flask recommender, initializes config in
     the proper ENV and initializes flask-restx"""
-
+    env = os.environ["FLASK_ENV"]
     init_sentry_flask()
 
     app = Flask(__name__)
-    app.config.from_object(config_by_name[os.environ["FLASK_ENV"]])
-    if not os.environ["FLASK_ENV"] == "testing":
+    app.config.from_object(config_by_name[env])
+
+    if not env == "testing":
         apply_logging_config()
 
     _register_extensions(app)
     api.init_app(app)
     init_celery(app)
-    _register_commands(app)
+    _register_commands(app, env)
 
     return app
 
 
-def _register_commands(app):
+def _register_commands(app, env: str):
     @app.cli.command("hitrate")
     @click.argument("engine_version", required=False)
     @click.argument("panel_id", required=False)
     def tmp_hitrate_command(engine_version=None, panel_id=None):
         calc_hitrate(engine_version, panel_id)
 
-    @app.cli.command("db", help="Database related tasks (seed, drop, etc).")
+    @app.cli.command("db", help="Database related tasks (without seeding).")
     @click.argument(
         "task",
-        type=click.Choice(
-            ["seed", "drop_mp", "drop_models", "seed_faker", "regenerate_sarses"]
-        ),
+        type=click.Choice(["drop_mp", "drop_models", "regenerate_sarses"]),
     )
     def tmp_db_command(task):
         db_command(task)
+
+    if env != "production":
+
+        @app.cli.command("seed", help="Tasks for seeding database.")
+        @click.argument(
+            "task",
+            type=click.Choice(["seed", "seed_faker"]),
+        )
+        def tmp_seed_command(task):
+            seed_command(task)
 
     @app.cli.command("train", help="Run training routine.")
     @click.argument("task", type=click.Choice(["ae", "embedding", "ncf", "rl", "all"]))

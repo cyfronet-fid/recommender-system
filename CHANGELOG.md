@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cleaning up the main conftest [@Michal-Kolomanski]
 - More metadata in autoencoders pipeline [@Michal-Kolomanski]
 - Pandas warnings in the AE pipline [@Michal-Kolomanski]
+- db commands divided into db and seed commands [@Michal-Kolomanski]
+- seed commands only available in development and testing env [@Michal-Kolomanski]
 ### Fixed
 ### Removed
 
