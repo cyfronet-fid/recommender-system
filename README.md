@@ -145,10 +145,15 @@ To specify from which engine the recommendations are requested, provide an optio
 It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
 (look into [ENV variables](#env-variables) section).
 
-### Generating DB entries for development
+### Seeding database
+Note: Only available in development and testing environment.
+
 Our recommender, like other systems, requires data to perform properly. Several prepared commands can be used to generate such data:
-- `flask db seed` - it allows to seed a database with any number of synthetic users and services. The exact number can be adjusted here [seed](https://github.com/cyfronet-fid/recommender-system/blob/040a41725f7a1f5ef1a7ea060744a18cd0b6fc7a/recommender/commands/db.py#L29),
-- `flask db seed_faker` - analysis the users and services from a current database and produces some documents which later on will enable to generate more realistic synthetic users and services,
+- `flask seed seed` - it allows to seed a database with any number of synthetic users and services. The exact number can be adjusted here [seed](https://github.com/cyfronet-fid/recommender-system/blob/040a41725f7a1f5ef1a7ea060744a18cd0b6fc7a/recommender/commands/db.py#L29),
+- `flask seed seed_faker` - analysis the users and services from a current database and produces some documents which later on will enable to generate more realistic synthetic users and services,
+
+### Managing database
+We provide also commands to manipulate database.
 - `flask db drop_mp` - drops the documents from the RS database which were sent by the MP database dump,
 - `flask db drop_models` - drops machine learning models from m_l_component collection,
 - `flask db regenerate_sarses` - based on new user actions - add new SARSes and regenerate existing ones that are deprecated.
