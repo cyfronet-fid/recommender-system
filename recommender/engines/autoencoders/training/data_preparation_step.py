@@ -5,11 +5,11 @@
 """Autoencoder Data Preparation Step."""
 
 import pickle
-from typing import Tuple
-
+from typing import Tuple, List
 import pandas as pd
 import torch
 from inflection import pluralize
+import sklearn.compose
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 from torch.utils.data import random_split
@@ -43,28 +43,9 @@ TRAIN_DS_SIZE = "train_ds_size"
 VALID_DS_SIZE = "valid_ds_size"
 DATASETS = "datasets"
 
-SERVICE_COLUMNS = [
-    "name",
-    "description",
-    "tagline",
-    "countries",
-    "categories",
-    "providers",
-    "resource_organisation",
-    "scientific_domains",
-    "platforms",
-    "target_users",
-    "access_modes",
-    "access_types",
-    "trls",
-    "life_cycle_statuses",
-]
-USER_COLUMNS = ["scientific_domains", "categories"]
 
-
-def create_users_transformer():
+def create_users_transformer() -> sklearn.compose.ColumnTransformer:
     """Creates users transformer"""
-
     transformer = make_column_transformer(
         (make_pipeline(ListColumnOneHotEncoder()), ["scientific_domains", "categories"])
     )
@@ -72,9 +53,8 @@ def create_users_transformer():
     return transformer
 
 
-def create_services_transformer():
+def create_services_transformer() -> sklearn.compose.ColumnTransformer:
     """Creates services transformer"""
-
     transformer = make_column_transformer(
         (
             make_pipeline(ListColumnOneHotEncoder()),
@@ -93,11 +73,10 @@ def create_services_transformer():
             ],
         )
     )
-
     return transformer
 
 
-def create_transformer(name):
+def create_transformer(name: str) -> sklearn.compose.ColumnTransformer:
     """Creates new transformer of given name."""
 
     if name == USERS:
@@ -108,12 +87,9 @@ def create_transformer(name):
     raise ValueError(f"Name not in ({USERS, SERVICES})")
 
 
-def service_to_df(service, save_df=False):
-    """It transform MongoEngine Service object into Pandas dataframe"""
-
-    df = pd.DataFrame(columns=SERVICE_COLUMNS)
-
-    row_dict = {
+def service_to_df(service: Service, save_df=False) -> pd.DataFrame:
+    """It transforms MongoEngine Service object into Pandas dataframe"""
+    service_df = {
         "name": service.name,
         "description": service.description,
         "tagline": service.tagline.split(", "),
@@ -144,53 +120,53 @@ def service_to_df(service, save_df=False):
         ],
     }
 
-    df = df.append(row_dict, ignore_index=True)
+    service_df = pd.DataFrame([service_df])
+
     if save_df:
-        service.dataframe = pickle.dumps(df)
+        service.dataframe = pickle.dumps(service_df)
         service.save()
 
-    return df
+    return service_df
 
 
-def user_to_df(user, save_df=False):
-    """It transform MongoEngine User object into Pandas dataframe"""
-
-    df = pd.DataFrame(columns=USER_COLUMNS)
-
-    row_dict = {
+def user_to_df(user: User, save_df=False) -> pd.DataFrame:
+    """It transforms MongoEngine User object into Pandas dataframe"""
+    user_df = {
         "categories": [category.name for category in user.categories],
         "scientific_domains": [
             scientific_domain.name for scientific_domain in user.scientific_domains
         ],
     }
 
-    df = df.append(row_dict, ignore_index=True)
+    user_df = pd.DataFrame([user_df])
+
     if save_df:
-        user.dataframe = pickle.dumps(df)
+        user.dataframe = pickle.dumps(user_df)
         user.save()
 
-    return df
+    return user_df
 
 
-def object_to_df(object, save_df=False):
+def object_to_df(obj: User | Service, save_df=False) -> pd.DataFrame:
     """Transform object into Pandas dataframe"""
-    collection_name = pluralize(object.__class__.__name__.lower())
+    collection_name = pluralize(obj.__class__.__name__.lower())
 
     if collection_name == USERS:
-        object_df = user_to_df(object, save_df=save_df)
+        object_df = user_to_df(obj, save_df=save_df)
     elif collection_name == SERVICES:
-        object_df = service_to_df(object, save_df=save_df)
+        object_df = service_to_df(obj, save_df=save_df)
     else:
         raise InvalidObject(f"Collection name not in ({USERS, SERVICES})")
 
     return object_df
 
 
-def df_to_tensor(df, transformer, fit=False):
+def df_to_tensor(
+    df: pd.DataFrame, transformer: sklearn.compose.ColumnTransformer, fit=False
+) -> [torch.Tensor, sklearn.compose.ColumnTransformer]:
     """Transform Pandas dataframe into Pytorch one_hot_tensor using Scikit-learn
     transformer.
     """
-
     if fit:
         user_features_array = transformer.fit_transform(df)
     else:
@@ -201,9 +177,13 @@ def df_to_tensor(df, transformer, fit=False):
     return tensor, transformer
 
 
-def precalculate_tensors(objects, transformer, fit=True, verbose=False):
+def precalculate_tensors(
+    objects: List[User | Service],
+    transformer: sklearn.compose.ColumnTransformer,
+    fit=True,
+    verbose=False,
+) -> [torch.Tensor, sklearn.compose.ColumnTransformer]:
     """Precalculate tensors for MongoEngine models"""
-
     objects = list(objects)
     collection_name = pluralize(objects[0].__class__.__name__.lower())
     if collection_name not in (USERS, SERVICES):
@@ -232,7 +212,7 @@ def precalculate_tensors(objects, transformer, fit=True, verbose=False):
     return tensors, transformer
 
 
-def precalc_users_and_service_tensors(collections: dict = None):
+def precalc_users_and_service_tensors(collections: dict = None) -> dict:
     """
     Precalculate users and services tensors
 
@@ -266,14 +246,13 @@ def precalc_users_and_service_tensors(collections: dict = None):
 
 
 def split_autoencoder_datasets(
-    collection,
-    train_ds_size=0.6,
-    valid_ds_size=0.2,
+    ds_tensor: torch.Tensor,
+    train_ds_size: float = 0.6,
+    valid_ds_size: float = 0.2,
     device: torch.device = torch.device("cpu"),
-):
+) -> dict:
     """Split users/services autoencoder dataset into train/valid/test datasets"""
-
-    ds_tensor = collection.to(device)
+    ds_tensor = ds_tensor.to(device)
     dataset = torch.utils.data.TensorDataset(ds_tensor)
 
     ds_size = len(dataset)
@@ -290,14 +269,14 @@ def split_autoencoder_datasets(
     return output
 
 
-def validate_split(datasets):
+def validate_split(datasets: dict) -> None:
     """Train and valid datasets should always have at least one object"""
     for split in (TRAIN, VALID):
         if len(datasets[split]) < 1:
             raise InvalidDatasetSplit()
 
 
-def create_details(data):
+def create_details(data: dict) -> dict:
     """Count objects in each train/valid/test dataset for User/Service collections"""
     details = {USERS: {}, SERVICES: {}}
     data = data[AUTOENCODERS]
