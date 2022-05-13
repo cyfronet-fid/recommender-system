@@ -1,10 +1,35 @@
 # pylint: disable-all
-"""Fixtures which enable creating isolated environment for unit testing of the autoencoders pipeline steps"""
+"""Fixtures for autoencoders"""
 
 import pytest
+from typing import Tuple, Dict
 from random import randint, uniform
 
+import torch
+from torch.nn import CosineEmbeddingLoss
+from torch.optim import Adam
+
 from torch.utils.data import DataLoader
+
+from recommender import User
+from recommender.engines.autoencoders.inference.embedding_component import (
+    EmbeddingComponent,
+)
+from recommender.engines.autoencoders.ml_components.autoencoder import AutoEncoder
+from recommender.engines.autoencoders.training.data_validation_step import (
+    LEAST_NUM_OF_USR_SRV,
+)
+from recommender.engines.autoencoders.training.model_validation_step import (
+    MAX_LOSS_SCORE,
+)
+from recommender.engines.base.base_steps import (
+    ModelTrainingStep,
+    DataExtractionStep,
+    DataValidationStep,
+    DataPreparationStep,
+    ModelEvaluationStep,
+    ModelValidationStep,
+)
 
 from recommender.models import User, Service
 from recommender.engines.autoencoders.training.data_extraction_step import (
@@ -42,17 +67,78 @@ from recommender.engines.autoencoders.training.model_training_step import (
     perform_training,
     autoencoder_loss_function,
     evaluate_autoencoder,
+    LOSS_FUNCTION,
+    USER_BATCH_SIZE,
+    SERVICE_BATCH_SIZE,
+    OPTIMIZER,
 )
 from recommender.engines.autoencoders.training.model_evaluation_step import (
     METRICS,
     BATCH_SIZE,
     ModelEvaluationStep,
 )
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.autoencoders.ml_components.embedder import (
+    Embedder,
+    USER_EMBEDDER,
+    SERVICE_EMBEDDER,
+)
 from recommender.engines.constants import DEVICE, WRITER, VERBOSE
 
 USER_FEATURES_DIM = "user_features_dim"
 SERVICE_FEATURES_DIM = "service_features_dim"
+
+
+@pytest.fixture
+def ae_pipeline_config(embedding_dims: Tuple[int, int]) -> Dict:
+    """Autoencoders pipline configuration"""
+    user_embedding_dim, service_embedding_dim = embedding_dims
+    config = {
+        DEVICE: torch.device("cpu"),
+        WRITER: None,
+        VERBOSE: True,
+        LOSS_FUNCTION: CosineEmbeddingLoss(),
+        DataExtractionStep.__name__: {},
+        DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 2},
+        DataPreparationStep.__name__: {TRAIN_DS_SIZE: 0.6, VALID_DS_SIZE: 0.2},
+        ModelTrainingStep.__name__: {
+            USER_BATCH_SIZE: 128,
+            SERVICE_BATCH_SIZE: 128,
+            USER_EMBEDDING_DIM: user_embedding_dim,
+            SERVICE_EMBEDDING_DIM: service_embedding_dim,
+            EPOCHS: 500,
+            OPTIMIZER: Adam,
+            LR: 0.01,
+        },
+        ModelEvaluationStep.__name__: {BATCH_SIZE: 128},
+        ModelValidationStep.__name__: {MAX_LOSS_SCORE: 1.5},
+    }
+
+    return config
+
+
+@pytest.fixture
+def mock_autoencoders_pipeline_exec(mongo, ae_pipeline_config: Dict):
+    """Mock execution of the AE pipeline"""
+    precalc_users_and_service_tensors()
+
+    USER_ONE_HOT_DIM = len(User.objects.first().one_hot_tensor)
+
+    user_autoencoder_mock = AutoEncoder(
+        USER_ONE_HOT_DIM,
+        ae_pipeline_config[ModelTrainingStep.__name__][USER_EMBEDDING_DIM],
+    )
+    user_embedder = Embedder(user_autoencoder_mock)
+
+    SERVICE_ONE_HOT_DIM = len(Service.objects.first().one_hot_tensor)
+
+    service_autoencoder_mock = AutoEncoder(
+        SERVICE_ONE_HOT_DIM,
+        ae_pipeline_config[ModelTrainingStep.__name__][SERVICE_EMBEDDING_DIM],
+    )
+    service_embedder = Embedder(service_autoencoder_mock)
+
+    user_embedder.save(USER_EMBEDDER)
+    service_embedder.save(SERVICE_EMBEDDER)
 
 
 @pytest.fixture
@@ -74,6 +160,7 @@ def simulate_invalid_data_extraction_step(
 
 
 def get_empty_data_and_details():
+    """Get empty data and details"""
     data = {AUTOENCODERS: {USERS: [], SERVICES: []}}
     details = {USERS: {}, SERVICES: {}}
 
@@ -81,6 +168,7 @@ def get_empty_data_and_details():
 
 
 def process_data_extraction_data():
+    """Process data extraction step data"""
     data, details = get_empty_data_and_details()
 
     # Get users and services
@@ -274,3 +362,16 @@ def simulate_model_evaluation_step(simulate_model_training_step, ae_pipeline_con
     data[METRICS] = metrics
 
     return data, details
+
+
+@pytest.fixture
+def embedding_dims() -> (int, int):
+    user_embedding_dim = 64
+    service_embedding_dim = 128
+    return user_embedding_dim, service_embedding_dim
+
+
+@pytest.fixture
+def embedding_exec(mock_autoencoders_pipeline_exec):
+    embedding_component = EmbeddingComponent()
+    embedding_component()

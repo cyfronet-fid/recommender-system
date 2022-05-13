@@ -20,10 +20,10 @@ from recommender.engines.ncf.inference.ncf_inference_component import (
 from recommender.models.ml_component import MLComponent
 from tests.endpoints.test_recommendations import recommendation_data
 from tests.conftest import (
-    mock_rl_pipeline_exec,
-    mock_ncf_pipeline_exec,
     generate_users_and_services,
 )
+from tests.engines.ncf.conftest import mock_ncf_pipeline_exec
+from tests.engines.rl.conftest import mock_rl_pipeline_exec
 from recommender.errors import (
     InvalidRecommendationPanelIDError,
     NoSavedMLComponentError,
