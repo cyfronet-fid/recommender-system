@@ -3,10 +3,10 @@
 from recommender.models import ML_MODELS
 from recommender.services.drop_ml_models import drop_ml_models
 from tests.conftest import (
-    mock_rl_pipeline_exec,
-    mock_ncf_pipeline_exec,
     generate_users_and_services,
 )
+from tests.engines.ncf.conftest import mock_ncf_pipeline_exec
+from tests.engines.rl.conftest import mock_rl_pipeline_exec
 
 
 def test_drop_ml_models(

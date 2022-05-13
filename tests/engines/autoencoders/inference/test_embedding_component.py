@@ -9,7 +9,7 @@ from recommender.engines.autoencoders.inference.embedding_component import (
 from recommender.engines.autoencoders.training.model_training_step import (
     AEModelTrainingStep,
 )
-from tests.conftest import embedding_dims
+from tests.engines.autoencoders.conftest import embedding_dims
 
 
 def test_embedding_component(
