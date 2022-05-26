@@ -1,5 +1,16 @@
+# pylint: disable-all
 """Fixtures for services testing"""
 import pytest
+from _pytest.fixtures import fixture
+
+from recommender.engines.random.inference.random_inference_component import (
+    RandomInferenceComponent,
+)
+from recommender.engines.ncf.inference.ncf_inference_component import (
+    NCFInferenceComponent,
+)
+from recommender.engines.rl.inference.rl_inference_component import RLInferenceComponent
+from tests.factories.marketplace import ServiceFactory
 
 
 @pytest.fixture
@@ -47,3 +58,26 @@ def user_action_json_dict():
         },
         "action": {"type": "button", "text": "Details", "order": True},
     }
+
+
+@fixture
+def get_engines():
+    engines = {
+        RLInferenceComponent.engine_name: RLInferenceComponent,
+        NCFInferenceComponent.engine_name: NCFInferenceComponent,
+        RandomInferenceComponent.engine_name: RandomInferenceComponent,
+    }
+    return engines
+
+
+@pytest.fixture
+def create_services(mongo):
+    services = [
+        ServiceFactory(status="published"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="unverified"),
+        ServiceFactory(status="errored"),
+        ServiceFactory(status="deleted"),
+        ServiceFactory(status="draft"),
+    ]
+    return services

@@ -1,5 +1,4 @@
 # pylint: disable-all
-import pytest
 
 from recommender.models import Service, SearchData
 from recommender.services.fts import (
@@ -14,19 +13,6 @@ from tests.factories.marketplace.platform import PlatformFactory
 from tests.factories.marketplace.provider import ProviderFactory
 from tests.factories.marketplace.scientific_domain import ScientificDomainFactory
 from tests.factories.marketplace.target_user import TargetUserFactory
-
-
-@pytest.fixture
-def create_services(mongo):
-    services = [
-        ServiceFactory(status="published"),
-        ServiceFactory(status="unverified"),
-        ServiceFactory(status="unverified"),
-        ServiceFactory(status="errored"),
-        ServiceFactory(status="deleted"),
-        ServiceFactory(status="draft"),
-    ]
-    return services
 
 
 def test_filter_services(mongo, mocker):

@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- Random recommendations' engine for anonymous users [@Michal-Kolomanski]
 ### Changed
 - Cleaning up the main conftest [@Michal-Kolomanski]
 - More metadata in autoencoders pipeline [@Michal-Kolomanski]

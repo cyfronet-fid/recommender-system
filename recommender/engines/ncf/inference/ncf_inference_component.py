@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import torch
 
-from recommender.engines.base.base_inference_component import BaseInferenceComponent
+from recommender.engines.base.base_inference_component import MLEngineInferenceComponent
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
     NeuralCollaborativeFilteringModel,
     NEURAL_CF,
@@ -23,8 +23,12 @@ from logger_config import get_logger
 logger = get_logger(__name__)
 
 
-class NCFInferenceComponent(BaseInferenceComponent):
-    """Neural Collaborative Filtering Inference Component"""
+class NCFInferenceComponent(MLEngineInferenceComponent):
+    """
+    Recommender engine that provides logged-in users with personalized recommendations in a given context.
+    """
+
+    engine_name = "NCF"
 
     def __init__(self, K: int) -> None:
         self.neural_cf_model = None
@@ -73,7 +77,7 @@ class NCFInferenceComponent(BaseInferenceComponent):
 
         return users_ids, users_tensor, services_ids, services_tensor
 
-    def _for_logged_user(
+    def _generate_recommendations(
         self, user: User, elastic_services: Tuple[int], search_data: SearchData
     ) -> List[int]:
         """Generate recommendation for logged user.

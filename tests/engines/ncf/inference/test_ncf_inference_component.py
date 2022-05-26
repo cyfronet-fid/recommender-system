@@ -49,6 +49,8 @@ def test_ncf_inference_component(
 
     for panel_id_version, K in list(PANEL_ID_TO_K.items()):
         ncf_inference_component = NCFInferenceComponent(K)
+        assert isinstance(ncf_inference_component, NCFInferenceComponent)
+        assert isinstance(ncf_inference_component.engine_name, str)
         user = random.choice(list(User.objects))
 
         context = {
@@ -71,51 +73,6 @@ def test_ncf_inference_component(
 
         services_ids_2 = ncf_inference_component(context)
         assert services_ids_1 == services_ids_2
-
-    for panel_id_version, K in list(PANEL_ID_TO_K.items()):
-        ncf_inference_component = NCFInferenceComponent(K)
-
-        context = {
-            "panel_id": panel_id_version,
-            "elastic_services": elastic_services,
-            "search_data": {},
-            "user_id": -1,
-        }
-
-        services_ids_1 = ncf_inference_component(context)
-        assert isinstance(
-            ncf_inference_component.neural_cf_model, NeuralCollaborativeFilteringModel
-        )
-
-        assert isinstance(services_ids_1, list)
-        assert len(services_ids_1) == PANEL_ID_TO_K.get(context["panel_id"])
-        assert all([isinstance(service_id, int) for service_id in services_ids_1])
-        assert all(service in elastic_services for service in services_ids_1)
-
-        services_ids_2 = ncf_inference_component(context)
-        assert services_ids_1 != services_ids_2
-
-    for panel_id_version, K in list(PANEL_ID_TO_K.items()):
-        ncf_inference_component = NCFInferenceComponent(K)
-
-        context = {
-            "panel_id": panel_id_version,
-            "elastic_services": elastic_services,
-            "search_data": {},
-        }
-
-        services_ids_1 = ncf_inference_component(context)
-        assert isinstance(
-            ncf_inference_component.neural_cf_model, NeuralCollaborativeFilteringModel
-        )
-
-        assert isinstance(services_ids_1, list)
-        assert len(services_ids_1) == PANEL_ID_TO_K.get(context["panel_id"])
-        assert all([isinstance(service_id, int) for service_id in services_ids_1])
-        assert all(service in elastic_services for service in services_ids_1)
-
-        services_ids_2 = ncf_inference_component(context)
-        assert services_ids_1 != services_ids_2
 
     with pytest.raises(InvalidRecommendationPanelIDError):
         NCFInferenceComponent(K=-1)

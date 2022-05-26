@@ -4,19 +4,15 @@
 import os
 from typing import Dict, Any, List, Tuple
 
-from recommender.engines.base.base_inference_component import BaseInferenceComponent
-from recommender.engines.ncf.inference.ncf_inference_component import (
-    NCFInferenceComponent,
+from recommender.engines.engines import ENGINES
+from recommender.engines.random.inference.random_inference_component import (
+    RandomInferenceComponent,
 )
-from recommender.engines.rl.inference.rl_inference_component import RLInferenceComponent
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.errors import (
     InvalidRecommendationPanelIDError,
     NoSavedMLComponentError,
 )
-
-NCF_ENGINE_NAME = "NCF"
-RL_ENGINE_NAME = "RL"
 
 
 def get_K(context: Dict[str, Any]) -> int:
@@ -27,7 +23,7 @@ def get_K(context: Dict[str, Any]) -> int:
         context: context json  from the /recommendations endpoint request.
 
     Returns:
-        K constant.
+        K: constant which specifies how many recommendations are requested.
     """
     K = PANEL_ID_TO_K.get(context.get("panel_id"))
     if K is None:
@@ -36,19 +32,23 @@ def get_K(context: Dict[str, Any]) -> int:
 
 
 def get_default_recommendation_alg(
-    env_variable: str = "DEFAULT_RECOMMENDATION_ALG",
+    engine_names: Tuple[str],
+    default_engine: str = "DEFAULT_RECOMMENDATION_ALG",
 ) -> str:
     """
     Get the default recommendation algorithm from the .env
 
     Args:
-        env_variable: the name of the default recommendation algorithm from .env
-    """
-    recommendation_alg = os.environ.get(env_variable, "RL").upper()
+        engine_names: list of available engines'
+        default_engine: the name of the default recommendation algorithm from .env
 
-    if recommendation_alg == "NCF":
-        return "NCF"
-    return "RL"
+    Returns:
+        rec_alg: default recommendation algorithm
+    """
+    rec_alg = os.environ.get(default_engine, "RL")
+    rec_alg = rec_alg.upper() if len(rec_alg) in {2, 3} else rec_alg.lower()
+
+    return rec_alg if rec_alg in engine_names else "RL"
 
 
 def get_engine_names(
@@ -65,16 +65,18 @@ def get_engine_names(
     3) Any engine name that exists.
 
     Args:
-        engine_from_req - engine name requested in a body of the request
-        default_engine - default recommendation engine name
-        engines_keys - any engine name potentially available
+        engine_from_req: engine name requested in a body of the request
+        default_engine: default recommendation engine name
+        engines_keys: any engine name potentially available
+
+    Returns:
+        engine_names: engines names to load in a proper order
     """
     engine_names = []
 
     for engine in (engine_from_req, default_engine):
         if engine in engines_keys and engine not in engine_names:
             engine_names.append(engine)
-
     for engine in engines_keys:
         if engine not in engine_names:
             engine_names.append(engine)
@@ -86,14 +88,18 @@ def engine_loader(
     engine_names: List[str],
     engines: Dict[str, Any],
     K: int,
-) -> Tuple[BaseInferenceComponent, str]:
+) -> Tuple[Any, str]:
     """
     Try loading engines in the right order to maximize the availability of recommendations
 
     Args:
-        engine_names - all engine names
-        engines - all available engines,
-        K - number of requested recommendations
+        engine_names: all engine names
+        engines: all available engines,
+        K: number of requested recommendations
+
+    Returns:
+        engine: engine for serving recommendations
+        engine_name: engine name
     """
     engine = None
     eg_name = None
@@ -114,28 +120,32 @@ def engine_loader(
     return engine, eg_name
 
 
-def load_engine(json_dict: dict) -> Tuple[BaseInferenceComponent, str]:
+def load_engine(json_dict: dict) -> Tuple[Any, str]:
     """
-    Load the engine based on 'engine_version' parameter from a query
+    Load the engine based on whether a user is logged in
+     and 'engine_version' parameter from the query.
 
     Args:
         json_dict: A body from Marketplace's query
 
     Returns:
-        engine: An instance of NCFInferenceComponent or RLInferenceComponent
+        engine: engine for serving recommendations
+        engine_name: engine name
     """
-    engine_from_req = json_dict.get("engine_version")
-    default_engine = get_default_recommendation_alg()
     K = get_K(json_dict)
 
-    engines = {
-        NCF_ENGINE_NAME: NCFInferenceComponent,
-        RL_ENGINE_NAME: RLInferenceComponent,
-    }
+    if not json_dict.get("user_id"):  # user is anonymous
+        return (
+            RandomInferenceComponent(K),
+            RandomInferenceComponent.engine_name,
+        )
+
+    engine_from_req = json_dict.get("engine_version")
+    default_engine = get_default_recommendation_alg(tuple(ENGINES.keys()))
 
     engine_names = get_engine_names(
-        engine_from_req, default_engine, list(engines.keys())
+        engine_from_req, default_engine, list(ENGINES.keys())
     )
-    engine, engine_name = engine_loader(engine_names, engines, K)
+    engine, engine_name = engine_loader(engine_names, ENGINES, K)
 
     return engine, engine_name

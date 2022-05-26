@@ -10,7 +10,6 @@ from tests.factories.marketplace.platform import PlatformFactory
 from tests.factories.marketplace.provider import ProviderFactory
 from tests.factories.marketplace.scientific_domain import ScientificDomainFactory
 from tests.factories.marketplace.target_user import TargetUserFactory
-from tests.endpoints.test_recommendations import recommendation_data
 
 
 def test_recommendation_deserialization(mongo, recommendation_json_dict):

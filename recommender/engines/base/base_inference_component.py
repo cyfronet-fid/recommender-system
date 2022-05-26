@@ -1,58 +1,79 @@
-# pylint: disable=invalid-name, no-self-use, no-member, too-few-public-methods, fixme
+# pylint: disable=invalid-name, no-self-use, no-member, too-few-public-methods, line-too-long
 
-"""Implementation of the base agent recommmender. Every other agent should
- inherit from this one."""
-
+"""Implementation of the base recommender engine"""
 from abc import ABC, abstractmethod
-import random
 from typing import Dict, Any, List, Tuple
 
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.errors import (
-    InsufficientRecommendationSpaceError,
     InvalidRecommendationPanelIDError,
+    InsufficientRecommendationSpaceError,
 )
 from recommender.models import User, SearchData
-from recommender.services.fts import retrieve_services_for_recommendation
-from logger_config import get_logger
-
-logger = get_logger(__name__)
 
 
 class BaseInferenceComponent(ABC):
     """
-    Base Recommender class with basic functionality
+    Base Recommender class with basic functionality.
+    Used in all available recommender engines.
     """
 
+    engine_name = None
+
     def __init__(self, K: int) -> None:
-        """
-        Initialization function.
-        """
         self.K = K
         if self.K not in PANEL_ID_TO_K.values():
             raise InvalidRecommendationPanelIDError()
-        self._load_models()
 
+    @abstractmethod
     def __call__(self, context: Dict[str, Any]) -> List[int]:
         """
-        This function allows for getting recommended services for the
-        recommendation endpoint based on recommendation context.
+        Get recommendations.
 
         Args:
             context: json dict from the /recommendations endpoint request.
 
         Returns:
-            Tuple of recommended services ids.
+            List of recommended services ids.
+        """
+
+    def _get_recommendation_context(
+        self, context: Dict[str, Any]
+    ) -> [Tuple[int], SearchData]:
+        elastic_services = tuple(context.get("elastic_services") or ())
+        search_data = context.get("search_data")
+
+        if len(elastic_services) < self.K:
+            raise InsufficientRecommendationSpaceError()
+
+        return elastic_services, search_data
+
+
+class MLEngineInferenceComponent(BaseInferenceComponent):
+    """
+    Recommender class for machine learning engines that serves recommendations to logged-in users.
+    Used in NCF and RL engines.
+    """
+
+    def __init__(self, K: int) -> None:
+        super().__init__(K)
+        self._load_models()
+
+    def __call__(self, context: Dict[str, Any]) -> List[int]:
+        """
+        Get recommendations for logged-in user.
+
+        Args:
+            context: json dict from the /recommendations endpoint request.
+
+        Returns:
+            List of recommended services ids.
         """
 
         user = self._get_user(context)
-        elastic_services, search_data = self._get_elastic_services_and_search_data(
-            context
-        )
+        elastic_services, search_data = self._get_recommendation_context(context)
 
-        if user is not None:
-            return self._for_logged_user(user, elastic_services, search_data)
-        return self._for_anonymous_user(elastic_services)
+        return self._generate_recommendations(user, elastic_services, search_data)
 
     @abstractmethod
     def _load_models(self) -> None:
@@ -61,7 +82,8 @@ class BaseInferenceComponent(ABC):
          exception if it is not available in the database.
         """
 
-    def _get_user(self, context: Dict[str, Any]) -> User:
+    @staticmethod
+    def _get_user(context: Dict[str, Any]) -> User:
         """
         Get the user from the context.
 
@@ -78,18 +100,12 @@ class BaseInferenceComponent(ABC):
 
         return user
 
-    @staticmethod
-    def _get_elastic_services_and_search_data(
-        context: Dict[str, Any]
-    ) -> [Tuple[int], SearchData]:
-        return tuple(context.get("elastic_services")), context.get("search_data")
-
     @abstractmethod
-    def _for_logged_user(
+    def _generate_recommendations(
         self, user: User, elastic_services: Tuple[int], search_data: SearchData
     ) -> List[int]:
         """
-        Generate recommendation for logged user
+        Generate recommendation for logged-in user.
 
         Args:
             user: user for whom recommendation will be generated.
@@ -100,24 +116,3 @@ class BaseInferenceComponent(ABC):
         Returns:
             recommended_services_ids: List of recommended services ids.
         """
-
-    def _for_anonymous_user(self, elastic_services: Tuple[int]) -> List[int]:
-        """
-        Generate recommendation for anonymous user
-
-        Args:
-            elastic_services: item space from the Marketplace.
-
-        Returns:
-            recommended_services_ids: List of recommended services ids.
-        """
-
-        candidate_services = list(
-            retrieve_services_for_recommendation(elastic_services)
-        )
-        if len(candidate_services) < self.K:
-            raise InsufficientRecommendationSpaceError()
-        recommended_services = random.sample(list(candidate_services), self.K)
-        recommended_services_ids = [s.id for s in recommended_services]
-
-        return recommended_services_ids
