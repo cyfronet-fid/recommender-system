@@ -1,14 +1,12 @@
+# pylint: disable=line-too-long
 """Persistent Mixin"""
 
 import pickle
 from abc import ABC
-from typing import Any
+from typing import Optional
 
 from recommender.errors import NoSavedMLComponentError
 from recommender.models.ml_component import MLComponent
-from logger_config import get_logger
-
-logger = get_logger(__name__)
 
 
 class Persistent(ABC):
@@ -17,35 +15,49 @@ class Persistent(ABC):
     """
 
     @classmethod
-    def load(cls, version: str = None) -> Any:
+    def fetch_latest_component(cls, version: str = None) -> Optional[MLComponent]:
         """
-        Load object from MLComponents. It will look for object with type of the
-         class that inherit this mixin and with provided version. It will
-         return the newest one object in the DB that matches criteria.
+        Check whether certain ML model exists in the MLComponents
+         and return the newest object from the DB that matches criteria.
         Args:
             version: Any, user-defined string.
 
         Returns:
-            ml_component: Newest object that matches criteria.
-
+            ml_component: Newest ML model that matches criteria.
         """
         if version is None:
-            last_object = MLComponent.objects(type=cls.__name__).order_by("-id").first()
+            ml_component = (
+                MLComponent.objects(type=cls.__name__).order_by("-id").first()
+            )
         else:
-            last_object = (
+            ml_component = (
                 MLComponent.objects(type=cls.__name__, version=version)
                 .order_by("-id")
                 .first()
             )
 
-        if last_object is None:
+        return ml_component
+
+    @classmethod
+    def load(cls, version: str = None) -> Optional[MLComponent]:
+        """
+        Load object from MLComponents based on the class and version of an object
+        Args:
+            version: Any, user-defined string.
+
+        Returns:
+            loaded_ml_component: Loaded version of the newest ML model that matches criteria.
+
+        """
+        ml_component = cls.fetch_latest_component(version)
+        if ml_component is None:
             raise NoSavedMLComponentError(
                 f"No saved ML component with version {version}!"
             )
 
-        ml_component = pickle.loads(last_object.binary_object)
+        loaded_ml_component = pickle.loads(ml_component.binary_object)
 
-        return ml_component
+        return loaded_ml_component
 
     def save(self, version: str) -> None:
         """

@@ -12,7 +12,7 @@ from recommender.api.schemas.recommendation import (
     recommendation_context,
 )
 from recommender.services.deserializer import deserialize_recommendation
-from recommender.services.rec_engine_selector import load_engine
+from recommender.services.engine_selector import load_engine
 from logger_config import get_logger
 
 api = Namespace("recommendations", "Endpoint used for getting recommendations")

@@ -6,6 +6,8 @@ from random import seed, randint
 
 import pytest
 import mongoengine
+import torch
+from mongoengine import disconnect, connect
 from mongoengine import disconnect, connect
 from pymongo import uri_parser
 
@@ -27,6 +29,7 @@ from tests.engines.rl.conftest import (
     rl_pipeline_v2_config,
     base_rl_pipeline_config,
 )
+from tests.endpoints.conftest import recommendation_data
 
 
 @pytest.fixture()

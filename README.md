@@ -120,9 +120,24 @@ pipenv run pytest ./tests
 docker-compose -f docker-compose.testing.yml up && docker-compose -f docker-compose.testing.yml down
 ```
 
+### Recommendation Engines
+Recommendation engines ensure that both logged in and non-logged in users receive relevant recommendations.
+
+#### Engines for logged-in users (training required):
+- [NCF](#training)
+- [RL](#training)
+
+These engines use artificial intelligence algorithms to make recommendations based on a user's interests, the context of the search, and all of that user's and other users' behaviours on the portal.
+
+#### Engines for anonymous users (no training required):
+- Anonymous (in development) - integrated with Google Analytics
+- Random
+
+These engines employ statistical methods to provide an anonymous user with the best possible recommendations. The anonymous engine provides information, for example, which services are most commonly visited or purchased by other users in a specific search context. In that case, even if a user is anonymous, our recommender system can provide the user with valuable recommendations.
+
 ### Training
 
-Recommender system can use one of two recommendation engines implemented:
+Recommender system can use one of two recommendation engines implemented for logged-in user:
 - `NCF` - based on [Neural Collaborative Filtering](https://arxiv.org/abs/1708.05031) paper.
 - `RL` - based on [Deep Deterministic Policy Gradient](https://arxiv.org/abs/1509.02971) paper.
 
@@ -141,7 +156,7 @@ GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (lo
 
 After training is finished, the system is immediately ready for serving recommendations (no manual reloading is needed).
 
-To specify from which engine the recommendations are requested, provide an optional `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine.
+To specify from which engine the recommendations are requested, provide a `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine.
 It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
 (look into [ENV variables](#env-variables) section).
 
@@ -206,7 +221,7 @@ present in the project root directory. Details:
 - `SENTRY_ENVIRONMENT` - environment name - it's optional and it can be a free-form string. If not specified and using Docker, it is set to `development`/`testing`/`production` respectively to the docker environment.
 - `SENTRY_RELEASE` - human-readable release name - it's optional and it can be a free-form string. If not specified, Sentry automatically set it based on the commit revision number.
 - `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in Jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
-- `DEFAULT_RECOMMENDATION_ALG` - the version of the recommender engine (one of `NCF`, `RL`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
+- `DEFAULT_RECOMMENDATION_ALG` - the version of the recommender engine (one of `NCF`, `RL`, `random`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
 - `RS_SUBSCRIBER_HOST` - the address of your JMS provider (optional)
 - `RS_SUBSCRIBER_PORT` - the port of your JMS provider (optional)
 - `RS_SUBSCRIBER_USERNAME` - your login to the JMS provider (optional)
