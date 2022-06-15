@@ -25,8 +25,6 @@ def test_load_and_drop_mp_dump(mongo, mp_dump_data):
     for k, v in raw_mongo_objects_no_internal_data.items():
         if k == "services" or k == "users":
             for mongo_json_repr in v:
-                mongo_json_repr.pop("one_hot_tensor", None)
-                mongo_json_repr.pop("dense_tensor", None)
                 mongo_json_repr.pop("synthetic", None)
 
     assert raw_mongo_objects_no_internal_data == mp_dump_data

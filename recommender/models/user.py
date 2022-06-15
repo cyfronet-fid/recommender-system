@@ -20,8 +20,5 @@ class User(MarketplaceDocument):
     categories = ListField(ReferenceField(Category))
     accessed_services = ListField(ReferenceField(Service))
     synthetic = BooleanField(default=False)
-    dataframe = BinaryField(blank=True)
-    one_hot_tensor = ListField(IntField(), blank=True)
-    dense_tensor = ListField(FloatField(), blank=True)
 
     meta = {"indexes": ["id"]}

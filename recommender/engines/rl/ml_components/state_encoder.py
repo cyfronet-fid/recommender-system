@@ -6,10 +6,14 @@
 from typing import Tuple, List
 import torch
 from torch.nn.utils.rnn import pad_sequence
+
+from recommender.engines.nlp_embedders.embedders import (
+    Users2tensorsEmbedder,
+    Services2tensorsEmbedder,
+)
 from recommender.engines.rl.ml_components.service_encoder import (
     ServiceEncoder,
 )
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
 from recommender.models import Service, State
 from logger_config import get_logger
 
@@ -21,16 +25,10 @@ class StateEncoder:
 
     def __init__(
         self,
-        user_embedder: Embedder,
-        service_embedder: Embedder,
-        use_cached_embeddings: bool = True,
-        save_cached_embeddings: bool = False,
     ):
-        self.user_embedder = user_embedder
-        self.service_embedder = service_embedder
-        self.use_cached_embeddings = use_cached_embeddings
-        self.save_cached_embeddings = save_cached_embeddings
         self.service_encoder = ServiceEncoder()
+        self.users2tensor_embedder = Users2tensorsEmbedder()
+        self.services2tensor_embedder = Services2tensorsEmbedder()
 
     def __call__(
         self, states: List[State], verbose: bool = False
@@ -38,12 +36,9 @@ class StateEncoder:
         """
         Encode given states to the tuple of tensors using appropriate encoders
          and embedders as follows:
-            - state.user
-                -> one_hot_tensor
-                 --(user_embedder)--> users_dense_tensor
+            - state.user --(users2tensor_embedder)--> users_dense_tensor
             - state.services_history
-                -> services_one_hot_tensors
-                --(service_embedder)--> services_dense_tensors
+                --(services2tensor_embedder)--> services_dense_tensors
                 --(concat)--> services_histories_tensor
             - state.elastic_services
                 --(service encoder)--> service_tensor (mask)
@@ -80,17 +75,11 @@ class StateEncoder:
             logger.info("Getting all services_histories from states")
         services_histories = [state.services_history for state in states]
 
-        with torch.no_grad():
-            users_batch, _ = self.user_embedder(
-                users,
-                use_cache=self.use_cached_embeddings,
-                save_cache=self.save_cached_embeddings,
-            )
-            service_histories_batch = self._create_service_histories_batch(
-                services_histories
-            )
-
-            service_masks_batch = self.service_encoder(users, states, verbose=verbose)
+        users_batch = self.users2tensor_embedder(users)
+        service_histories_batch = self._create_service_histories_batch(
+            services_histories
+        )
+        service_masks_batch = self.service_encoder(users, states, verbose=verbose)
 
         encoded_states = users_batch, service_histories_batch, service_masks_batch
 
@@ -131,11 +120,7 @@ class StateEncoder:
                 start_end_indices.append(None)
 
         if services:
-            service_tensors, _ = self.service_embedder(
-                services,
-                use_cache=self.use_cached_embeddings,
-                save_cache=self.save_cached_embeddings,
-            )
+            service_tensors = self.services2tensor_embedder(services)
 
         sequences = []
         for state_idx in range(states_number):
@@ -147,7 +132,7 @@ class StateEncoder:
                 sequences.append(services_history_tensor)
             else:
                 N = 1
-                SE = self.service_embedder.dense_dim
+                SE = self.services2tensor_embedder.embedding_dim
                 services_history_tensor = torch.zeros((N, SE))
                 sequences.append(services_history_tensor)
 

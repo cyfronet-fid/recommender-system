@@ -5,11 +5,6 @@ from typing import Tuple
 
 import torch
 
-from recommender.engines.autoencoders.ml_components.embedder import (
-    Embedder,
-    USER_EMBEDDER,
-    SERVICE_EMBEDDER,
-)
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
 from recommender.engines.rl.utils import create_state
 from recommender.engines.base.base_inference_component import MLEngineInferenceComponent
@@ -39,13 +34,8 @@ class RLInferenceComponent(MLEngineInferenceComponent):
         version = K_TO_PANEL_ID.get(self.K)
         self.actor = Actor.load(version=version)
         self.actor.eval()
-        self.service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
-        self.user_embedder = Embedder.load(version=USER_EMBEDDER)
-        self.state_encoder = StateEncoder(
-            user_embedder=self.user_embedder,
-            service_embedder=self.service_embedder,
-        )
-        self.service_selector = ServiceSelector(self.service_embedder)
+        self.state_encoder = StateEncoder()
+        self.service_selector = ServiceSelector()
 
     def _generate_recommendations(
         self, user: User, elastic_services: Tuple[int], search_data: SearchData

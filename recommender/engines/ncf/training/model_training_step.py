@@ -15,10 +15,6 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm
 
-from recommender.engines.autoencoders.training.model_training_step import (
-    USER_EMBEDDING_DIM,
-    SERVICE_EMBEDDING_DIM,
-)
 from recommender.engines.base.base_steps import ModelTrainingStep
 from recommender.engines.metadata_creators import accuracy_function
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
@@ -40,6 +36,10 @@ from recommender.engines.ncf.training.data_preparation_step import (
     VALID,
 )
 from recommender.engines.constants import WRITER, VERBOSE, DEVICE
+from recommender.engines.nlp_embedders.embedders import (
+    Users2tensorsEmbedder,
+    Services2tensorsEmbedder,
+)
 
 BATCH_SIZE = "batch_size"
 MF_EMBEDDING_DIM = "mf_embedding_dim"
@@ -172,8 +172,8 @@ class NCFModelTrainingStep(ModelTrainingStep):
 
         self.mf_embedding_dim = self.resolve_constant(MF_EMBEDDING_DIM, 64)
         self.users_ids_embedding_dim = self.resolve_constant(USER_IDS_EMBEDDING_DIM, 64)
-        self.user_emb_dim = self.resolve_constant(USER_EMBEDDING_DIM)
-        self.service_emb_dim = self.resolve_constant(SERVICE_EMBEDDING_DIM)
+        self.user_emb_dim = Users2tensorsEmbedder().embedding_dim  # TODO
+        self.service_emb_dim = Services2tensorsEmbedder().embedding_dim  # TODO
         self.services_ids_embedding_dim = self.resolve_constant(
             SERVICE_IDS_EMBEDDING_DIM, 64
         )

@@ -19,7 +19,6 @@ import time
 from typing import List, Union
 from copy import deepcopy
 import billiard
-import torch
 from mongoengine import DoesNotExist
 from mongoengine.errors import NotUniqueError
 from tqdm.auto import tqdm
@@ -121,22 +120,11 @@ def _get_empty_user() -> User:
         logger.error("There is no users in the database. Aborting...")
         raise NotEnoughUsersOrServices()
 
-    true_user = User.objects.first()
-    oht_shape = len(true_user.one_hot_tensor)
-    dt_shape = len(true_user.dense_tensor)
-
     user = User.objects(id=-1).first()
     if user is None:
         start = time.time()
         try:
-            user = User(
-                id=-1,
-                # Here is an assumption that anonymous user should be empty and
-                # therefore its tensors should be zeros.
-                # TODO: maybe Embedder should be used?
-                one_hot_tensor=torch.zeros(oht_shape),
-                dense_tensor=torch.zeros(dt_shape),
-            )
+            user = User(id=-1)
             user.save()
         # Billiard may try to save multiple users with ID = -1
         except NotUniqueError as e:

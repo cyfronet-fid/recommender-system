@@ -3,10 +3,6 @@
 from time import time
 from typing import Tuple, List
 
-from recommender.engines.autoencoders.ml_components.embedder import (
-    Embedder,
-    SERVICE_EMBEDDER,
-)
 from recommender.engines.base.base_steps import DataExtractionStep
 from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
     RewardGeneration,
@@ -60,8 +56,7 @@ class RLDataExtractionStep(DataExtractionStep):
     def _generate_sarses(self) -> List[Sars]:
         """Generate real and synthetic (if needed) sarses"""
         if self._need_to_generate_sarses():
-            service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
-            return generate_synthetic_sarses(service_embedder, **self.synthetic_params)
+            return generate_synthetic_sarses(**self.synthetic_params)
 
         real_sarses = regenerate_sarses(multi_processing=True, verbose=True)
         real_sarses = real_sarses(__raw__={"action": {"$size": self.K}})

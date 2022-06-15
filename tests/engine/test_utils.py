@@ -20,10 +20,10 @@ def proper_parameters():
 def services(mongo, proper_parameters):
     SOH, _ = proper_parameters
     return [
-        ServiceFactory(id=2, one_hot_tensor=torch.randint(2, (SOH,))),
-        ServiceFactory(id=8, one_hot_tensor=torch.randint(2, (SOH,))),
-        ServiceFactory(id=4, one_hot_tensor=torch.randint(2, (SOH,))),
-        ServiceFactory(id=6, one_hot_tensor=torch.randint(2, (SOH,))),
+        ServiceFactory(id=2),
+        ServiceFactory(id=8),
+        ServiceFactory(id=4),
+        ServiceFactory(id=6),
     ]
 
 

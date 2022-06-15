@@ -64,16 +64,6 @@ class DifferentTypeObjectsInCollectionError(RecommendationEngineError):
         return "All objects should be users or all objects should be services"
 
 
-class MissingOneHotTensorError(RecommendationEngineError):
-    def message(self):
-        return "One or more objects don't have one hot tensor"
-
-
-class MissingDenseTensorError(RecommendationEngineError):
-    def message(self):
-        return "One or more objects don't have dense tensor needed to"
-
-
 class DataValidationError(RecommendationEngineError):
     def message(self):
         return "Data provided in the pipeline are invalid"

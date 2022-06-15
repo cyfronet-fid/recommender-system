@@ -17,12 +17,6 @@ from recommender.models import Service, Recommendation
 from tests.services.user_journey import UserJourney
 from tests.factories.populate_database import populate_users_and_services
 from tests.endpoints.conftest import mp_dump_data
-from tests.engines.autoencoders.conftest import (
-    ae_pipeline_config,
-    mock_autoencoders_pipeline_exec,
-    embedding_dims,
-    embedding_exec,
-)
 from tests.engines.ncf.conftest import ncf_pipeline_config
 from tests.engines.rl.conftest import (
     rl_pipeline_v1_config,

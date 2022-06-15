@@ -515,7 +515,6 @@ def test_regenerate_sarses_in_rl_pipeline(
     generate_users_and_services,
     generate_uas_and_recs,
     rl_pipeline_v1_config,
-    embedding_exec,
 ):
     # WARNING: due to setting task_always_eager=True in the init_celery in the recommender/__init__.py
     # This test isn't actually check if billard multiprocessing is properly handled

@@ -6,14 +6,11 @@ import numpy as np
 import pandas as pd
 import torch
 
+from recommender.engines.nlp_embedders.embedders import Services2tensorsEmbedder
 from recommender.engines.rl.ml_components.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
 )
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
-from recommender.engines.autoencoders.ml_components.normalizer import (
-    Normalizer,
-    NormalizationMode,
-)
+from recommender.engines.rl.utils import create_index_id_map
 from recommender.models import Service, State, SearchData, Sars, User
 from recommender.services.fts import retrieve_services_for_synthetic_sarses
 from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
@@ -71,7 +68,6 @@ def _get_relevant_search_data(user, ordered_services, k):
 
 
 def generate_synthetic_sarses(
-    service_embedder: Embedder,
     K: List[int] = 3,
     interactions_range: Tuple[int, int] = (3, 10),
     reward_generation_mode: RewardGeneration = RewardGeneration.COMPLEX,
@@ -104,7 +100,10 @@ def generate_synthetic_sarses(
 
     users = User.objects
 
-    normalized_services, index_id_map = _embed_and_normalize(service_embedder)
+    services = list(Service.objects.order_by("id"))
+    services_tensors = Services2tensorsEmbedder()(services)
+    index_id_map = create_index_id_map(services)
+
     transition_rewards_df = pd.read_csv(TRANSITION_REWARDS_CSV_PATH, index_col="source")
     sarses = []
 
@@ -135,7 +134,7 @@ def generate_synthetic_sarses(
 
             service_engagements = {
                 s: approx_service_engagement(
-                    user, s, engaged_services, normalized_services, index_id_map
+                    user, s, engaged_services, services_tensors, index_id_map
                 )
                 for s in action
             }
@@ -173,13 +172,3 @@ def generate_synthetic_sarses(
             state = next_state
 
     return sarses
-
-
-def _embed_and_normalize(service_embedder):
-    service_embedded_tensors, index_id_map = service_embedder(
-        Service.objects.order_by("id"), use_cache=False, save_cache=False
-    )
-    normalizer = Normalizer(mode=NormalizationMode.NORM_WISE)
-    normalized_services, _ = normalizer(service_embedded_tensors)
-
-    return normalized_services, index_id_map

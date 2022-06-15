@@ -5,11 +5,6 @@ from typing import Tuple
 
 from torch.utils.data import DataLoader
 
-from recommender.engines.autoencoders.ml_components.embedder import (
-    Embedder,
-    USER_EMBEDDER,
-    SERVICE_EMBEDDER,
-)
 from recommender.engines.rl.ml_components.sars_encoder import SarsEncoder
 from recommender.engines.base.base_steps import DataPreparationStep
 from recommender.engines.rl.training.data_preparation_step.replay_buffer_v2 import (
@@ -25,9 +20,7 @@ class RLDataPreparationStep(DataPreparationStep):
         super().__init__(pipeline_config)
         self.batch_size = self.resolve_constant(SARS_BATCH_SIZE, 64)
         self.shuffle = self.resolve_constant(SHUFFLE, True)
-        self.user_embedder = Embedder.load(version=USER_EMBEDDER)
-        self.service_embedder = Embedder.load(version=SERVICE_EMBEDDER)
-        self.sars_encoder = SarsEncoder(self.user_embedder, self.service_embedder)
+        self.sars_encoder = SarsEncoder()
 
     def __call__(self, data=None) -> Tuple[tuple, dict]:
         encoding_start = time.time()

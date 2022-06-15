@@ -4,10 +4,6 @@ import pytest
 from typing import Tuple, Dict
 import torch
 
-from recommender.engines.autoencoders.training.model_training_step import (
-    SERVICE_EMBEDDING_DIM,
-    USER_EMBEDDING_DIM,
-)
 from recommender.engines.base.base_steps import (
     ModelTrainingStep,
     DataExtractionStep,
@@ -17,6 +13,12 @@ from recommender.engines.base.base_steps import (
     ModelValidationStep,
 )
 from recommender.engines.constants import DEVICE, VERBOSE
+from recommender.engines.nlp_embedders.embedders import (
+    SERVICE_EMBEDDING_DIM,
+    USER_EMBEDDING_DIM,
+    Users2tensorsEmbedder,
+    Services2tensorsEmbedder,
+)
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
 from recommender.engines.rl.ml_components.actor import Actor
 from recommender.engines.rl.ml_components.history_embedder import MLPHistoryEmbedder
@@ -69,9 +71,10 @@ from recommender.models import Service
 
 
 @pytest.fixture
-def base_rl_pipeline_config(embedding_dims: Tuple[int, int]) -> Dict:
+def base_rl_pipeline_config() -> Dict:
     """Base configuration of RL pipline"""
-    user_embedding_dim, service_embedding_dim = embedding_dims
+    user_embedding_dim = Users2tensorsEmbedder().embedding_dim
+    service_embedding_dim = Services2tensorsEmbedder().embedding_dim
     config = {
         SERVICE_EMBEDDING_DIM: service_embedding_dim,
         USER_EMBEDDING_DIM: user_embedding_dim,
@@ -147,12 +150,7 @@ def rl_pipeline_v2_config(base_rl_pipeline_config: Dict) -> Dict:
 
 
 @pytest.fixture
-def mock_rl_pipeline_exec(
-    rl_pipeline_v1_config,
-    rl_pipeline_v2_config,
-    mock_autoencoders_pipeline_exec,
-    embedding_exec,
-):
+def mock_rl_pipeline_exec(rl_pipeline_v1_config, rl_pipeline_v2_config):
     """Mock execution of RL pipline"""
     actor_v1 = Actor(
         K=rl_pipeline_v1_config[K],

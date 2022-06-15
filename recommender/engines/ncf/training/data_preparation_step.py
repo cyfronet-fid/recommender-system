@@ -20,6 +20,10 @@ from recommender.engines.ncf.training.data_extraction_step import (
 from recommender.engines.ncf.ml_components.tensor_dict_dataset import (
     TensorDictDataset,
 )
+from recommender.engines.nlp_embedders.embedders import (
+    Services2tensorsEmbedder,
+    Users2tensorsEmbedder,
+)
 from recommender.models import User, Service
 
 TRAIN_DS_SIZE = "train_ds_size"
@@ -79,15 +83,17 @@ def split_and_group(
     label: float,
     train_ds_size: float,
     valid_ds_size: float,
+    users2tensor_embedder: Users2tensorsEmbedder,
+    services2tensor_embedder: Services2tensorsEmbedder,
 ):
     """Split and group services into proper dict form."""
     services_splits = _split_services(services, train_ds_size, valid_ds_size)
     for split_name, services_split in services_splits.items():
         dataset = datasets[split_name]
         for service in services_split:
-            dataset[USERS].append(user.dense_tensor)
+            dataset[USERS].append(users2tensor_embedder([user])[0].tolist())
             dataset[USERS_IDS].append(user.id)
-            dataset[SERVICES].append(service.dense_tensor)
+            dataset[SERVICES].append(services2tensor_embedder([service])[0].tolist())
             dataset[SERVICES_IDS].append(service.id)
             dataset[LABELS].append(label)
 
@@ -173,6 +179,8 @@ class NCFDataPreparationStep(DataPreparationStep):
         self.train_ds_size = self.resolve_constant(TRAIN_DS_SIZE, 0.6)
         self.valid_ds_size = self.resolve_constant(VALID_DS_SIZE, 0.2)
         self.device = self.resolve_constant(DEVICE, torch.device("cpu"))
+        self.services2tensorEmbedder = (Services2tensorsEmbedder(),)
+        self.users2tensorEmbedder = (Users2tensorsEmbedder(),)
 
     def __call__(self, data: Dict = None) -> Tuple[Dict, Dict]:
         """Perform data preparation consisting of:

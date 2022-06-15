@@ -40,9 +40,6 @@ class Service(MarketplaceDocument):
     life_cycle_statuses = ListField(ReferenceField(LifeCycleStatus))
     related_services = ListField(ReferenceField("Service"))
     required_services = ListField(ReferenceField("Service"))
-    dataframe = BinaryField(blank=True)
-    one_hot_tensor = ListField(IntField(), blank=True)
-    dense_tensor = ListField(FloatField(), blank=True)
     status = StringField()
 
     meta = {

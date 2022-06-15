@@ -8,7 +8,6 @@ import pytest
 def test_data_extraction_step(
     mongo,
     generate_users_and_services,
-    mock_autoencoders_pipeline_exec,
     ncf_pipeline_config,
 ):
     pass

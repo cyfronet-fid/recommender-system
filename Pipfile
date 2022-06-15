@@ -23,6 +23,7 @@ sentry-sdk = {extras = ["flask"], version = "*"}
 celery = {extras = ["redis"], version = "*"}
 flask-mongoengine = "*"
 pymongo = "==3.12"
+spacy-universal-sentence-encoder = "*"
 
 [dev-packages]
 factory-boy = "*"

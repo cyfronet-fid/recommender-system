@@ -2,15 +2,11 @@
 
 """This module contains celery tasks"""
 from logger_config import get_logger
-from recommender.engines.autoencoders.inference.embedding_component import (
-    EmbeddingComponent,
-)
-from recommender.engines.autoencoders.training.pipeline import AEPipeline
+
 from recommender.engines.ncf.training.pipeline import NCFPipeline
 from recommender.engines.rl.training.pipeline import RLPipeline
 from recommender.extensions import celery
 from recommender.pipeline_configs import (
-    AUTOENCODERS_PIPELINE_CONFIG,
     NCF_PIPELINE_CONFIG,
     RL_PIPELINE_CONFIG,
 )
@@ -28,11 +24,6 @@ def update(data):
         drop_mp_dump()
         load_mp_dump(data)
         drop_ml_models()
-
-        AEPipeline(AUTOENCODERS_PIPELINE_CONFIG)()
-        EmbeddingComponent()()
-        # TODO: parallel computing algebra here to make it faster
-        # TODO: Commented unused pipelines to speed up the training
         NCFPipeline(NCF_PIPELINE_CONFIG)()
         RLPipeline(RL_PIPELINE_CONFIG)()
 

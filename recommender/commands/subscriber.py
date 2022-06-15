@@ -1,10 +1,12 @@
 """Simple wrapper for entrypoint to jms subscriber"""
 import uuid
 from typing import Optional
-from jms.connector import subscribe_to_databus
 
 
 # pylint: disable=too-many-arguments
+from jms.connector import subscribe_to_databus
+
+
 def subscribe(
     host: str,
     port: int,

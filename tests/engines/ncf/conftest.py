@@ -8,23 +8,6 @@ from torch.nn import BCELoss
 from torch.optim import Adam
 
 from recommender import User
-from recommender.engines.autoencoders.ml_components.embedder import (
-    Embedder,
-    USER_EMBEDDER,
-    SERVICE_EMBEDDER,
-)
-from recommender.engines.autoencoders.training.data_preparation_step import (
-    TRAIN_DS_SIZE,
-    VALID_DS_SIZE,
-)
-from recommender.engines.autoencoders.training.model_evaluation_step import BATCH_SIZE
-from recommender.engines.autoencoders.training.model_training_step import (
-    USER_EMBEDDING_DIM,
-    SERVICE_EMBEDDING_DIM,
-    LOSS_FUNCTION,
-    EPOCHS,
-    OPTIMIZER,
-)
 from recommender.engines.base.base_steps import (
     ModelTrainingStep,
     DataExtractionStep,
@@ -39,6 +22,10 @@ from recommender.engines.ncf.ml_components.neural_collaborative_filtering import
     NEURAL_CF,
 )
 from recommender.engines.ncf.training.data_extraction_step import MAX_USERS
+from recommender.engines.ncf.training.data_preparation_step import (
+    TRAIN_DS_SIZE,
+    VALID_DS_SIZE,
+)
 from recommender.engines.ncf.training.data_validation_step import (
     LEAST_N_ORDERS_PER_USER,
 )
@@ -49,19 +36,30 @@ from recommender.engines.ncf.training.model_training_step import (
     MLP_LAYERS_SPEC,
     CONTENT_MLP_LAYERS_SPEC,
     OPTIMIZER_PARAMS,
+    EPOCHS,
+    OPTIMIZER,
+    LOSS_FUNCTION,
+    BATCH_SIZE,
 )
 from recommender.engines.ncf.training.model_validation_step import (
     MAX_EXECUTION_TIME,
     MAX_ITEMSPACE_SIZE,
     MIN_WEIGHTED_AVG_F1_SCORE,
 )
+from recommender.engines.nlp_embedders.embedders import (
+    USER_EMBEDDING_DIM,
+    SERVICE_EMBEDDING_DIM,
+    Users2tensorsEmbedder,
+    Services2tensorsEmbedder,
+)
 from recommender.models import Service
 
 
 @pytest.fixture
-def ncf_pipeline_config(embedding_dims: Tuple[int, int]) -> Dict:
+def ncf_pipeline_config() -> Dict:
     """NCF pipline configuration"""
-    user_embedding_dim, service_embedding_dim = embedding_dims
+    user_embedding_dim = Users2tensorsEmbedder().embedding_dim
+    service_embedding_dim = Services2tensorsEmbedder().embedding_dim
     config = {
         DEVICE: torch.device("cpu"),
         WRITER: None,
@@ -97,15 +95,12 @@ def ncf_pipeline_config(embedding_dims: Tuple[int, int]) -> Dict:
 
 
 @pytest.fixture
-def mock_ncf_pipeline_exec(ncf_pipeline_config, mock_autoencoders_pipeline_exec):
+def mock_ncf_pipeline_exec(ncf_pipeline_config):
     """Mock execution of NCF pipline"""
     training_step_config = ncf_pipeline_config[ModelTrainingStep.__name__]
 
     users_max_id = User.objects.order_by("-id").first().id
     services_max_id = Service.objects.order_by("-id").first().id
-
-    Embedder.load(USER_EMBEDDER)(User.objects, use_cache=False, save_cache=True)
-    Embedder.load(SERVICE_EMBEDDER)(Service.objects, use_cache=False, save_cache=True)
 
     model = NeuralCollaborativeFilteringModel(
         users_max_id=users_max_id,

@@ -6,15 +6,6 @@ import torch
 from torch.nn import BCELoss, CosineEmbeddingLoss
 from torch.optim import Adam
 
-from recommender.engines.autoencoders.training.data_validation_step import (
-    LEAST_NUM_OF_USR_SRV,
-)
-from recommender.engines.autoencoders.training.model_evaluation_step import (
-    BATCH_SIZE as AE_BATCH_SIZE,
-)
-from recommender.engines.autoencoders.training.model_validation_step import (
-    MAX_LOSS_SCORE,
-)
 from recommender.engines.base.base_steps import (
     DataExtractionStep,
     DataValidationStep,
@@ -28,10 +19,6 @@ from recommender.engines.ncf.training.data_extraction_step import MAX_USERS
 from recommender.engines.ncf.training.data_preparation_step import (
     TRAIN_DS_SIZE as NCF_TRAIN_DS_SIZE,
     VALID_DS_SIZE as NCF_VALID_DS_SIZE,
-)
-from recommender.engines.autoencoders.training.data_preparation_step import (
-    TRAIN_DS_SIZE,
-    VALID_DS_SIZE,
 )
 
 from recommender.engines.ncf.training.data_validation_step import (
@@ -50,13 +37,6 @@ from recommender.engines.ncf.training.model_training_step import (
 )
 
 from recommender.engines.ncf.training.model_training_step import EPOCHS as NCF_EPOCHS
-from recommender.engines.autoencoders.training.model_training_step import (
-    EPOCHS as AE_EPOCHS,
-    LR,
-)
-from recommender.engines.autoencoders.training.model_training_step import (
-    OPTIMIZER as AE_OPTIMIZER,
-)
 
 from recommender.engines.ncf.training.model_training_step import (
     OPTIMIZER as NCF_OPTIMIZER,
@@ -69,17 +49,15 @@ from recommender.engines.ncf.training.model_validation_step import (
     MIN_WEIGHTED_AVG_F1_SCORE,
 )
 
-from recommender.engines.autoencoders.training.model_training_step import (
-    LOSS_FUNCTION as AE_LOSS_FUNCTION,
-    ENCODER_LAYER_SIZES,
-    DECODER_LAYER_SIZES,
-    USER_BATCH_SIZE,
-    SERVICE_BATCH_SIZE,
-    USER_EMBEDDING_DIM,
-    SERVICE_EMBEDDING_DIM,
-)
+
 from recommender.engines.ncf.training.model_training_step import (
     LOSS_FUNCTION as NCF_LOSS_FUNCTION,
+)
+from recommender.engines.nlp_embedders.embedders import (
+    SERVICE_EMBEDDING_DIM,
+    USER_EMBEDDING_DIM,
+    Services2tensorsEmbedder,
+    Users2tensorsEmbedder,
 )
 from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
     RewardGeneration,
@@ -130,36 +108,13 @@ SE = 128
 UE = 64
 COMPUTING_DEVICE = torch.device("cpu")
 
-AUTOENCODERS_PIPELINE_CONFIG = {
-    DEVICE: COMPUTING_DEVICE,
-    WRITER: None,
-    VERBOSE: True,
-    AE_LOSS_FUNCTION: CosineEmbeddingLoss(),
-    DataExtractionStep.__name__: {},
-    DataValidationStep.__name__: {LEAST_NUM_OF_USR_SRV: 2},
-    DataPreparationStep.__name__: {TRAIN_DS_SIZE: 0.96, VALID_DS_SIZE: 0.02},
-    ModelTrainingStep.__name__: {
-        ENCODER_LAYER_SIZES: (128, 64),
-        DECODER_LAYER_SIZES: (64, 128),
-        USER_BATCH_SIZE: 128,
-        SERVICE_BATCH_SIZE: 128,
-        SERVICE_EMBEDDING_DIM: SE,
-        USER_EMBEDDING_DIM: UE,
-        AE_EPOCHS: 200,
-        AE_OPTIMIZER: Adam,
-        LR: 0.01,
-    },
-    ModelEvaluationStep.__name__: {AE_BATCH_SIZE: 128},
-    ModelValidationStep.__name__: {MAX_LOSS_SCORE: 2},
-}
-
 NCF_PIPELINE_CONFIG = {
     DEVICE: COMPUTING_DEVICE,
     WRITER: None,
     VERBOSE: True,
     NCF_BATCH_SIZE: 64,
-    SERVICE_EMBEDDING_DIM: SE,
-    USER_EMBEDDING_DIM: UE,
+    SERVICE_EMBEDDING_DIM: Services2tensorsEmbedder().embedding_dim,
+    USER_EMBEDDING_DIM: Users2tensorsEmbedder().embedding_dim,
     NCF_LOSS_FUNCTION: BCELoss(),
     DataExtractionStep.__name__: {MAX_USERS: None},
     DataValidationStep.__name__: {LEAST_N_ORDERS_PER_USER: 5},

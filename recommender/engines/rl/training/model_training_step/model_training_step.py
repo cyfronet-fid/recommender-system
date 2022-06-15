@@ -10,12 +10,12 @@ from time import time
 import numpy as np
 import torch
 
-from recommender.engines.autoencoders.training.model_training_step import (
-    SERVICE_EMBEDDING_DIM,
-    USER_EMBEDDING_DIM,
-)
 from recommender.engines.base.base_steps import ModelTrainingStep
 from recommender.engines.constants import DEVICE
+from recommender.engines.nlp_embedders.embedders import (
+    Services2tensorsEmbedder,
+    Users2tensorsEmbedder,
+)
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
 from recommender.engines.rl.ml_components.actor import Actor
 from recommender.engines.rl.ml_components.critic import Critic
@@ -69,8 +69,12 @@ class RLModelTrainingStep(ModelTrainingStep):
         super().__init__(pipeline_config)
 
         self.K = self.resolve_constant(K)
-        self.SE = self.resolve_constant(SERVICE_EMBEDDING_DIM)
-        self.UE = self.resolve_constant(USER_EMBEDDING_DIM)
+        self.SE = (
+            Services2tensorsEmbedder().embedding_dim
+        )  # TODO: use config constants and resolve_constant
+        self.UE = (
+            Users2tensorsEmbedder().embedding_dim
+        )  # TODO: use config constants and resolve_constant
         self.I = len(
             Service.objects
         )  # TODO: Consider not reaching to the database for this

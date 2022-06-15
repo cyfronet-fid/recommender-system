@@ -5,7 +5,8 @@ from typing import Tuple
 import torch
 import torch.nn.functional as F
 
-from recommender.engines.autoencoders.ml_components.embedder import Embedder
+from recommender.engines.nlp_embedders.embedders import Services2tensorsEmbedder
+from recommender.engines.rl.utils import create_index_id_map
 from recommender.errors import InsufficientRecommendationSpaceError
 from recommender.models import Service
 from logger_config import get_logger
@@ -17,26 +18,10 @@ class ServiceSelector:
     """Responsible for strategy and selection of services to
     recommend, given output of the Actor"""
 
-    def __init__(
-        self,
-        service_embedder: Embedder,
-        use_cached_embeddings: bool = True,
-        save_cached_embeddings: bool = False,
-    ) -> None:
-        """
-        Args:
-            service_embedder: Embedder of the services
-            use_cached_embeddings: Flag, describing if we should use cached services'
-                and users' embeddings
-            save_cached_embeddings: Flag, describing if we should
-                cache computed services' and users' embeddings
-        """
+    def __init__(self) -> None:
         all_services = list(Service.objects.order_by("id"))
-        self.itemspace, self.index_id_map = service_embedder(
-            all_services,
-            use_cache=use_cached_embeddings,
-            save_cache=save_cached_embeddings,
-        )
+        self.itemspace = Services2tensorsEmbedder()(all_services)
+        self.index_id_map = create_index_id_map(all_services)
 
     def __call__(
         self,
