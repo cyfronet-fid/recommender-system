@@ -80,9 +80,6 @@ def jms_controller() -> JMSSubscriberController:
     controller.terminate()
 
 
-@pytest.mark.skip(
-    reason="Before enabling rabbitmq+stomp must be enabled on the test environment"
-)
 def test_listener(jms_controller, mocker: MockerFixture):
     deserializer_mock = mocker.patch(
         "recommender.tasks.Deserializer.deserialize_user_action"
