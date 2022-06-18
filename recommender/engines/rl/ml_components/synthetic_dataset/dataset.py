@@ -10,7 +10,6 @@ from recommender.engines.nlp_embedders.embedders import Services2tensorsEmbedder
 from recommender.engines.rl.ml_components.reward_mapping import (
     TRANSITION_REWARDS_CSV_PATH,
 )
-from recommender.engines.rl.utils import create_index_id_map
 from recommender.models import Service, State, SearchData, Sars, User
 from recommender.services.fts import retrieve_services_for_synthetic_sarses
 from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
@@ -101,8 +100,7 @@ def generate_synthetic_sarses(
     users = User.objects
 
     services = list(Service.objects.order_by("id"))
-    services_tensors = Services2tensorsEmbedder()(services)
-    index_id_map = create_index_id_map(services)
+    services_tensors, index_id_map = Services2tensorsEmbedder()(services)
 
     transition_rewards_df = pd.read_csv(TRANSITION_REWARDS_CSV_PATH, index_col="source")
     sarses = []

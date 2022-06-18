@@ -3,10 +3,7 @@
 from mongoengine import (
     ListField,
     ReferenceField,
-    BinaryField,
-    FloatField,
     BooleanField,
-    IntField,
 )
 
 from .category import Category

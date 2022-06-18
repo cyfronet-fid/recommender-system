@@ -19,7 +19,7 @@ from recommender.engines.rl.ml_components.service_selector import ServiceSelecto
 from recommender.engines.rl.ml_components.synthetic_dataset.rewards import (
     synthesize_reward,
 )
-from recommender.engines.rl.utils import create_state, create_index_id_map
+from recommender.engines.rl.utils import create_state
 from recommender.models import Service, SearchData
 from recommender.engines.rl.ml_components.synthetic_dataset.service_engagement import (
     approx_service_engagement,
@@ -47,8 +47,7 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         self.service_selector = ServiceSelector()
 
         services = list(Service.objects.order_by("id"))
-        self.services = Services2tensorsEmbedder()(services)
-        self.index_id_map = create_index_id_map(services)
+        self.services, self.index_id_map = Services2tensorsEmbedder()(services)
 
         self.transition_rewards_df = pd.read_csv(
             TRANSITION_REWARDS_CSV_PATH, index_col="source"
@@ -101,9 +100,7 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         for _ in range(self.time_measurement_samples):
             start = time()
             example_user = random.choice(sarses).state.user
-            elastic_services = tuple(
-                [int(service.id) for service in Service.objects]
-            )  # TODO: so.. it works?
+            elastic_services = tuple(int(service.id) for service in Service.objects)  # TODO: so.. it works?
             example_state = create_state(example_user, elastic_services, SearchData())
             self._get_recommendation(actor, example_state)
             end = time()

@@ -6,7 +6,6 @@ import torch
 from recommender.engines.nlp_embedders.embedders import Services2tensorsEmbedder
 from recommender.engines.rl.utils import (
     get_service_indices,
-    create_index_id_map,
 )
 from recommender.models import Service
 
@@ -19,8 +18,7 @@ class Services2Weights:
 
     def __init__(self):
         all_services = list(Service.objects.order_by("id"))
-        self.itemspace = Services2tensorsEmbedder()(all_services)
-        self.index_id_map = create_index_id_map(all_services)
+        self.itemspace, self.index_id_map = Services2tensorsEmbedder()(all_services)
         self.itemspace_inverse = self.itemspace.pinverse().T
         self.I = self.itemspace.shape[0]
 

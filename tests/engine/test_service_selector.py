@@ -55,12 +55,11 @@ def weights():
     )
 
 
-@pytest.mark.skip(reason="TODO")
 def test_proper_initialization(
     mongo, mocker, proper_parameters, services, service_embeddings, index_id_map
 ):
     mock_embedder_call = mocker.patch(
-        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+        "recommender.engines.nlp_embedders.embedders.Objects2tensorsEmbedder.__call__"
     )
     mock_embedder_call.return_value = (service_embeddings, index_id_map)
 
@@ -75,7 +74,6 @@ def test_proper_initialization(
     mock_embedder_call.assert_called_once()
 
 
-@pytest.mark.skip(reason="TODO")
 def test_call_with_matching_services(
     mongo,
     mocker,
@@ -86,7 +84,7 @@ def test_call_with_matching_services(
     index_id_map,
 ):
     mock_embedder_call = mocker.patch(
-        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+        "recommender.engines.nlp_embedders.embedders.Objects2tensorsEmbedder.__call__"
     )
     mock_embedder_call.return_value = (service_embeddings, index_id_map)
 
@@ -100,7 +98,6 @@ def test_call_with_matching_services(
     assert service_selector(weights, mask=torch.Tensor([0, 1, 0, 1])) == [4, 8]
 
 
-@pytest.mark.skip(reason="TODO")
 def test_raise_insufficient_recommendation_space(
     mongo,
     mocker,
@@ -111,7 +108,7 @@ def test_raise_insufficient_recommendation_space(
     index_id_map,
 ):
     mock_embedder_call = mocker.patch(
-        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+        "recommender.engines.nlp_embedders.embedders.Objects2tensorsEmbedder.__call__"
     )
     mock_embedder_call.return_value = (service_embeddings, index_id_map)
 

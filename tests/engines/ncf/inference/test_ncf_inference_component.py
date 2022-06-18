@@ -22,7 +22,6 @@ from recommender.models import User, Service
 from recommender.models.ml_component import MLComponent
 
 
-@pytest.mark.skip(reason="TODO")
 def test_ncf_inference_component(
     mongo, generate_users_and_services, ncf_pipeline_config, mock_ncf_pipeline_exec
 ):
@@ -70,8 +69,9 @@ def test_ncf_inference_component(
         NCFInferenceComponent(K=-1)
 
 
-@pytest.mark.skip(reason="TODO")
-def test_user_and_services_to_tensors(mongo, generate_users_and_services):
+def test_user_and_services_to_tensors(
+    mongo, generate_users_and_services, mock_ncf_pipeline_exec
+):
 
     u1 = User.objects[0]
 

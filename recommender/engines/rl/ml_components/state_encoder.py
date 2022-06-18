@@ -75,7 +75,7 @@ class StateEncoder:
             logger.info("Getting all services_histories from states")
         services_histories = [state.services_history for state in states]
 
-        users_batch = self.users2tensor_embedder(users)
+        users_batch, _ = self.users2tensor_embedder(users)
         service_histories_batch = self._create_service_histories_batch(
             services_histories
         )
@@ -120,7 +120,7 @@ class StateEncoder:
                 start_end_indices.append(None)
 
         if services:
-            service_tensors = self.services2tensor_embedder(services)
+            service_tensors, _ = self.services2tensor_embedder(services)
 
         sequences = []
         for state_idx in range(states_number):

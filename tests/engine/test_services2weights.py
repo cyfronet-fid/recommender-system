@@ -35,12 +35,11 @@ def index_id_map(services):
     return pd.DataFrame([2, 4, 6, 8], columns=["id"])
 
 
-@pytest.mark.skip(reason="TODO")
 def test_services2weights(mocker, services, service_embeddings, index_id_map):
     # Values of SE and Service OH len don't matter here
     # as we are mocking the service embedder output anyway
     mock_embedder_call = mocker.patch(
-        "recommender.engines.autoencoders.ml_components.embedder.Embedder.__call__"
+        "recommender.engines.nlp_embedders.embedders.Objects2tensorsEmbedder.__call__"
     )
     mock_embedder_call.return_value = (service_embeddings, index_id_map)
 

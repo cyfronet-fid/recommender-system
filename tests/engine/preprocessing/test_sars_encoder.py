@@ -23,9 +23,8 @@ from tests.factories.search_data import SearchDataFactory
 from tests.factories.state import StateFactory
 
 
-@pytest.mark.skip(reason="TODO")
 def test_sars_encoder(mongo):
-    B = 3
+    B = 4
     SARSes_K_2 = SarsFactory.create_batch(
         B,
         state=StateFactory(search_data=SearchDataFactory(q=None)),

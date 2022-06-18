@@ -6,7 +6,6 @@ import torch
 import torch.nn.functional as F
 
 from recommender.engines.nlp_embedders.embedders import Services2tensorsEmbedder
-from recommender.engines.rl.utils import create_index_id_map
 from recommender.errors import InsufficientRecommendationSpaceError
 from recommender.models import Service
 from logger_config import get_logger
@@ -20,8 +19,7 @@ class ServiceSelector:
 
     def __init__(self) -> None:
         all_services = list(Service.objects.order_by("id"))
-        self.itemspace = Services2tensorsEmbedder()(all_services)
-        self.index_id_map = create_index_id_map(all_services)
+        self.itemspace, self.index_id_map = Services2tensorsEmbedder()(all_services)
 
     def __call__(
         self,

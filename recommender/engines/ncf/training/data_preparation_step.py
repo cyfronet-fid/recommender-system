@@ -91,9 +91,9 @@ def split_and_group(
     for split_name, services_split in services_splits.items():
         dataset = datasets[split_name]
         for service in services_split:
-            dataset[USERS].append(users2tensor_embedder([user])[0].tolist())
+            dataset[USERS].append(users2tensor_embedder([user])[0][0].tolist())
             dataset[USERS_IDS].append(user.id)
-            dataset[SERVICES].append(services2tensor_embedder([service])[0].tolist())
+            dataset[SERVICES].append(services2tensor_embedder([service])[0][0].tolist())
             dataset[SERVICES_IDS].append(service.id)
             dataset[LABELS].append(label)
 
@@ -126,6 +126,8 @@ def tensorize(
             ORDERED_LABEL,
             train_ds_size,
             valid_ds_size,
+            Users2tensorsEmbedder(),
+            Services2tensorsEmbedder(),
         )
         split_and_group(
             datasets,
@@ -134,6 +136,8 @@ def tensorize(
             NOT_ORDERED_LABEL,
             train_ds_size,
             valid_ds_size,
+            Users2tensorsEmbedder(),
+            Services2tensorsEmbedder(),
         )
 
     tensors_dict = prepare_empty_datasets()
@@ -179,8 +183,8 @@ class NCFDataPreparationStep(DataPreparationStep):
         self.train_ds_size = self.resolve_constant(TRAIN_DS_SIZE, 0.6)
         self.valid_ds_size = self.resolve_constant(VALID_DS_SIZE, 0.2)
         self.device = self.resolve_constant(DEVICE, torch.device("cpu"))
-        self.services2tensorEmbedder = (Services2tensorsEmbedder(),)
-        self.users2tensorEmbedder = (Users2tensorsEmbedder(),)
+        self.services2tensor_embedder = Services2tensorsEmbedder()
+        self.users2tensor_embedder = Users2tensorsEmbedder()
 
     def __call__(self, data: Dict = None) -> Tuple[Dict, Dict]:
         """Perform data preparation consisting of:

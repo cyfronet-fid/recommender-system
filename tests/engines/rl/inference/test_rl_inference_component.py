@@ -9,7 +9,6 @@ from recommender.engines.rl.inference.rl_inference_component import RLInferenceC
 from recommender.models import Service
 
 
-@pytest.mark.skip(reason="TODO")
 @pytest.mark.parametrize("ver", ["v1", "v2"])
 def test_known_user(mongo, generate_users_and_services, mock_rl_pipeline_exec, ver):
     K = PANEL_ID_TO_K[ver]

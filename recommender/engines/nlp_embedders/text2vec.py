@@ -1,3 +1,7 @@
+# pylint: disable=missing-function-docstring
+
+"""This module contains Text2Vec class that encapsulate external NLP library"""
+
 import spacy_universal_sentence_encoder
 from torch import Tensor
 
@@ -5,6 +9,8 @@ __all__ = ["Text2Vec"]
 
 
 class Text2Vec:
+    """It encapsulate external NLP library"""
+
     def __init__(self):
         self.nlp = spacy_universal_sentence_encoder.load_model("en_use_lg")
 

@@ -4,7 +4,6 @@ import pytest
 from recommender.engines.rl.training.pipeline import RLPipeline
 
 
-@pytest.mark.skip(reason="TODO")
 def test_rl_pipeline(
     mongo,
     generate_users_and_services,

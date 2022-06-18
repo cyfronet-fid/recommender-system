@@ -3,7 +3,7 @@
 """This file contains all pipelines' configs"""
 
 import torch
-from torch.nn import BCELoss, CosineEmbeddingLoss
+from torch.nn import BCELoss
 from torch.optim import Adam
 
 from recommender.engines.base.base_steps import (
@@ -104,8 +104,8 @@ from recommender.engines.rl.training.model_validation_step.model_validation_step
     REWARD_LOWER_BOUND,
 )
 
-SE = 128
-UE = 64
+SE = Services2tensorsEmbedder().embedding_dim
+UE = Users2tensorsEmbedder().embedding_dim
 COMPUTING_DEVICE = torch.device("cpu")
 
 NCF_PIPELINE_CONFIG = {
@@ -113,8 +113,8 @@ NCF_PIPELINE_CONFIG = {
     WRITER: None,
     VERBOSE: True,
     NCF_BATCH_SIZE: 64,
-    SERVICE_EMBEDDING_DIM: Services2tensorsEmbedder().embedding_dim,
-    USER_EMBEDDING_DIM: Users2tensorsEmbedder().embedding_dim,
+    SERVICE_EMBEDDING_DIM: SE,
+    USER_EMBEDDING_DIM: UE,
     NCF_LOSS_FUNCTION: BCELoss(),
     DataExtractionStep.__name__: {MAX_USERS: None},
     DataValidationStep.__name__: {LEAST_N_ORDERS_PER_USER: 5},

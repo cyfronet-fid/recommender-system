@@ -55,11 +55,11 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
 
         services = list(services)
         services_ids = torch.tensor([service.id for service in services])
-        services_tensor = self.services2tensors_embedder(services)
+        services_tensor, _ = self.services2tensors_embedder(services)
 
         services_t_shape = services_tensor.shape[0]
         users_ids = torch.full([services_t_shape], user.id)
-        users_tensor = self.services2tensors_embedder([user]).repeat(
+        users_tensor = self.users2tensors_embedder([user])[0].repeat(
             services_t_shape, 1
         )
 
