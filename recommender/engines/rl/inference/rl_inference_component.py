@@ -1,5 +1,5 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods
-# pylint: disable=too-many-instance-attributes, no-self-use, line-too-long
+# pylint: disable=too-many-instance-attributes, line-too-long
 
 from typing import Tuple
 

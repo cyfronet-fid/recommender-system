@@ -1,4 +1,4 @@
-# pylint: disable=missing-module-docstring, invalid-name, no-member, too-few-public-methods, no-self-use
+# pylint: disable=missing-module-docstring, invalid-name, no-member, too-few-public-methods
 
 from typing import Tuple
 

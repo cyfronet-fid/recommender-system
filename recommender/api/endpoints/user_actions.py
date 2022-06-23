@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-self-use
+# pylint: disable=missing-function-docstring
 
 """User action endpoint definition"""
 

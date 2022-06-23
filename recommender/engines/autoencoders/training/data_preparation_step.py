@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring, no-self-use
+# pylint: disable=invalid-name, missing-class-docstring, missing-function-docstring
 # pylint: disable=redefined-builtin, no-member, not-callable
 # pylint: disable=line-too-long, no-else-return, too-many-branches
 

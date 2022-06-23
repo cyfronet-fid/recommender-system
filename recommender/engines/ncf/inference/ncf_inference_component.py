@@ -1,5 +1,5 @@
 # pylint: disable=unused-argument, too-few-public-methods, missing-class-docstring, missing-function-docstring
-# pylint: disable=no-self-use, superfluous-parens, no-else-return, no-member, not-callable, line-too-long
+# pylint: disable=superfluous-parens, no-else-return, no-member, not-callable, line-too-long
 
 """Neural Collaborative Filtering Inference Component"""
 

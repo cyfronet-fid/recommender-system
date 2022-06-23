@@ -1,4 +1,4 @@
-# pylint: disable=invalid-name, no-self-use, no-member, too-few-public-methods, line-too-long
+# pylint: disable=invalid-name, no-member, too-few-public-methods, line-too-long
 
 """Implementation of the base recommender engine"""
 from abc import ABC, abstractmethod

@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, too-many-arguments, invalid-name, no-member, no-self-use
+# pylint: disable=missing-function-docstring, too-many-arguments, invalid-name, no-member
 
 """Multilayer Perceptron used in Neural Collaborative Filtering model"""
 
