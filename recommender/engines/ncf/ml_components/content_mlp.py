@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, no-self-use, invalid-name, no-member
+# pylint: disable=missing-function-docstring, invalid-name, no-member
 
 """Content Multi Layer Perceptron used for users and services contents processing"""
 

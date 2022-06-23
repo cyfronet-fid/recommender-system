@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - db commands divided into db and seed commands [@Michal-Kolomanski]
 - seed commands only available in development and testing env [@Michal-Kolomanski]
 ### Fixed
+- Dependabot alerts [@Michal-Kolomanski]
 ### Removed
 
 ## [3.2.1] - 2022-05-05
