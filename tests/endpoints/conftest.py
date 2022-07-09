@@ -59,6 +59,13 @@ def mp_dump_data():
                 "accessed_services": [1, 2],
             }
         ],
+        "projects": [
+            {
+                "id": 1,
+                "user_id": 1,
+                "services": [1, 2],
+            }
+        ],
         "categories": [{"id": 1, "name": "c1"}, {"id": 2, "name": "c2"}],
         "providers": [{"id": 1, "name": "p1"}, {"id": 2, "name": "p2"}],
         "scientific_domains": [{"id": 1, "name": "sd1"}, {"id": 2, "name": "sd2"}],

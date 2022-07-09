@@ -20,6 +20,7 @@ from .user import User
 from .user_action import UserAction
 from .search_data import SearchData
 from .ml_component import MLComponent
+from .project import Project
 
 MP_DUMP_MODEL_CLASSES = [
     Category,
@@ -33,6 +34,7 @@ MP_DUMP_MODEL_CLASSES = [
     LifeCycleStatus,
     User,
     Service,
+    Project,
 ]
 
 ML_MODELS = [

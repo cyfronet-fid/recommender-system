@@ -8,6 +8,7 @@ from .access_type import access_type
 from .category import category
 from .life_cycle_status import life_cycle_status
 from .platform import platform
+from .project import project
 from .provider import provider
 from .scientific_domain import scientific_domain
 from .service import service
@@ -39,6 +40,17 @@ database_dump = api.model(
             required=True,
             title="Users",
             description="List of user",
+        ),
+        "projects": fields.List(
+            fields.Nested(
+                project,
+                required=True,
+                title="Project",
+                description="Project  in the Marketplace Portal",
+            ),
+            required=True,
+            title="Projects",
+            description="List of projects",
         ),
         "categories": fields.List(
             fields.Nested(
