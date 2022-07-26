@@ -2,6 +2,9 @@
 from recommender.engines.ncf.inference.ncf_inference_component import (
     NCFInferenceComponent,
 )
+from recommender.engines.ncf.inference.ncf_ranking_inference_component import (
+    NCFRankingInferenceComponent,
+)
 from recommender.engines.rl.inference.rl_inference_component import RLInferenceComponent
 from recommender.engines.random.inference.random_inference_component import (
     RandomInferenceComponent,
@@ -12,4 +15,5 @@ ENGINES = {
     RLInferenceComponent.engine_name: RLInferenceComponent,
     NCFInferenceComponent.engine_name: NCFInferenceComponent,
     RandomInferenceComponent.engine_name: RandomInferenceComponent,
+    NCFRankingInferenceComponent.engine_name: NCFRankingInferenceComponent,
 }

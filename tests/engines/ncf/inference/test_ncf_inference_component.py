@@ -16,6 +16,9 @@ from recommender.engines.autoencoders.training.data_preparation_step import (
 from recommender.engines.ncf.inference.ncf_inference_component import (
     NCFInferenceComponent,
 )
+from recommender.engines.ncf.inference.ncf_ranking_inference_component import (
+    NCFRankingInferenceComponent,
+)
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
     NEURAL_CF,
     NeuralCollaborativeFilteringModel,
@@ -29,6 +32,7 @@ from recommender.errors import (
 
 from recommender.models import User, Service
 from recommender.models.ml_component import MLComponent
+from recommender.services.fts import retrieve_services_for_recommendation
 
 
 def test_ncf_inference_component(
@@ -76,6 +80,35 @@ def test_ncf_inference_component(
 
     with pytest.raises(InvalidRecommendationPanelIDError):
         NCFInferenceComponent(K=-1)
+
+
+def test_ncf_ranking_inference_component_returns_full_ranking(
+    mongo, generate_users_and_services, ncf_pipeline_config, mock_ncf_pipeline_exec
+):
+    elastic_services = [service.id for service in Service.objects]
+
+    for panel_id_version, K in list(PANEL_ID_TO_K.items()):
+        ncf_ranking_inference_component = NCFRankingInferenceComponent(K)
+
+        user = random.choice(list(User.objects))
+        context = {
+            "panel_id": panel_id_version,
+            "elastic_services": elastic_services,
+            "search_data": {},
+            "user_id": user.id,
+        }
+
+        ranked_services_ids = ncf_ranking_inference_component(context)
+
+        assert isinstance(ranked_services_ids, list)
+        assert all([isinstance(service_id, int) for service_id in ranked_services_ids])
+        not_ranked_services_ids = [
+            s.id
+            for s in retrieve_services_for_recommendation(
+                elastic_services, user.accessed_services
+            )
+        ]
+        assert set(not_ranked_services_ids) == set(ranked_services_ids)
 
 
 def test_user_and_services_to_tensors_errors(mongo, generate_users_and_services):

@@ -77,10 +77,10 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
 
         return users_ids, users_tensor, services_ids, services_tensor
 
-    def _generate_recommendations(
+    def _get_ranking(
         self, user: User, elastic_services: Tuple[int], search_data: SearchData
-    ) -> List[int]:
-        """Generate recommendation for logged user.
+    ) -> List[Tuple[float, int]]:
+        """Generate services ranking.
 
         Args:
             user: user for whom recommendation will be generated.
@@ -89,7 +89,7 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
              down an item space.
 
         Returns:
-            recommended_services_ids: List of recommended services ids.
+            ranking: Ranking of services.
         """
 
         candidate_services = list(
@@ -112,10 +112,28 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
             users_ids, users_tensor, services_ids, services_tensor
         )
         matching_probs = torch.reshape(matching_probs, (-1,)).tolist()
-        top_k = sorted(list(zip(matching_probs, candidate_services_ids)), reverse=True)[
-            : self.K
-        ]
+        ranking = sorted(
+            list(zip(matching_probs, candidate_services_ids)), reverse=True
+        )
 
+        return ranking
+
+    def _generate_recommendations(
+        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+    ) -> List[int]:
+        """Generate recommendation for logged user.
+
+        Args:
+            user: user for whom recommendation will be generated.
+            elastic_services: item space from the Marketplace.
+            search_data: search phrase and filters information for narrowing
+             down an item space.
+
+        Returns:
+            recommended_services_ids: List of recommended services ids.
+        """
+
+        top_k = self._get_ranking(user, elastic_services, search_data)[: self.K]
         recommended_services_ids = [pair[1] for pair in top_k]
 
         return recommended_services_ids
