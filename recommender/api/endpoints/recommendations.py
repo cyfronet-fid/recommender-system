@@ -1,6 +1,5 @@
-# pylint: disable=no-self-use
-
 """Recommendations endpoint definition"""
+
 from flask import request
 from flask_restx import Resource, Namespace
 
