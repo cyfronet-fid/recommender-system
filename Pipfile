@@ -25,6 +25,7 @@ flask-mongoengine = "*"
 pymongo = "==3.12"
 pillow = ">=9.1.1"
 notebook = ">=6.4.12"
+werkzeug = "==2.1.2"
 
 [dev-packages]
 factory-boy = "*"
