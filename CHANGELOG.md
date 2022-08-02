@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+### Changed
+- /recommendations endpoint for the purposes of the User Dashboard [@Michal-Kolomanski]
+### Fixed
+### Removed
+
+## [Unreleased] - 2022-06-23
+### Added
 - Random recommendations' engine for anonymous users [@Michal-Kolomanski]
 ### Changed
 - Cleaning up the main conftest [@Michal-Kolomanski]

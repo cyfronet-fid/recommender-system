@@ -9,6 +9,7 @@ from recommender.api.schemas.recommendation import (
     recommendation,
     recommendation_context,
 )
+from recommender.services.provide_service_ctx import service_ctx
 from recommender.services.deserializer import deserialize_recommendation
 from recommender.services.engine_selector import load_engine
 from logger_config import get_logger
@@ -26,7 +27,7 @@ class Recommendation(Resource):
     def post(self):
         """Returns list of ids of recommended scientific services"""
 
-        json_dict = request.get_json()
+        json_dict = service_ctx(request.get_json())
         engine, engine_name = load_engine(json_dict)
         try:
             services_ids = engine(json_dict)
