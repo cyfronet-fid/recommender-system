@@ -24,6 +24,8 @@ celery = {extras = ["redis"], version = "*"}
 flask-mongoengine = "*"
 pymongo = "==3.12"
 spacy-universal-sentence-encoder = "*"
+werkzeug = "==2.1.2"# TODO: this version has been set due to compatibility reasons, unset if possible
+
 
 [dev-packages]
 factory-boy = "*"
