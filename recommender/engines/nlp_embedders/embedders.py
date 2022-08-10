@@ -1,4 +1,4 @@
-# pylint: disable=expression-not-assigned, missing-function-docstring, too-few-public-methods
+# pylint: disable=expression-not-assigned, missing-function-docstring, too-few-public-methods, fixme
 
 """External NLP based embedders"""
 
@@ -54,19 +54,19 @@ class Objects2tensorsEmbedder:
             return (
                 objects_tensor[:, :512],
                 index_id_map,
-            )  # TODO: this is hard cut, only for smaller size, it should be
+            )  # TODO: refactor this when the comprehensive solution is found
             # fixed before the merge
         # return objects_tensors, index_id_map
         return (
             objects_tensors[:, :512],
             index_id_map,
-        )  # TODO: this is hard cut, only for smaller size, it should be
+        )  # TODO: refactor this when the comprehensive solution is found
         # fixed before the merge
 
     @property
     def embedding_dim(self):
         # return sum(handler.embedding_dim for handler in self.handlers)
-        return 512  # TODO: this is hard cut, only for smaller size, it should
+        return 512  # TODO: refactor this when the comprehensive solution is found
         # be fixed before the merge
 
 

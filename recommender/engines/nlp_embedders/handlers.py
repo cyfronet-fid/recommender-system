@@ -1,4 +1,4 @@
-# pylint: disable=missing-class-docstring, missing-function-docstring, no-self-use
+# pylint: disable=missing-class-docstring, missing-function-docstring
 
 """
 Handlers used by object2vec - related functions. Used for embedding various

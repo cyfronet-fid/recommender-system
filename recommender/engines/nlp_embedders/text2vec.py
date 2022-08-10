@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring
+# pylint: disable=missing-function-docstring, fixme
 
 """This module contains Text2Vec class that encapsulate external NLP library"""
 
@@ -19,4 +19,4 @@ class Text2Vec:
 
     @property
     def embedding_dim(self):
-        return 512  # TODO: come on... did you think about doing it correctly?
+        return 512  # TODO: refactor this when the comprehensive solution is found

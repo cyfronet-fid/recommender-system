@@ -1,4 +1,4 @@
-# pylint: disable=missing-class-docstring, missing-function-docstring, no-self-use
+# pylint: disable=missing-class-docstring, missing-function-docstring
 
 """This module contains error classes.
 All custom exceptions should be placed in this file and this file should be
