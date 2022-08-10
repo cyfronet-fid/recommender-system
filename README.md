@@ -156,7 +156,7 @@ GPU support can be enabled using an environmental variable `TRAINING_DEVICE` (lo
 
 After training is finished, the system is immediately ready for serving recommendations (no manual reloading is needed).
 
-To specify from which engine the recommendations are requested, provide a `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine.
+To specify from which engine the recommendations are requested, provide an `engine_version` parameter inside the body of `\recommendations` endpoint. `NCF` denotes the NCF engine, while `RL` indicates the RL engine. There is also `NCFRanking` (that uses `NCF` engine under the hood) but while requested it returns whole ranking of services rather than top K recommended services.
 It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
 (look into [ENV variables](#env-variables) section).
 
