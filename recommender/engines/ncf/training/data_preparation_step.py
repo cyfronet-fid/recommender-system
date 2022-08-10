@@ -91,9 +91,11 @@ def split_and_group(
     for split_name, services_split in services_splits.items():
         dataset = datasets[split_name]
         for service in services_split:
-            dataset[USERS].append(users2tensor_embedder([user])[0][0].tolist())
+            user_tensor_as_list = users2tensor_embedder([user])[0][0].tolist()
+            dataset[USERS].append(user_tensor_as_list)
             dataset[USERS_IDS].append(user.id)
-            dataset[SERVICES].append(services2tensor_embedder([service])[0][0].tolist())
+            service_tensor_as_list = services2tensor_embedder([service])[0][0].tolist()
+            dataset[SERVICES].append(service_tensor_as_list)
             dataset[SERVICES_IDS].append(service.id)
             dataset[LABELS].append(label)
 

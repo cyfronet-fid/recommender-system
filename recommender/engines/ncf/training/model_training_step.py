@@ -172,8 +172,8 @@ class NCFModelTrainingStep(ModelTrainingStep):
 
         self.mf_embedding_dim = self.resolve_constant(MF_EMBEDDING_DIM, 64)
         self.users_ids_embedding_dim = self.resolve_constant(USER_IDS_EMBEDDING_DIM, 64)
-        self.user_emb_dim = Users2tensorsEmbedder().embedding_dim  # TODO
-        self.service_emb_dim = Services2tensorsEmbedder().embedding_dim  # TODO
+        self.user_emb_dim = Users2tensorsEmbedder().embedding_dim
+        self.service_emb_dim = Services2tensorsEmbedder().embedding_dim
         self.services_ids_embedding_dim = self.resolve_constant(
             SERVICE_IDS_EMBEDDING_DIM, 64
         )
