@@ -28,6 +28,7 @@ from recommender.errors import (
     InvalidRecommendationPanelIDError,
     NoSavedMLComponentError,
     NoPrecalculatedTensorsError,
+    UserCannotBeIdentified,
 )
 
 from recommender.models import User, Service
@@ -35,8 +36,13 @@ from recommender.models.ml_component import MLComponent
 from recommender.services.fts import retrieve_services_for_recommendation
 
 
+@pytest.mark.parametrize("user_id_type", ["user_id", "aai_uid"])
 def test_ncf_inference_component(
-    mongo, generate_users_and_services, ncf_pipeline_config, mock_ncf_pipeline_exec
+    mongo,
+    generate_users_and_services,
+    ncf_pipeline_config,
+    mock_ncf_pipeline_exec,
+    user_id_type,
 ):
     # With-no-model case
     ncf_model = NeuralCollaborativeFilteringModel.load(version=NEURAL_CF)
@@ -58,11 +64,19 @@ def test_ncf_inference_component(
         user = random.choice(list(User.objects))
 
         context = {
-            "panel_id": panel_id_version,
-            "elastic_services": elastic_services,
-            "search_data": {},
-            "user_id": user.id,
-        }
+            "user_id": {
+                "panel_id": panel_id_version,
+                "elastic_services": elastic_services,
+                "search_data": {},
+                "user_id": user.id,
+            },
+            "aai_uid": {
+                "panel_id": panel_id_version,
+                "elastic_services": elastic_services,
+                "search_data": {},
+                "aai_uid": user.aai_uid,
+            },
+        }[user_id_type]
 
         services_ids_1 = ncf_inference_component(context)
 
@@ -80,6 +94,22 @@ def test_ncf_inference_component(
 
     with pytest.raises(InvalidRecommendationPanelIDError):
         NCFInferenceComponent(K=-1)
+
+
+def test_user_cannot_be_identified(
+    mongo, generate_users_and_services, ncf_pipeline_config, mock_ncf_pipeline_exec
+):
+    ncf_inference_component = NCFInferenceComponent(3)
+    elastic_services = [service.id for service in Service.objects]
+
+    context = {
+        "panel_id": "v1",
+        "elastic_services": elastic_services,
+        "search_data": {},
+    }
+
+    with pytest.raises(UserCannotBeIdentified):
+        ncf_inference_component(context)
 
 
 def test_ncf_ranking_inference_component_returns_full_ranking(

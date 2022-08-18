@@ -117,6 +117,13 @@ user_action = api.model(
             description="The unique identifier of the logged user.",
             example=1234,
         ),
+        "aai_uid": fields.String(
+            required=False,
+            title="AAI Token (UID)",
+            description="The unique identifier of the logged "
+            + "user in form of an AAI Token. ",
+            example="64-characters@egi.eu",
+        ),
         "unique_id": fields.String(
             required=True,
             title="Not logged user ID",

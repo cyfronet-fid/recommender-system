@@ -8,6 +8,7 @@ from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_
 from recommender.errors import (
     InvalidRecommendationPanelIDError,
     InsufficientRecommendationSpaceError,
+    UserCannotBeIdentified,
 )
 from recommender.models import User, SearchData
 
@@ -85,20 +86,26 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
     @staticmethod
     def _get_user(context: Dict[str, Any]) -> User:
         """
-        Get the user from the context.
+        Get the user from the context using either a user_id or an aai_uid.
+        Raises exception if no user is found.
 
         Args:
             context: context json  from the /recommendations endpoint request.
 
         Returns:
-            User.
+            User object model retrieved from the database.
         """
 
-        user = None
-        if context.get("user_id") is not None:
-            user = User.objects(id=context.get("user_id")).first()
+        user_id, aai_uid = context.get("user_id"), context.get("aai_uid")
 
-        return user
+        if not (user_id or aai_uid):
+            raise UserCannotBeIdentified()
+
+        return (
+            User.objects(id=user_id).first()
+            if user_id
+            else User.objects(aai_uid=aai_uid).first()
+        )
 
     @abstractmethod
     def _generate_recommendations(

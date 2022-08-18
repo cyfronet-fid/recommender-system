@@ -13,6 +13,12 @@ user = api.model(
             description="The unique identifier of a the user",
             example=1234,
         ),
+        "aai_uid": fields.String(
+            required=True,
+            title="AAI Token",
+            description="AAI token of the user",
+            example="64-characters@egi.eu",
+        ),
         "scientific_domains": fields.List(
             fields.Integer(
                 title="Scientific domain ID",

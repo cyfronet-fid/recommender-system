@@ -20,7 +20,10 @@ from recommender.engines.random.inference.random_inference_component import (
     RandomInferenceComponent,
 )
 from recommender.models.ml_component import MLComponent
-from tests.endpoints.conftest import recommendation_data
+from tests.endpoints.conftest import (
+    recommendation_data,
+    recommendation_data_with_aai_uid,
+)
 from tests.conftest import (
     generate_users_and_services,
 )
@@ -245,5 +248,37 @@ def test_load_engine(
     for engine_version in {"RL", "NCF", "random", "placeholder"}:
         recommendation_data["engine_version"] = engine_version
         engine, engine_name = load_engine(recommendation_data)
+        assert type(engine) == RandomInferenceComponent
+        assert engine_name == "random"
+
+
+def test_load_engine_with_aai_uid(
+    generate_users_and_services,
+    mock_rl_pipeline_exec,
+    mock_ncf_pipeline_exec,
+    recommendation_data_with_aai_uid,
+):
+    """
+    Expected behaviour:
+    Return proper engine and its name based on "engine_version"
+    and whether user is logged-in or not
+    """
+    # 1. case user is logged-in
+    recommendation_data_with_aai_uid["engine_version"] = "NCF"
+    engine, engine_name = load_engine(recommendation_data_with_aai_uid)
+    assert type(engine) == NCFInferenceComponent
+    assert engine_name == "NCF"
+
+    recommendation_data_with_aai_uid["engine_version"] = "RL"
+    engine, engine_name = load_engine(recommendation_data_with_aai_uid)
+    assert type(engine) == RLInferenceComponent
+    assert engine_name == "RL"
+
+    # 2. user is random
+    del recommendation_data_with_aai_uid["aai_uid"]
+
+    for engine_version in {"RL", "NCF", "random", "placeholder"}:
+        recommendation_data_with_aai_uid["engine_version"] = engine_version
+        engine, engine_name = load_engine(recommendation_data_with_aai_uid)
         assert type(engine) == RandomInferenceComponent
         assert engine_name == "random"

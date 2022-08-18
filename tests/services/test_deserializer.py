@@ -55,6 +55,17 @@ def test_recommendation_deserialization(mongo, recommendation_json_dict):
     )
 
 
+def test_user_action_deserialization_with_aai_uid(
+    mongo, user_action_json_dict_with_aai_uid
+):
+    user = UserFactory(aai_uid=user_action_json_dict_with_aai_uid.get("aai_uid"))
+    ServiceFactory()
+    Deserializer.deserialize_user_action(user_action_json_dict_with_aai_uid).save()
+    ua = UserAction.objects.first()
+
+    assert ua.user.id == user.id
+
+
 def test_user_action_deserialization(mongo, user_action_json_dict):
     UserFactory(id=1)
     ServiceFactory(id=1)
