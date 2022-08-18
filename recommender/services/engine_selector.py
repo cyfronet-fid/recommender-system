@@ -134,7 +134,7 @@ def load_engine(json_dict: dict) -> Tuple[Any, str]:
     """
     K = get_K(json_dict)
 
-    if not json_dict.get("user_id"):  # user is anonymous
+    if not (json_dict.get("user_id") or json_dict.get("aai_uid")):  # user is anonymous
         return (
             RandomInferenceComponent(K),
             RandomInferenceComponent.engine_name,

@@ -178,3 +178,8 @@ class SizeOfUsersAndElasticServicesError(Exception):
 class ServicesContextNotProvidedError(Exception):
     def message(self):
         return "Elastic_services not provided outside the context of the User Dashboard"
+
+
+class UserCannotBeIdentified(Exception):
+    def message(self):
+        return "Recommendation context did not provide user_id or aai_uid"

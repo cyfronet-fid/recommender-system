@@ -3,6 +3,7 @@
 """Implementation of the user activity stub - for development purpose"""
 import copy
 from typing import List
+
 from recommender.models import (
     Recommendation,
     UserAction,
@@ -11,6 +12,7 @@ from recommender.models import (
     Target,
     Action,
     SearchData,
+    User,
 )
 
 
@@ -78,8 +80,12 @@ class Deserializer:
         action_data = json_dict.get("action", {})
         action = Action(**action_data)
 
+        user_id, aai_uid = json_dict.get("user_id"), json_dict.get("aai_uid")
+        if aai_uid and not user_id:
+            user_id = User.objects(aai_uid=aai_uid).first().id
+
         user_action = UserAction(
-            user=json_dict.get("user_id"),
+            user=user_id,
             unique_id=json_dict.get("unique_id"),
             timestamp=json_dict.get("timestamp"),
             source=source1,

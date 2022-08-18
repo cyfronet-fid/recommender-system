@@ -7,6 +7,7 @@ from mongoengine import (
     FloatField,
     BooleanField,
     IntField,
+    StringField,
 )
 
 from .category import Category
@@ -16,6 +17,7 @@ from .service import Service
 
 
 class User(MarketplaceDocument):
+    aai_uid = StringField()
     scientific_domains = ListField(ReferenceField(ScientificDomain))
     categories = ListField(ReferenceField(Category))
     accessed_services = ListField(ReferenceField(Service))

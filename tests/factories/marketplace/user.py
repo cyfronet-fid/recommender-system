@@ -1,6 +1,6 @@
 # pylint: disable-all
 
-from factory import LazyFunction
+from factory import LazyFunction, Sequence
 from factory.random import reseed_random, random
 from faker import Factory as FakerFactory
 
@@ -17,6 +17,8 @@ reseed_random("test-seed")
 class UserFactory(MarketplaceDocument):
     class Meta:
         model = User
+
+    aai_uid = Sequence(lambda n: f"abc{n}@egi.eu")
 
     categories = LazyFunction(
         lambda: CategoryFactory.create_batch(random.randint(2, 5))
