@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pandas warnings in the AE pipline [@Michal-Kolomanski]
 - db commands divided into db and seed commands [@Michal-Kolomanski]
 - seed commands only available in development and testing env [@Michal-Kolomanski]
+- Add NLP-main branch
 ### Fixed
 ### Removed
 
