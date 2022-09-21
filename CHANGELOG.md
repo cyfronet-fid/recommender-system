@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 ### Changed
 - /recommendations endpoint for the purposes of the User Dashboard [@Michal-Kolomanski]
+- rename elastic_services to candidates
 ### Fixed
 ### Removed
 
