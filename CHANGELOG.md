@@ -6,8 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- Implement basic recommendations explanations handling [@JanKapala]
 ### Changed
-- /recommendations endpoint for the purposes of the User Dashboard [@Michal-Kolomanski]
+- `/recommendations` endpoint for the purposes of the User Dashboard [@Michal-Kolomanski]
+- Rename elastic_services to candidates [@JanKapala]
+- Adapt Inference Components to return probability scores [@JanKapala]
+- **BREAKING CHANGE**: Extend `/recommendations` endpoint response with additional fields [@JanKapala]
 ### Fixed
 ### Removed
 

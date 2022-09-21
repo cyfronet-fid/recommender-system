@@ -123,8 +123,8 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         for _ in range(self.time_measurement_samples):
             start = time()
             example_user = random.choice(sarses).state.user
-            elastic_services = [service.id for service in Service.objects]
-            example_state = create_state(example_user, elastic_services, SearchData())
+            candidates = [service.id for service in Service.objects]
+            example_state = create_state(example_user, candidates, SearchData())
             self._get_recommendation(actor, example_state)
             end = time()
             recommendation_durations.append(end - start)
@@ -135,7 +135,7 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         encoded_state = self.state_encoder([state])
         weights = actor(encoded_state).squeeze(0)
         mask = encoded_state[-1][0]
-        chosen_services = self.service_selector(weights, mask)
+        chosen_services, _ = self.service_selector(weights, mask)
 
         return chosen_services
 

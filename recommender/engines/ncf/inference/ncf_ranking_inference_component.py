@@ -5,6 +5,7 @@
 
 from typing import List, Tuple
 
+from recommender.engines.explanations import Explanation
 from recommender.engines.ncf.inference.ncf_inference_component import (
     NCFInferenceComponent,
 )
@@ -16,27 +17,33 @@ logger = get_logger(__name__)
 
 class NCFRankingInferenceComponent(NCFInferenceComponent):
     """
-    Recommender engine that provides logged-in users with personalized recommendations in a given context. It ranks all services.
+    Recommender engine that provides logged-in users with personalized
+     recommendations in a given context. It ranks all services.
     """
 
     engine_name = "NCFRanking"
 
     def _generate_recommendations(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
-    ) -> List[int]:
+        self, user: User, candidates: Tuple[int], search_data: SearchData
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """Generate services ranking for logged user.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
         Returns:
-            services_ids_ranking: Ranked list of services IDs.
+            recommended_services_ids: List of recommended services ids.
+            scores: List of ranking scores for all recommended services.
+            explanations: List of explanations for all recommended services.
         """
 
-        ranking = self._get_ranking(user, elastic_services, search_data)
-        services_ids_ranking = [pair[1] for pair in ranking]
+        all_recommended_services_ids, all_scores = self._get_ranking(
+            user, candidates, search_data
+        )
+        self.K = len(all_recommended_services_ids)
+        explanations = self._generate_explanations()
 
-        return services_ids_ranking
+        return all_recommended_services_ids, all_scores, explanations

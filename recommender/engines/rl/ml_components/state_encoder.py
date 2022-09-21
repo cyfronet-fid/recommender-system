@@ -45,7 +45,7 @@ class StateEncoder:
                 -> services_one_hot_tensors
                 --(service_embedder)--> services_dense_tensors
                 --(concat)--> services_histories_tensor
-            - state.elastic_services
+            - state.candidates
                 --(service encoder)--> service_tensor (mask)
 
 

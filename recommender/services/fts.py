@@ -44,16 +44,16 @@ def filter_services(search_data: SearchData) -> QuerySet:
 
 
 def retrieve_services_for_recommendation(
-    elastic_services: Tuple[int], accessed_services: Optional[Iterable] = None
+    candidates: Tuple[int], accessed_services: Optional[Iterable] = None
 ) -> QuerySet:
     """
     Selecting candidates for recommendation
 
     Args:
-        elastic_services: Marketplace's context
+        candidates: Marketplace's context
         accessed_services: Services that user accessed
     """
-    q = list(elastic_services)
+    q = list(candidates)
     q = filter_available_and_recommendable_services(q)
     q = q(id__nin=[s.id for s in accessed_services]) if accessed_services else q
     return q

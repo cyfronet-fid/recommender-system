@@ -38,7 +38,7 @@ class ServiceEncoder:
         states_len = len(states)
 
         if batch_size != states_len:
-            # Each state has elastic_services
+            # Each state has candidates
             raise SizeOfUsersAndElasticServicesError
 
         mask = torch.zeros(batch_size, self.I)
@@ -54,14 +54,14 @@ class ServiceEncoder:
                 # This avoids mongodb ValidationError
                 state.search_data = None
 
-            # Just reading the tuple of references (which is the elastic_services)
+            # Just reading the tuple of references (which is the candidates)
             # causes the IDs to be replaced with entire service objects in all referenced tuple.
             # To avoid memory leak:
             # - state has 3 references - direct manipulation on state object will result in memory leak
             #   to avoid that, there is deepcopy made
             state = deepcopy(state)
-            elastic_services = state.elastic_services
-            services_context = self.get_id_from_services(elastic_services)
+            candidates = state.candidates
+            services_context = self.get_id_from_services(candidates)
 
             ordered_services = get_ordered_services(users[i])
 

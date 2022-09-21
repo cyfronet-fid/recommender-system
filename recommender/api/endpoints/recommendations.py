@@ -30,11 +30,22 @@ class Recommendation(Resource):
 
         json_dict = service_ctx(request.get_json())
         engine, engine_name = load_engine(json_dict)
+        panel_id = json_dict.get("panel_id")
         try:
-            services_ids = engine(json_dict)
+            services_ids, scores, explanations = engine(json_dict)
+            explanations_long, explanations_short = [
+                list(t) for t in list(zip(*[(e.long, e.short) for e in explanations]))
+            ]
             deserialize_recommendation(json_dict, services_ids, engine_name)
 
-            response = {"recommendations": services_ids}
+            response = {
+                "panel_id": panel_id,
+                "recommendations": services_ids,
+                "explanations": explanations_long,
+                "explanations_short": explanations_short,
+                "scores": scores,
+                "engine_version": json_dict.get("engine_version"),
+            }
 
         except InsufficientRecommendationSpaceError:
             logger.error(InsufficientRecommendationSpaceError().message())

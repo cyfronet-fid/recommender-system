@@ -5,6 +5,7 @@ import random
 from typing import List, Tuple, Dict, Any
 
 from recommender.engines.base.base_inference_component import BaseInferenceComponent
+from recommender.engines.explanations import Explanation
 from recommender.services.fts import retrieve_services_for_recommendation
 
 
@@ -18,8 +19,15 @@ class RandomInferenceComponent(BaseInferenceComponent):
     """
 
     engine_name = "random"
+    default_explanation = Explanation(
+        long="This service has been selected at random however taking into"
+        " account the search criteria",
+        short="This service has been selected randomly.",
+    )
 
-    def __call__(self, context: Dict[str, Any]) -> List[int]:
+    def __call__(
+        self, context: Dict[str, Any]
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """
         Get random recommendations in a given context.
 
@@ -29,25 +37,30 @@ class RandomInferenceComponent(BaseInferenceComponent):
         Returns:
             Tuple of recommended services ids.
         """
-        elastic_services, _ = self._get_recommendation_context(context)
+        candidates, _ = self._get_recommendation_context(context)
 
-        return self._generate_recommendations(elastic_services)
+        return self._generate_recommendations(candidates)
 
-    def _generate_recommendations(self, elastic_services: Tuple[int]) -> List[int]:
+    def _generate_recommendations(
+        self, candidates: Tuple[int]
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """
         Generate recommendations.
 
         Args:
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
 
         Returns:
             recommended_services_ids: List of recommended services ids.
         """
-        candidate_services = list(
-            retrieve_services_for_recommendation(elastic_services)
-        )
+        candidate_services = list(retrieve_services_for_recommendation(candidates))
 
         recommended_services = random.sample(list(candidate_services), self.K)
         recommended_services_ids = [s.id for s in recommended_services]
 
-        return recommended_services_ids
+        scores = self.K * [
+            1 / len(candidate_services)
+        ]  # Services have been sampled uniformly
+        explanations = self._generate_explanations()
+
+        return recommended_services_ids, scores, explanations

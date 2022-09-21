@@ -101,25 +101,23 @@ def get_service_indices(index_id_map: pd.DataFrame, ids: List[int]) -> List[int]
     return indices
 
 
-def create_state(
-    user: User, elastic_services: Tuple[int], search_data: SearchData
-) -> State:
+def create_state(user: User, candidates: Tuple[int], search_data: SearchData) -> State:
     """
     Get needed information from context and create state.
 
     Args:
         user: MongoEngine User object.
-        elastic_services: Services search context from the Marketplace
+        candidates: Services search context from the Marketplace
         search_data: SearchData object.
 
     Returns:
-        state: State containing information about user, elastic_services and search_data
+        state: State containing information about user, candidates and search_data
     """
 
     state = State(
         user=user,
         services_history=generate_services_history(user),
-        elastic_services=elastic_services,
+        candidates=candidates,
         search_data=search_data,
     )
 

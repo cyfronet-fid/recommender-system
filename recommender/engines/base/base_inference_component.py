@@ -4,6 +4,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Tuple
 
+from recommender.engines.explanations import Explanation
 from recommender.engines.panel_id_to_services_number_mapping import PANEL_ID_TO_K
 from recommender.errors import (
     InvalidRecommendationPanelIDError,
@@ -20,6 +21,7 @@ class BaseInferenceComponent(ABC):
     """
 
     engine_name = None
+    default_explanation: Explanation = None
 
     def __init__(self, K: int) -> None:
         self.K = K
@@ -41,13 +43,27 @@ class BaseInferenceComponent(ABC):
     def _get_recommendation_context(
         self, context: Dict[str, Any]
     ) -> [Tuple[int], SearchData]:
-        elastic_services = tuple(context.get("elastic_services") or ())
+        candidates = tuple(context.get("candidates") or ())
         search_data = context.get("search_data")
 
-        if len(elastic_services) < self.K:
+        if len(candidates) < self.K:
             raise InsufficientRecommendationSpaceError()
 
-        return elastic_services, search_data
+        return candidates, search_data
+
+    def _generate_explanations(self):
+        """
+        Explanation for each service recommendation provided by the given engine is the same, so it can be generated
+         as a batch.
+
+        Args:
+            n: The number of recommended services.
+
+        Returns:
+            explanations: The list of explanations that length matches the recommended services number.
+        """
+
+        return self.K * [self.default_explanation]
 
 
 class MLEngineInferenceComponent(BaseInferenceComponent):
@@ -60,7 +76,9 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
         super().__init__(K)
         self._load_models()
 
-    def __call__(self, context: Dict[str, Any]) -> List[int]:
+    def __call__(
+        self, context: Dict[str, Any]
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """
         Get recommendations for logged-in user.
 
@@ -68,13 +86,19 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
             context: json dict from the /recommendations endpoint request.
 
         Returns:
-            List of recommended services ids.
+            services_ids: List of recommended services ids.
+            scores: List of scores in the [0;1] range for each recommended service
+            explanations: List of explanations for each recommended service
         """
 
         user = self._get_user(context)
-        elastic_services, search_data = self._get_recommendation_context(context)
+        candidates, search_data = self._get_recommendation_context(context)
 
-        return self._generate_recommendations(user, elastic_services, search_data)
+        services_ids, scores, explanations = self._generate_recommendations(
+            user, candidates, search_data
+        )
+
+        return services_ids, scores, explanations
 
     @abstractmethod
     def _load_models(self) -> None:
@@ -109,14 +133,14 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
 
     @abstractmethod
     def _generate_recommendations(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
-    ) -> List[int]:
+        self, user: User, candidates: Tuple[int], search_data: SearchData
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """
         Generate recommendation for logged-in user.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 

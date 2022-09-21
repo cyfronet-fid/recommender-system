@@ -172,12 +172,12 @@ class RangeOfCommonServicesError(Exception):
 
 class SizeOfUsersAndElasticServicesError(Exception):
     def message(self):
-        return "Length of users and elastic_services is not equal"
+        return "Length of users and candidates is not equal"
 
 
 class ServicesContextNotProvidedError(Exception):
     def message(self):
-        return "Elastic_services not provided outside the context of the User Dashboard"
+        return "Candidates not provided outside the context of the User Dashboard"
 
 
 class UserCannotBeIdentified(Exception):
