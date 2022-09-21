@@ -41,13 +41,13 @@ class BaseInferenceComponent(ABC):
     def _get_recommendation_context(
         self, context: Dict[str, Any]
     ) -> [Tuple[int], SearchData]:
-        elastic_services = tuple(context.get("elastic_services") or ())
+        candidates = tuple(context.get("candidates") or ())
         search_data = context.get("search_data")
 
-        if len(elastic_services) < self.K:
+        if len(candidates) < self.K:
             raise InsufficientRecommendationSpaceError()
 
-        return elastic_services, search_data
+        return candidates, search_data
 
 
 class MLEngineInferenceComponent(BaseInferenceComponent):
@@ -72,9 +72,9 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
         """
 
         user = self._get_user(context)
-        elastic_services, search_data = self._get_recommendation_context(context)
+        candidates, search_data = self._get_recommendation_context(context)
 
-        return self._generate_recommendations(user, elastic_services, search_data)
+        return self._generate_recommendations(user, candidates, search_data)
 
     @abstractmethod
     def _load_models(self) -> None:
@@ -109,14 +109,14 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
 
     @abstractmethod
     def _generate_recommendations(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+        self, user: User, candidates: Tuple[int], search_data: SearchData
     ) -> List[int]:
         """
         Generate recommendation for logged-in user.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 

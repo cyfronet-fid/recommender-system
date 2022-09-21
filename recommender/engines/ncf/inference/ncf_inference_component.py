@@ -78,13 +78,13 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
         return users_ids, users_tensor, services_ids, services_tensor
 
     def _get_ranking(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+        self, user: User, candidates: Tuple[int], search_data: SearchData
     ) -> List[Tuple[float, int]]:
         """Generate services ranking.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
@@ -93,9 +93,7 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
         """
 
         candidate_services = list(
-            retrieve_services_for_recommendation(
-                elastic_services, user.accessed_services
-            )
+            retrieve_services_for_recommendation(candidates, user.accessed_services)
         )
         if len(candidate_services) < self.K:
             raise InsufficientRecommendationSpaceError()
@@ -119,13 +117,13 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
         return ranking
 
     def _generate_recommendations(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+        self, user: User, candidates: Tuple[int], search_data: SearchData
     ) -> List[int]:
         """Generate recommendation for logged user.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
@@ -133,7 +131,7 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
             recommended_services_ids: List of recommended services ids.
         """
 
-        top_k = self._get_ranking(user, elastic_services, search_data)[: self.K]
+        top_k = self._get_ranking(user, candidates, search_data)[: self.K]
         recommended_services_ids = [pair[1] for pair in top_k]
 
         return recommended_services_ids

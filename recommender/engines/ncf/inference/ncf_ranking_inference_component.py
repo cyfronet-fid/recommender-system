@@ -22,13 +22,13 @@ class NCFRankingInferenceComponent(NCFInferenceComponent):
     engine_name = "NCFRanking"
 
     def _generate_recommendations(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+        self, user: User, candidates: Tuple[int], search_data: SearchData
     ) -> List[int]:
         """Generate services ranking for logged user.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
@@ -36,7 +36,7 @@ class NCFRankingInferenceComponent(NCFInferenceComponent):
             services_ids_ranking: Ranked list of services IDs.
         """
 
-        ranking = self._get_ranking(user, elastic_services, search_data)
+        ranking = self._get_ranking(user, candidates, search_data)
         services_ids_ranking = [pair[1] for pair in ranking]
 
         return services_ids_ranking

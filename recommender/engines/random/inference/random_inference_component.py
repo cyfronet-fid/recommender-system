@@ -29,23 +29,21 @@ class RandomInferenceComponent(BaseInferenceComponent):
         Returns:
             Tuple of recommended services ids.
         """
-        elastic_services, _ = self._get_recommendation_context(context)
+        candidates, _ = self._get_recommendation_context(context)
 
-        return self._generate_recommendations(elastic_services)
+        return self._generate_recommendations(candidates)
 
-    def _generate_recommendations(self, elastic_services: Tuple[int]) -> List[int]:
+    def _generate_recommendations(self, candidates: Tuple[int]) -> List[int]:
         """
         Generate recommendations.
 
         Args:
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
 
         Returns:
             recommended_services_ids: List of recommended services ids.
         """
-        candidate_services = list(
-            retrieve_services_for_recommendation(elastic_services)
-        )
+        candidate_services = list(retrieve_services_for_recommendation(candidates))
 
         recommended_services = random.sample(list(candidate_services), self.K)
         recommended_services_ids = [s.id for s in recommended_services]

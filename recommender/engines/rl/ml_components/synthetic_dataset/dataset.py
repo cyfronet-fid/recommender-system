@@ -115,7 +115,7 @@ def generate_synthetic_sarses(
         state = State(
             user=user,
             services_history=[],
-            elastic_services=Service.objects.distinct("id"),
+            candidates=Service.objects.distinct("id"),
             search_data=SearchData().save(),
             synthetic=True,
         ).save()
@@ -156,7 +156,7 @@ def generate_synthetic_sarses(
             next_state = State(
                 user=user,
                 services_history=engaged_services,
-                elastic_services=Service.objects.distinct("id"),
+                candidates=Service.objects.distinct("id"),
                 search_data=SearchData().save(),
                 synthetic=True,
             ).save()

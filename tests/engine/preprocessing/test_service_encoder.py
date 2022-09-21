@@ -48,12 +48,12 @@ def services(mongo, categories, scientific_domains):
 def states(services):
     return [
         StateFactory(
-            elastic_services=[services[0], services[1], services[-1]],
+            candidates=[services[0], services[1], services[-1]],
             search_data=SearchDataFactory(q=None),
             non_empty_history=True,
         ),
         StateFactory(
-            elastic_services=[services[0], services[1], services[-1]],
+            candidates=[services[0], services[1], services[-1]],
             search_data=SearchDataFactory(q=None),
             non_empty_history=True,
         ),
@@ -80,7 +80,7 @@ def test_service_encoder_init(encoder, services, users):
 
 def test_service_encoder_one_state_one_user(encoder):
     state = StateFactory(
-        elastic_services=[2, 8, 4, 6, 11, 1],
+        candidates=[2, 8, 4, 6, 11, 1],
         search_data=SearchDataFactory(q=None),
         non_empty_history=True,
     )
@@ -100,7 +100,7 @@ def test_service_encoder_multiple_states_users(encoder, states, users):
 
 def test_service_encoder_exception(encoder):
     state = StateFactory(
-        elastic_services=[2, 8, 4, 6, 11, 1],
+        candidates=[2, 8, 4, 6, 11, 1],
         search_data=SearchDataFactory(q=None),
         non_empty_history=True,
     )
@@ -115,12 +115,12 @@ def test_service_encoder_exception(encoder):
 
     state = [
         StateFactory(
-            elastic_services=[2, 8, 4, 6, 11, 1],
+            candidates=[2, 8, 4, 6, 11, 1],
             search_data=SearchDataFactory(q=None),
             non_empty_history=True,
         ),
         StateFactory(
-            elastic_services=[2, 8, 1],
+            candidates=[2, 8, 1],
             search_data=SearchDataFactory(q=None),
             non_empty_history=True,
         ),

@@ -52,7 +52,7 @@ def test_ncf_inference_component(
         K = 2
         NCFInferenceComponent(K)
 
-    elastic_services = [service.id for service in Service.objects]
+    candidates = [service.id for service in Service.objects]
 
     # With-model case
     ncf_model.save(version=NEURAL_CF)
@@ -66,13 +66,13 @@ def test_ncf_inference_component(
         context = {
             "user_id": {
                 "panel_id": panel_id_version,
-                "elastic_services": elastic_services,
+                "candidates": candidates,
                 "search_data": {},
                 "user_id": user.id,
             },
             "aai_uid": {
                 "panel_id": panel_id_version,
-                "elastic_services": elastic_services,
+                "candidates": candidates,
                 "search_data": {},
                 "aai_uid": user.aai_uid,
             },
@@ -87,7 +87,7 @@ def test_ncf_inference_component(
         assert isinstance(services_ids_1, list)
         assert len(services_ids_1) == PANEL_ID_TO_K.get(context["panel_id"])
         assert all([isinstance(service_id, int) for service_id in services_ids_1])
-        assert all(service in elastic_services for service in services_ids_1)
+        assert all(service in candidates for service in services_ids_1)
 
         services_ids_2 = ncf_inference_component(context)
         assert services_ids_1 == services_ids_2
@@ -100,11 +100,11 @@ def test_user_cannot_be_identified(
     mongo, generate_users_and_services, ncf_pipeline_config, mock_ncf_pipeline_exec
 ):
     ncf_inference_component = NCFInferenceComponent(3)
-    elastic_services = [service.id for service in Service.objects]
+    candidates = [service.id for service in Service.objects]
 
     context = {
         "panel_id": "v1",
-        "elastic_services": elastic_services,
+        "candidates": candidates,
         "search_data": {},
     }
 
@@ -115,7 +115,7 @@ def test_user_cannot_be_identified(
 def test_ncf_ranking_inference_component_returns_full_ranking(
     mongo, generate_users_and_services, ncf_pipeline_config, mock_ncf_pipeline_exec
 ):
-    elastic_services = [service.id for service in Service.objects]
+    candidates = [service.id for service in Service.objects]
 
     for panel_id_version, K in list(PANEL_ID_TO_K.items()):
         ncf_ranking_inference_component = NCFRankingInferenceComponent(K)
@@ -123,7 +123,7 @@ def test_ncf_ranking_inference_component_returns_full_ranking(
         user = random.choice(list(User.objects))
         context = {
             "panel_id": panel_id_version,
-            "elastic_services": elastic_services,
+            "candidates": candidates,
             "search_data": {},
             "user_id": user.id,
         }
@@ -135,7 +135,7 @@ def test_ncf_ranking_inference_component_returns_full_ranking(
         not_ranked_services_ids = [
             s.id
             for s in retrieve_services_for_recommendation(
-                elastic_services, user.accessed_services
+                candidates, user.accessed_services
             )
         ]
         assert set(not_ranked_services_ids) == set(ranked_services_ids)

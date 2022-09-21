@@ -31,16 +31,16 @@ def test_get_all_collection_ids(mongo, generate_users_and_services):
 def test_service_ctx(mongo, generate_users_and_services, recommendation_data):
     """
     Check:
-    1) elastic_services provided, page_id different from /dashboard
-    2) elastic_services NOT provided, page_id different from /dashboard
-    3) elastic_services NOT provided, page_id == /dashboard
+    1) candidates provided, page_id different from /dashboard
+    2) candidates NOT provided, page_id different from /dashboard
+    3) candidates NOT provided, page_id == /dashboard
     """
     # 1)
     returned_dict = service_ctx(recommendation_data)
     assert returned_dict == recommendation_data
 
     # 2)
-    del recommendation_data["elastic_services"]
+    del recommendation_data["candidates"]
     with pytest.raises(ServicesContextNotProvidedError):
         service_ctx(recommendation_data)
 
@@ -51,8 +51,6 @@ def test_service_ctx(mongo, generate_users_and_services, recommendation_data):
     args = users_services_args()
     services_num = args["common_services_num"] + args["unordered_services_num"]
 
-    assert returned_dict.get("elastic_services")
-    assert len(returned_dict["elastic_services"]) == services_num
-    assert all(
-        [type(service_id) == int for service_id in returned_dict["elastic_services"]]
-    )
+    assert returned_dict.get("candidates")
+    assert len(returned_dict["candidates"]) == services_num
+    assert all([type(service_id) == int for service_id in returned_dict["candidates"]])

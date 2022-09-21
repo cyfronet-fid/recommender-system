@@ -48,13 +48,13 @@ class RLInferenceComponent(MLEngineInferenceComponent):
         self.service_selector = ServiceSelector(self.service_embedder)
 
     def _generate_recommendations(
-        self, user: User, elastic_services: Tuple[int], search_data: SearchData
+        self, user: User, candidates: Tuple[int], search_data: SearchData
     ) -> Tuple[int]:
         """Generate recommendation for logged user.
 
         Args:
             user: user for whom recommendation will be generated.
-            elastic_services: item space from the Marketplace.
+            candidates: item space from the Marketplace.
             search_data: search phrase and filters information for narrowing
              down an item space.
 
@@ -62,7 +62,7 @@ class RLInferenceComponent(MLEngineInferenceComponent):
             service_ids: List of recommended services ids.
         """
 
-        state = create_state(user, elastic_services, search_data)
+        state = create_state(user, candidates, search_data)
         state_tensors = self.state_encoder([state])
         weights_tensor = self._get_weights(state_tensors)
         services_mask = self._get_service_mask(state_tensors)

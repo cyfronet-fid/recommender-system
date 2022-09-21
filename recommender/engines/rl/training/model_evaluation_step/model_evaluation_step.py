@@ -123,8 +123,8 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         for _ in range(self.time_measurement_samples):
             start = time()
             example_user = random.choice(sarses).state.user
-            elastic_services = [service.id for service in Service.objects]
-            example_state = create_state(example_user, elastic_services, SearchData())
+            candidates = [service.id for service in Service.objects]
+            example_state = create_state(example_user, candidates, SearchData())
             self._get_recommendation(actor, example_state)
             end = time()
             recommendation_durations.append(end - start)

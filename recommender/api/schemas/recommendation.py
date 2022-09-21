@@ -100,7 +100,7 @@ recommendation_context = api.model(
             description="Version of the recommendation engine",
             example="NCF",
         ),
-        "elastic_services": fields.List(
+        "candidates": fields.List(
             fields.Integer(
                 title="Service ID", description="The unique identifier of the service"
             ),
