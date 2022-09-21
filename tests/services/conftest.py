@@ -22,6 +22,7 @@ def recommendation_json_dict():
         "unique_id": "5642c351-80fe-44cf-b606-304f2f338122",
         "timestamp": "2021-03-25T12:43:53.118Z",
         "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
+        "client_id": "marketplace",
         "page_id": "some_page_identifier",
         "panel_id": "v1",
         "services": [1, 2, 3],
@@ -46,6 +47,7 @@ def user_action_json_dict():
     return {
         "user_id": 1,
         "unique_id": "5642c351-80fe-44cf-b606-304f2f338122",
+        "client_id": "marketplace",
         "timestamp": "2021-03-25T14:10:42.368Z",
         "source": {
             "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",

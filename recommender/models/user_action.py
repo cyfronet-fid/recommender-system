@@ -7,6 +7,7 @@ from mongoengine import (
     EmbeddedDocumentField,
     UUIDField,
     BooleanField,
+    StringField,
 )
 
 from .action import Action
@@ -19,6 +20,7 @@ class UserAction(Document):
     user = ReferenceField(User, blank=True)
     unique_id = UUIDField()
     timestamp = DateTimeField()
+    client_id = StringField(blank=True)
     source = EmbeddedDocumentField(Source)
     target = EmbeddedDocumentField(Target)
     action = EmbeddedDocumentField(Action)

@@ -101,6 +101,34 @@ def recommendation_data():
         "unique_id": "5642c351-80fe-44cf-b606-304f2f338122",
         "timestamp": "2021-03-18T18:49:55.006Z",
         "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
+        "client_id": "marketplace",
+        "page_id": "some_page_identifier",
+        "panel_id": "v1",
+        "engine_version": "NCF",
+        "elastic_services": [1, 2, 3],
+        "search_data": {
+            "q": "Cloud GPU",
+            "categories": [1],
+            "geographical_availabilities": ["PL"],
+            "order_type": "open_access",
+            "providers": [1],
+            "rating": "5",
+            "related_platforms": [1],
+            "scientific_domains": [1],
+            "sort": "_score",
+            "target_users": [1],
+        },
+    }
+
+
+@pytest.fixture
+def recommendation_data_with_aai_uid():
+    return {
+        "aai_uid": "abc@egi.eu",
+        "unique_id": "5642c351-80fe-44cf-b606-304f2f338122",
+        "timestamp": "2021-03-18T18:49:55.006Z",
+        "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
+        "client_id": "user_dashboard",
         "page_id": "some_page_identifier",
         "panel_id": "v1",
         "engine_version": "NCF",

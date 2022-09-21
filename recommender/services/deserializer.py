@@ -42,6 +42,7 @@ class Deserializer:
         recommendation = Recommendation(
             user=json_dict.get("user_id"),
             unique_id=json_dict.get("unique_id"),
+            client_id=json_dict.get("client_id"),
             timestamp=json_dict.get("timestamp"),
             visit_id=json_dict.get("visit_id"),
             page_id=json_dict.get("page_id"),
@@ -88,6 +89,7 @@ class Deserializer:
             user=user_id,
             unique_id=json_dict.get("unique_id"),
             timestamp=json_dict.get("timestamp"),
+            client_id=json_dict.get("client_id"),
             source=source1,
             target=target,
             action=action,
