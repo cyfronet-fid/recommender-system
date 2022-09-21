@@ -10,3 +10,12 @@ class NullableString(fields.String):
 
     __schema_type__ = ["string", "null"]
     __schema_example__ = "nullable string"
+
+
+client_id_field = fields.String(
+    required=False,
+    title="Client id",
+    description="Client identification which made the recommendation request",
+    example="marketplace",
+    enum=["marketplace", "search_service", "user_dashboard", "undefined"],
+)

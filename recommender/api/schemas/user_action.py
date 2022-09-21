@@ -4,7 +4,7 @@
 
 from flask_restx import fields
 
-from .common import api, NullableString
+from .common import api, NullableString, client_id_field
 
 root = api.model(
     "Root info",
@@ -130,6 +130,7 @@ user_action = api.model(
             description="The unique identifier of the not logged user.",
             example="5642c351-80fe-44cf-b606-304f2f338122",
         ),
+        "client_id": client_id_field,
         "timestamp": fields.DateTime(
             dt_format="iso8601",
             required=True,

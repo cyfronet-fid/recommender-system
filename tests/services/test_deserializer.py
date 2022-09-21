@@ -54,6 +54,8 @@ def test_recommendation_deserialization(mongo, recommendation_json_dict):
         "target_users"
     )
 
+    assert r.client_id == "marketplace"
+
 
 def test_user_action_deserialization_with_aai_uid(
     mongo, user_action_json_dict_with_aai_uid
@@ -97,6 +99,8 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
     assert ua.action.type == user_action_json_dict.get("action").get("type")
     assert ua.action.text == user_action_json_dict.get("action").get("text")
     assert ua.action.order == user_action_json_dict.get("action").get("order")
+
+    assert ua.client_id == user_action_json_dict.get("client_id")
 
     json_dict_without_root = deepcopy(user_action_json_dict)
     json_dict_without_root.get("source").pop("root")
