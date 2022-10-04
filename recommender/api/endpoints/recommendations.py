@@ -30,11 +30,24 @@ class Recommendation(Resource):
 
         json_dict = service_ctx(request.get_json())
         engine, engine_name = load_engine(json_dict)
+        panel_id = json_dict.get("panel_id")
         try:
-            services_ids = engine(json_dict)
+            services_ids, scores, explanations = engine(json_dict)
+            explanations, explanations_short = [
+                list(t) for t in list(zip(*[(e.long, e.short) for e in explanations]))
+            ]
             deserialize_recommendation(json_dict, services_ids, engine_name)
 
-            response = {"recommendations": services_ids}
+            response = {
+                "panel_name": panel_id,
+                "recommendations": services_ids,
+                "explanations": explanations,
+                "explanations_short": explanations_short,
+                "score": scores,
+                # TODO: Beter name is "scores" as it's a list - not a single
+                #  value, so internally we will use scores. Can we consider
+                #  to change the external API from "score" to "scores" too?
+            }
 
         except InsufficientRecommendationSpaceError:
             logger.error(InsufficientRecommendationSpaceError().message())

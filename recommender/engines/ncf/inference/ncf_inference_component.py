@@ -8,6 +8,7 @@ from typing import List, Tuple
 import torch
 
 from recommender.engines.base.base_inference_component import MLEngineInferenceComponent
+from recommender.engines.explanations import Explanation
 from recommender.engines.ncf.ml_components.neural_collaborative_filtering import (
     NeuralCollaborativeFilteringModel,
     NEURAL_CF,
@@ -29,6 +30,15 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
     """
 
     engine_name = "NCF"
+    default_explanation = Explanation(
+        long="This service has been selected based on the users/services matrix that contains information about"
+        " historical orders of services by users. The technique called Neural Collaborative Filtering utilises"
+        " neural networks to decompose users/services matrix into features of users and services that in turn are"
+        " used to make an educated guess which services could be ordered by what user in the future. The most"
+        " promising ones are recommended.",
+        short="This service has been selected based on historical orders of the given user and similar orders of"
+        " similar users. Utilised choice technique: NCF.",
+    )
 
     def __init__(self, K: int) -> None:
         self.neural_cf_model = None
@@ -79,7 +89,7 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
 
     def _get_ranking(
         self, user: User, candidates: Tuple[int], search_data: SearchData
-    ) -> List[Tuple[float, int]]:
+    ) -> Tuple[List[int], List[float]]:
         """Generate services ranking.
 
         Args:
@@ -114,11 +124,13 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
             list(zip(matching_probs, candidate_services_ids)), reverse=True
         )
 
-        return ranking
+        scores, recommended_services_ids = [list(t) for t in list(zip(*ranking))]
+
+        return recommended_services_ids, scores
 
     def _generate_recommendations(
         self, user: User, candidates: Tuple[int], search_data: SearchData
-    ) -> List[int]:
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """Generate recommendation for logged user.
 
         Args:
@@ -129,9 +141,13 @@ class NCFInferenceComponent(MLEngineInferenceComponent):
 
         Returns:
             recommended_services_ids: List of recommended services ids.
+            scores: List of ranking scores for all recommended services.
+            explanations: List of explanations for all recommended services.
         """
 
-        top_k = self._get_ranking(user, candidates, search_data)[: self.K]
-        recommended_services_ids = [pair[1] for pair in top_k]
+        recommended_services_ids, scores = tuple(
+            l[: self.K] for l in self._get_ranking(user, candidates, search_data)
+        )
+        explanations = self._generate_explanations()
 
-        return recommended_services_ids
+        return recommended_services_ids, scores, explanations

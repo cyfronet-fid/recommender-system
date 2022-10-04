@@ -1,6 +1,6 @@
 # pylint: disable=missing-module-docstring, invalid-name, no-member, too-few-public-methods
 
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 import torch.nn.functional as F
@@ -42,7 +42,7 @@ class ServiceSelector:
         self,
         weights: torch.Tensor,
         mask: torch.Tensor,
-    ) -> Tuple[int]:
+    ) -> Tuple[List[int], List[float]]:
         """
         Based on weights_tensor, user and search_data, it selects services for
          recommendation and returns them
@@ -53,7 +53,8 @@ class ServiceSelector:
                 - SE is a service content tensor embedding dim
 
         Returns:
-            The tuple of recommended services ids
+            recommended_services_ids: List of recommended services ids.
+            scores: List of ranking scores for all recommended services.
         """
 
         K = weights.shape[0]
@@ -63,18 +64,22 @@ class ServiceSelector:
 
         engagement_values = F.softmax(weights @ self.itemspace.T, dim=1)
 
-        recommended_indices = self._choose_recommended_indices(
+        recommended_indices, scores = self._choose_recommended_indices(
             engagement_values, mask, K
         )
 
-        return self.index_id_map.iloc[recommended_indices].id.values.tolist()
+        recommended_services_ids = self.index_id_map.iloc[
+            recommended_indices
+        ].id.values.tolist()
+
+        return recommended_services_ids, scores
 
     def _choose_recommended_indices(self, engagement_values, mask, K):
         masked_engagement_values = mask * engagement_values
         top_K_indices = torch.topk(masked_engagement_values, K).indices.numpy().tolist()
         indices = [top_K_indices[0][0]]
-
         for k in range(1, K):
             indices += [next(filter(lambda x: x not in indices, top_K_indices[k]))]
+        scores = [masked_engagement_values[k][indices[k]] for k in range(K)]
 
-        return indices
+        return indices, scores

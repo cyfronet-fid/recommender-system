@@ -1,7 +1,7 @@
 # pylint: disable=missing-module-docstring, missing-class-docstring, too-few-public-methods
 # pylint: disable=too-many-instance-attributes, line-too-long
 
-from typing import Tuple
+from typing import Tuple, List
 
 import torch
 
@@ -10,6 +10,7 @@ from recommender.engines.autoencoders.ml_components.embedder import (
     USER_EMBEDDER,
     SERVICE_EMBEDDER,
 )
+from recommender.engines.explanations import Explanation
 from recommender.engines.panel_id_to_services_number_mapping import K_TO_PANEL_ID
 from recommender.engines.rl.utils import create_state
 from recommender.engines.base.base_inference_component import MLEngineInferenceComponent
@@ -49,7 +50,7 @@ class RLInferenceComponent(MLEngineInferenceComponent):
 
     def _generate_recommendations(
         self, user: User, candidates: Tuple[int], search_data: SearchData
-    ) -> Tuple[int]:
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """Generate recommendation for logged user.
 
         Args:
@@ -66,8 +67,9 @@ class RLInferenceComponent(MLEngineInferenceComponent):
         state_tensors = self.state_encoder([state])
         weights_tensor = self._get_weights(state_tensors)
         services_mask = self._get_service_mask(state_tensors)
-        service_ids = self.service_selector(weights_tensor, services_mask)
-        return service_ids
+        service_ids, scores = self.service_selector(weights_tensor, services_mask)
+        explanations = self._generate_explanations()
+        return service_ids, scores, explanations
 
     @staticmethod
     def _get_service_mask(state_tensors):

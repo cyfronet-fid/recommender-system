@@ -5,6 +5,7 @@
 
 from typing import List, Tuple
 
+from recommender.engines.explanations import Explanation
 from recommender.engines.ncf.inference.ncf_inference_component import (
     NCFInferenceComponent,
 )
@@ -23,7 +24,7 @@ class NCFRankingInferenceComponent(NCFInferenceComponent):
 
     def _generate_recommendations(
         self, user: User, candidates: Tuple[int], search_data: SearchData
-    ) -> List[int]:
+    ) -> Tuple[List[int], List[float], List[Explanation]]:
         """Generate services ranking for logged user.
 
         Args:
@@ -33,10 +34,15 @@ class NCFRankingInferenceComponent(NCFInferenceComponent):
              down an item space.
 
         Returns:
-            services_ids_ranking: Ranked list of services IDs.
+            recommended_services_ids: List of recommended services ids.
+            scores: List of ranking scores for all recommended services.
+            explanations: List of explanations for all recommended services.
         """
 
-        ranking = self._get_ranking(user, candidates, search_data)
-        services_ids_ranking = [pair[1] for pair in ranking]
+        all_recommended_services_ids, all_scores = self._get_ranking(
+            user, candidates, search_data
+        )
+        self.K = len(all_recommended_services_ids)
+        explanations = self._generate_explanations()
 
-        return services_ids_ranking
+        return all_recommended_services_ids, all_scores, explanations
