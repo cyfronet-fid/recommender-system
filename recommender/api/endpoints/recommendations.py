@@ -33,7 +33,7 @@ class Recommendation(Resource):
         panel_id = json_dict.get("panel_id")
         try:
             services_ids, scores, explanations = engine(json_dict)
-            explanations, explanations_short = [
+            explanations_long, explanations_short = [
                 list(t) for t in list(zip(*[(e.long, e.short) for e in explanations]))
             ]
             deserialize_recommendation(json_dict, services_ids, engine_name)
@@ -41,7 +41,7 @@ class Recommendation(Resource):
             response = {
                 "panel_name": panel_id,
                 "recommendations": services_ids,
-                "explanations": explanations,
+                "explanations": explanations_long,
                 "explanations_short": explanations_short,
                 "score": scores,
                 # TODO: Beter name is "scores" as it's a list - not a single

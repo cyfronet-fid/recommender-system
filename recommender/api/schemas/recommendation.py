@@ -116,6 +116,12 @@ recommendation_context = api.model(
 recommendation = api.model(
     "Recommendations",
     {
+        "panel_name": fields.String(
+            required=True,
+            title="Root type",
+            description="The unique identifier of the recommender panel on the page",
+            example="v1",
+        ),
         "recommendations": fields.List(
             fields.Integer(
                 title="Service ID", description="The unique identifier of the service"
@@ -124,6 +130,45 @@ recommendation = api.model(
             title="Recommended services list",
             description="List of the recommended services' IDs",
             example=[1234, 2345, 3456],
-        )
+        ),
+        "explanations": fields.List(
+            fields.String(
+                title="Explanation",
+                description="Explanation of choice of the corresponding service",
+            ),
+            required=True,
+            title="Explanations list",
+            description="List of the recommended services explanations",
+            example=[
+                "some long explanation",
+                "some long explanation",
+                "some long explanation",
+            ],
+        ),
+        "explanations_short": fields.List(
+            fields.String(
+                title="Short explanation",
+                description="Short explanation of choice of the corresponding service",
+            ),
+            required=True,
+            title="Short explanations list",
+            description="List of the recommended services short explanations",
+            example=[
+                "some short explanation",
+                "some short explanation",
+                "some short explanation",
+            ],
+        ),
+        "score": fields.List(
+            fields.Float(
+                title="Service score",
+                description="Score of the corresponding service on the basis"
+                " of which the choice of recommendation has been made",
+            ),
+            required=True,
+            title="Recommended services scores list",
+            description="List of the recommended services scores",
+            example=[0.7, 0.2, 0.1],
+        ),
     },
 )

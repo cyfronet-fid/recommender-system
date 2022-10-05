@@ -135,7 +135,7 @@ class RLModelEvaluationStep(ModelEvaluationStep):
         encoded_state = self.state_encoder([state])
         weights = actor(encoded_state).squeeze(0)
         mask = encoded_state[-1][0]
-        chosen_services = self.service_selector(weights, mask)
+        chosen_services, _ = self.service_selector(weights, mask)
 
         return chosen_services
 

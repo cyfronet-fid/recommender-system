@@ -21,7 +21,7 @@ class BaseInferenceComponent(ABC):
     """
 
     engine_name = None
-    default_explanation = None
+    default_explanation: Explanation = None
 
     def __init__(self, K: int) -> None:
         self.K = K

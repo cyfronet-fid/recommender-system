@@ -51,10 +51,10 @@ def test_random_inference_component(mongo, generate_users_and_services, ver):
     ]
 
     for context in contexts:
-        services_ids_1 = inference_component(context)
+        services_ids_1, _, _ = inference_component(context)
         _check_proper(services_ids_1, candidates, ver)
 
-        services_ids_2 = inference_component(context)
+        services_ids_2, _, _ = inference_component(context)
         _check_proper(services_ids_2, candidates, ver)
         assert services_ids_1 != services_ids_2
 
@@ -81,7 +81,7 @@ def test_random_inference_component(mongo, generate_users_and_services, ver):
             with pytest.raises(InsufficientRecommendationSpaceError):
                 inference_component(context)
         else:
-            services_ids_1 = inference_component(context)
+            services_ids_1, _, _ = inference_component(context)
             _check_proper(services_ids_1, candidates, ver)
 
 

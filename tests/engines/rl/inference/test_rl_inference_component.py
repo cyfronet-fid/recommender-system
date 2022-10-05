@@ -38,14 +38,14 @@ def test_known_user(
         },
     }[user_id_type]
 
-    services_ids_1 = inference_component(context)
+    services_ids_1, _, _ = inference_component(context)
 
     assert isinstance(services_ids_1, list)
     assert len(services_ids_1) == PANEL_ID_TO_K.get(context["panel_id"])
     assert all([isinstance(service_id, int) for service_id in services_ids_1])
     assert all(service in candidates for service in services_ids_1)
 
-    services_ids_2 = inference_component(context)
+    services_ids_2, _, _ = inference_component(context)
     assert services_ids_1 == services_ids_2
 
 

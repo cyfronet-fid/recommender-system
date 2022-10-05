@@ -59,6 +59,6 @@ def test_services2weights(mocker, services, service_embeddings, index_id_map):
                 service_selector(
                     weights=weights,
                     mask=torch.ones(len(services)),
-                )
+                )[0]
                 == recommended_ids
             )

@@ -78,7 +78,7 @@ def test_ncf_inference_component(
             },
         }[user_id_type]
 
-        services_ids_1 = ncf_inference_component(context)
+        services_ids_1, _, _ = ncf_inference_component(context)
 
         assert isinstance(
             ncf_inference_component.neural_cf_model, NeuralCollaborativeFilteringModel
@@ -89,7 +89,7 @@ def test_ncf_inference_component(
         assert all([isinstance(service_id, int) for service_id in services_ids_1])
         assert all(service in candidates for service in services_ids_1)
 
-        services_ids_2 = ncf_inference_component(context)
+        services_ids_2, _, _ = ncf_inference_component(context)
         assert services_ids_1 == services_ids_2
 
     with pytest.raises(InvalidRecommendationPanelIDError):
@@ -128,7 +128,7 @@ def test_ncf_ranking_inference_component_returns_full_ranking(
             "user_id": user.id,
         }
 
-        ranked_services_ids = ncf_ranking_inference_component(context)
+        ranked_services_ids, _, _ = ncf_ranking_inference_component(context)
 
         assert isinstance(ranked_services_ids, list)
         assert all([isinstance(service_id, int) for service_id in ranked_services_ids])
