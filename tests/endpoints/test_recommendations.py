@@ -46,9 +46,10 @@ def test_recommendations(
         ]
 
         assert response.get_json() == {
-            "panel_name": recc_data["panel_id"],
+            "panel_id": recc_data["panel_id"],
             "recommendations": mock_recommended_services_ids,
             "explanations": mock_explanations_long,
             "explanations_short": mock_explanations_short,
-            "score": mock_scores,
+            "scores": mock_scores,
+            "engine_version": recc_data["engine_version"],
         }

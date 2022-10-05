@@ -17,7 +17,8 @@ logger = get_logger(__name__)
 
 class NCFRankingInferenceComponent(NCFInferenceComponent):
     """
-    Recommender engine that provides logged-in users with personalized recommendations in a given context. It ranks all services.
+    Recommender engine that provides logged-in users with personalized
+     recommendations in a given context. It ranks all services.
     """
 
     engine_name = "NCFRanking"

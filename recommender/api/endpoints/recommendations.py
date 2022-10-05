@@ -39,14 +39,12 @@ class Recommendation(Resource):
             deserialize_recommendation(json_dict, services_ids, engine_name)
 
             response = {
-                "panel_name": panel_id,
+                "panel_id": panel_id,
                 "recommendations": services_ids,
                 "explanations": explanations_long,
                 "explanations_short": explanations_short,
-                "score": scores,
-                # Beter name is "scores" as it's a list - not a single
-                # value, so internally we will use scores. We can consider
-                # to change the external API from "score" to "scores" too?
+                "scores": scores,
+                "engine_version": json_dict.get("engine_version"),
             }
 
         except InsufficientRecommendationSpaceError:

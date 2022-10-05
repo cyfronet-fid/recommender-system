@@ -22,17 +22,15 @@ from recommender.models import User, SearchData
 
 class RLInferenceComponent(MLEngineInferenceComponent):
     """
-    Recommender engine that provides logged-in users with personalized recommendations in a given context.
+    Recommender engine that provides logged-in users with personalized
+     recommendations in a given context.
     """
 
     engine_name = "RL"
     default_explanation = Explanation(
-        long="This service has been selected based on the historical service"
-        " orders and user's activity in the marketplace. The"
-        " reinforcement learning algorithm has been used for analysis"
-        " of this data and to choose recommendations.",
-        short="This service has been selected based on the historical"
-        " service orders and user's activity in the marketplace.",
+        long="This service has been selected based on the analysis of"
+        " historical services orders and users activity patterns.",
+        short="This service has been selected based on the users activity.",
     )
 
     def __init__(self, K: int, exploration: bool = False, act_noise: float = 0.0):

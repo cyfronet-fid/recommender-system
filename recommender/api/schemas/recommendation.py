@@ -116,7 +116,7 @@ recommendation_context = api.model(
 recommendation = api.model(
     "Recommendations",
     {
-        "panel_name": fields.String(
+        "panel_id": fields.String(
             required=True,
             title="Root type",
             description="The unique identifier of the recommender panel on the page",
@@ -159,7 +159,7 @@ recommendation = api.model(
                 "some short explanation",
             ],
         ),
-        "score": fields.List(
+        "scores": fields.List(
             fields.Float(
                 title="Service score",
                 description="Score of the corresponding service on the basis"
@@ -169,6 +169,12 @@ recommendation = api.model(
             title="Recommended services scores list",
             description="List of the recommended services scores",
             example=[0.7, 0.2, 0.1],
+        ),
+        "engine_version": fields.String(
+            required=True,
+            title="Engine version",
+            description="Version of the recommendation engine",
+            example="NCF",
         ),
     },
 )

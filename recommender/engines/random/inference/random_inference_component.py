@@ -20,7 +20,8 @@ class RandomInferenceComponent(BaseInferenceComponent):
 
     engine_name = "random"
     default_explanation = Explanation(
-        long="This service has been selected at random however taking into account the search criteria",
+        long="This service has been selected at random however taking into"
+        " account the search criteria",
         short="This service has been selected randomly.",
     )
 

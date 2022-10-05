@@ -26,18 +26,15 @@ logger = get_logger(__name__)
 
 class NCFInferenceComponent(MLEngineInferenceComponent):
     """
-    Recommender engine that provides logged-in users with personalized recommendations in a given context.
+    Recommender engine that provides logged-in users with personalized
+     recommendations in a given context.
     """
 
     engine_name = "NCF"
     default_explanation = Explanation(
-        long="This service has been selected based on the users/services matrix that contains information about"
-        " historical orders of services by users. The technique called Neural Collaborative Filtering utilises"
-        " neural networks to decompose users/services matrix into features of users and services that in turn are"
-        " used to make an educated guess which services could be ordered by what user in the future. The most"
-        " promising ones are recommended.",
-        short="This service has been selected based on historical orders of the given user and similar orders of"
-        " similar users. Utilised choice technique: NCF.",
+        long="This service has been selected based on historical orders of the"
+        " given user and similar orders of similar users",
+        short="This service has been selected based on historical orders.",
     )
 
     def __init__(self, K: int) -> None:
