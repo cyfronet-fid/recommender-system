@@ -80,6 +80,6 @@ class ServiceSelector:
         indices = [top_K_indices[0][0]]
         for k in range(1, K):
             indices += [next(filter(lambda x: x not in indices, top_K_indices[k]))]
-        scores = [masked_engagement_values[k][indices[k]] for k in range(K)]
+        scores = [float(masked_engagement_values[k][indices[k]]) for k in range(K)]
 
         return indices, scores

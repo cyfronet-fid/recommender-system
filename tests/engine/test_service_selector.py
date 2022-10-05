@@ -1,4 +1,5 @@
 # pylint: disable-all
+import numpy as np
 import pandas as pd
 import pytest
 import torch
@@ -100,6 +101,11 @@ def test_call_with_matching_services(
     assert service_selector(weights, mask=torch.Tensor([1, 0, 0, 1]))[0] == [2, 8]
     assert service_selector(weights, mask=torch.Tensor([0, 0, 1, 1]))[0] == [6, 8]
     assert service_selector(weights, mask=torch.Tensor([0, 1, 0, 1]))[0] == [4, 8]
+
+    scores = service_selector(weights, mask=torch.ones(len(services)))[1]
+    assert len(scores) == K
+    assert all(isinstance(s, float) for s in scores)
+    assert scores == sorted(scores, reverse=True)
 
 
 def test_raise_insufficient_recommendation_space(

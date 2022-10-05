@@ -44,9 +44,9 @@ class Recommendation(Resource):
                 "explanations": explanations_long,
                 "explanations_short": explanations_short,
                 "score": scores,
-                # TODO: Beter name is "scores" as it's a list - not a single
-                #  value, so internally we will use scores. Can we consider
-                #  to change the external API from "score" to "scores" too?
+                # Beter name is "scores" as it's a list - not a single
+                # value, so internally we will use scores. We can consider
+                # to change the external API from "score" to "scores" too?
             }
 
         except InsufficientRecommendationSpaceError:

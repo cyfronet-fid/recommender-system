@@ -26,6 +26,14 @@ class RLInferenceComponent(MLEngineInferenceComponent):
     """
 
     engine_name = "RL"
+    default_explanation = Explanation(
+        long="This service has been selected based on the historical service"
+        " orders and user's activity in the marketplace. The"
+        " reinforcement learning algorithm has been used for analysis"
+        " of this data and to choose recommendations.",
+        short="This service has been selected based on the historical"
+        " service orders and user's activity in the marketplace.",
+    )
 
     def __init__(self, K: int, exploration: bool = False, act_noise: float = 0.0):
         self.exploration = exploration
