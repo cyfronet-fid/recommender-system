@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+### Changed
+### Fixed
+- engine_version in the recommendations response [@Michal-Kolomanski]
+### Removed
+
+## [4.0.0] - 2022-10-26
+### Added
 - Implement basic recommendations explanations handling [@JanKapala]
 ### Changed
 - `/recommendations` endpoint for the purposes of the User Dashboard [@Michal-Kolomanski]
