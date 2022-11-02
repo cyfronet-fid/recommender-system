@@ -44,7 +44,7 @@ class Recommendation(Resource):
                 "explanations": explanations_long,
                 "explanations_short": explanations_short,
                 "scores": scores,
-                "engine_version": json_dict.get("engine_version"),
+                "engine_version": engine_name,
             }
 
         except InsufficientRecommendationSpaceError:
