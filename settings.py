@@ -24,6 +24,17 @@ class Config:
     RESTPLUS_MASK_SWAGGER = False
     REDIS_HOST = f"redis://{os.environ.get('REDIS_HOST', '127.0.0.1:6379')}"
     TRAINING_DEVICE = get_device("TRAINING_DEVICE")
+    RS_DATABUS_HOST = os.environ.get("RS_DATABUS_HOST", "127.0.0.1")
+    RS_DATABUS_PORT = int(os.environ.get("RS_DATABUS_PORT", 61613))
+    RS_DATABUS_USERNAME = os.environ.get("RS_DATABUS_USERNAME", "admin")
+    RS_DATABUS_PASSWORD = os.environ.get("RS_DATABUS_PASSWORD", "admin")
+    RS_DATABUS_SSL = not os.environ.get("RS_DATABUS_SSL") in ["0", "no"]
+    RS_DATABUS_PUBLISH_TOPIC = os.environ.get(
+        "RS_DATABUS_PUBLISH_TOPIC", "/topic/recommendations"
+    )
+    RS_DATABUS_SUBSCRIPTION_TOPIC = os.environ.get(
+        "RS_DATABUS_SUBSCRIPTION_TOPIC", "/topic/user_actions"
+    )
 
 
 class ProductionConfig(Config):
@@ -49,6 +60,16 @@ class TestingConfig(Config):
 
     TESTING = True
     MONGODB_HOST = f"mongodb://{os.environ.get('MONGODB_HOST', '127.0.0.1:27017')}/test"
+    RS_DATABUS_HOST = os.environ.get("TEST_RS_DATABUS_HOST", "127.0.0.1")
+    RS_DATABUS_PORT = int(os.environ.get("TEST_RS_DATABUS_PORT", 61613))
+    RS_DATABUS_USERNAME = os.environ.get("TEST_RS_DATABUS_USERNAME", "admin")
+    RS_DATABUS_PASSWORD = os.environ.get("TEST_RS_DATABUS_PASSWORD", "admin")
+    RS_DATABUS_PUBLISH_TOPIC = os.environ.get(
+        "TEST_RS_DATABUS_PUBLISH_TOPIC", "/topic/recommendations_test"
+    )
+    RS_DATABUS_SUBSCRIPTION_TOPIC = os.environ.get(
+        "TEST_RS_DATABUS_SUBSCRIPTION_TOPIC", "topic/user_actions_test"
+    )
 
 
 config_by_name = dict(

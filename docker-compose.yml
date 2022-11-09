@@ -16,9 +16,10 @@ services:
     - redis:/data
 
   rabbitmq:
-    image: itzg/rabbitmq-stomp:latest
+    image: rmohr/activemq
     ports:
       - ${RABBIT_HOST:-127.0.0.1:61613}:61613
+      - ${RABBIT_HOST:-127.0.0.1:8161}:8161
 
 volumes:
   redis:

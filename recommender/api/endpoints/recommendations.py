@@ -13,6 +13,7 @@ from recommender.api.schemas.recommendation import (
 from recommender.services.provide_service_ctx import service_ctx
 from recommender.services.deserializer import deserialize_recommendation
 from recommender.services.engine_selector import load_engine
+from recommender.tasks import send_recommendation_to_databus
 from logger_config import get_logger
 
 api = Namespace("recommendations", "Endpoint used for getting recommendations")
@@ -46,6 +47,9 @@ class Recommendation(Resource):
                 "scores": scores,
                 "engine_version": json_dict.get("engine_version"),
             }
+
+            if json_dict.get("client_id") == "marketplace":
+                send_recommendation_to_databus.delay(json_dict, response)
 
         except InsufficientRecommendationSpaceError:
             logger.error(InsufficientRecommendationSpaceError().message())

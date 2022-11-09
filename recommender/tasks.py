@@ -1,6 +1,11 @@
 # pylint: disable=missing-function-docstring, broad-except, fixme
 
 """This module contains celery tasks"""
+import json
+
+import stomp
+from flask import current_app
+
 from logger_config import get_logger
 from recommender.engines.autoencoders.inference.embedding_component import (
     EmbeddingComponent,
@@ -51,3 +56,31 @@ def add_user_action(user_action_raw: dict):
     """
     user_action = UserAction.parse_obj(user_action_raw)
     Deserializer.deserialize_user_action(user_action).save()
+
+
+@celery.task
+def send_recommendation_to_databus(context: dict, recommendation_response: dict):
+    host = current_app.config["RS_DATABUS_HOST"]
+    port = current_app.config["RS_DATABUS_PORT"]
+    username = current_app.config["RS_DATABUS_USERNAME"]
+    password = current_app.config["RS_DATABUS_PASSWORD"]
+    publish_topic = current_app.config["RS_DATABUS_PUBLISH_TOPIC"]
+    enable_ssl = current_app.config["RS_DATABUS_SSL"]
+
+    conn = stomp.Connection([(host, port)])
+    conn.connect(username, password, wait=True)
+
+    conn.send(
+        body=json.dumps(
+            {
+                "recommender_system": "cyfronet",
+                "context": context,
+                "response": recommendation_response,
+            }
+        ),
+        destination=f"{publish_topic}",
+        headers={"content-type": "application/json"},
+        ssl=enable_ssl,
+    )
+
+    conn.disconnect()
