@@ -97,42 +97,42 @@ def _register_commands(app, env: str):
     )
     @click.option(
         "--host",
-        envvar="RS_SUBSCRIBER_HOST",
-        required=True,
+        envvar="RS_DATABUS_HOST",
+        default="127.0.0.1",
         show_default=True,
         show_envvar=True,
     )
     @click.option(
         "--port",
         default=61613,
-        envvar="RS_SUBSCRIBER_PORT",
+        envvar="RS_DATABUS_PORT",
         show_default=True,
         show_envvar=True,
     )
     @click.option(
         "--username",
-        default="guest",
-        envvar="RS_SUBSCRIBER_USERNAME",
+        default="admin",
+        envvar="RS_DATABUS_USERNAME",
         show_default=True,
         show_envvar=True,
     )
     @click.option(
         "--password",
-        default="guest",
-        envvar="RS_SUBSCRIBER_PASSWORD",
+        default="admin",
+        envvar="RS_DATABUS_PASSWORD",
         show_default=True,
         show_envvar=True,
     )
     @click.option(
         "--topic",
         default="/topic/user_actions",
-        envvar="RS_SUBSCRIBER_TOPIC",
+        envvar="RS_DATABUS_SUBSCRIPTION_TOPIC",
         show_default=True,
         show_envvar=True,
     )
     @click.option(
         "--subscription-id",
-        envvar="RS_SUBSCRIBER_SUBSCRIPTION_ID",
+        envvar="RS_DATABUS_SUBSCRIPTION_ID",
         help="Subscription id should be unique. "
         "If not specified random string will be generated",
         show_envvar=True,
@@ -140,7 +140,7 @@ def _register_commands(app, env: str):
     @click.option(
         "--ssl/--no-ssl",
         default=True,
-        envvar="RS_SUBSCRIBER_SSL",
+        envvar="RS_DATABUS_SSL",
         show_envvar=True,
     )
     def tmp_subscribe(host, port, username, password, topic, subscription_id, ssl):

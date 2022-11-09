@@ -222,18 +222,21 @@ present in the project root directory. Details:
 - `SENTRY_RELEASE` - human-readable release name - it's optional and it can be a free-form string. If not specified, Sentry automatically set it based on the commit revision number.
 - `TRAINING_DEVICE` - the device used for training of neural networks: `cuda` for GPU support or `cpu` (note: `cuda` support is experimental and works only in Jupyter notebook `neural_cf` - not in the recommender dev/prod/test environment)
 - `DEFAULT_RECOMMENDATION_ALG` - the version of the recommender engine (one of `NCF`, `RL`, `random`) - Whenever request handling or celery task need this variable, it is dynamically loaded from the .env file, so you can change it during flask server runtime.
-- `RS_SUBSCRIBER_HOST` - the address of your JMS provider (optional)
-- `RS_SUBSCRIBER_PORT` - the port of your JMS provider (optional)
-- `RS_SUBSCRIBER_USERNAME` - your login to the JMS provider (optional)
-- `RS_SUBSCRIBER_PASSWORD` - your password to the JMS provider (optional)
-- `RS_SUBSCRIBER_TOPIC` - topic on which subscriber listens to jms (optional)
-- `RS_SUBSCRIBER_SUBSCRIPTION_ID` - subscription id of the jms subscriber (optional)
-- `RS_SUBSCRIBER_SSL` - whether to use ssl when connecting to jms (optional) (accepted values `0` or `1`, `yes` or `no`)
-- `TEST_RS_SUBSCRIBER_HOST` - same as `RS_SUBSCRIBER_HOST` but used when testing via `pytest`  (default: `127.0.0.1`)
-- `TEST_RS_SUBSCRIBER_PORT` - same as `RS_SUBSCRIBER_PORT` but used when testing via `pytest` (default: `61613`)
-- `TEST_RS_SUBSCRIBER_USERNAME` - same as `RS_SUBSCRIBER_USERNAME` but used when testing via `pytest` (default: `guest`)
-- `TEST_RS_SUBSCRIBER_PASSWORD` - same as `RS_SUBSCRIBER_PASSWORD` but used when testing via `pytest` (default: `guest`)
-- `TEST_RS_SUBSCRIBER_TOPIC` - same as `RS_SUBSCRIBER_TOPIC` but used when testing via `pytest` (default: `topic/user_actions_test`)
+- `RS_DATABUS_HOST` - the address of your JMS provider (default: `127.0.0.1`)
+- `RS_DATABUS_USERNAME` - your login to the JMS provider (default: `admin`, placeholder for the real password)
+- `RS_DATABUS_PASSWORD` - your password to the JMS provider (default: `admin`, placeholder for the real password)
+- `RS_DATABUS_PORT` - the port of your JMS provider (default: `61613`)
+- `RS_DATABUS_SUBSCRIPTION_TOPIC` - topic on which subscriber listens to jms (default: `/topic/user_actions`)
+- `RS_DATABUS_PUBLISH_TOPIC` - name of the topic to publish the recommendations on the JMS host (default: `/topic/recommendations`)
+- `RS_DATABUS_SUBSCRIPTION_ID` - subscription id of the jms subscriber (optional)
+- `RS_DATABUS_SSL` - whether to use ssl when connecting to jms (default: 1) (accepted values `0` or `1`, `yes` or `no`)
+- `TEST_RS_DATABUS_HOST` - same as `RS_DATABUS_HOST` but used when testing via `pytest`  (default: `127.0.0.1`)
+- `TEST_RS_DATABUS_PORT` - same as `RS_DATABUS_PORT` but used when testing via `pytest` (default: `61613`)
+- `TEST_RS_DATABUS_USERNAME` - same as `RS_DATABUS_USERNAME` but used when testing via `pytest` (default: `admin`, default password for the stomp docker image)
+- `TEST_RS_DATABUS_PASSWORD` - same as `RS_DATABUS_PASSWORD` but used when testing via `pytest` (default: `admin`, default password for the stomp docker image)
+- `TEST_RS_DATABUS_SUBSCRIPTION_TOPIC` - same as `RS_DATABUS_SUBSCRIPTION_TOPIC` but used when testing via `pytest` (default: `topic/user_actions_test`)
+- `TEST_RS_DATABUS_PUBLISH_TOPIC` - same as `RS_DATABUS_PUBLISH_TOPIC` but used when testing via `pytest` (default: `topic/recommendations_test`)
+- 
 
 NOTE: All the above variables have reasonable defaults, so if you want you can just have your .env file empty.
 
