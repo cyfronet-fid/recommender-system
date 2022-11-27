@@ -1,7 +1,6 @@
 # pylint: disable-all
 
 import json
-import os
 import threading
 import time
 import uuid
@@ -10,16 +9,11 @@ from typing import Optional
 import pytest
 import stomp
 from pytest_mock import MockerFixture
+from flask import current_app
 
 from jms.connector import subscribe_to_databus
 from recommender.types import UserAction
 from tests.factories.requests.user_actions import UserActionFactory
-
-JMS_HOST = os.environ.get("TEST_RS_SUBSCRIBER_HOST", "127.0.0.1")
-JMS_PORT = int(os.environ.get("TEST_RS_SUBSCRIBER_PORT", "61613"))
-JMS_USERNAME = os.environ.get("TEST_RS_SUBSCRIBER_USERNAME", "guest")
-JMS_PASSWORD = os.environ.get("TEST_RS_SUBSCRIBER_PASSWORD", "guest")
-JMS_TOPIC = os.environ.get("TEST_RS_SUBSCRIBER_TOPIC", "/topic/user_actions_test")
 
 Second = int
 
@@ -71,10 +65,17 @@ class JMSSubscriberController:
 
 
 @pytest.fixture
-def jms_controller() -> JMSSubscriberController:
-    controller = JMSSubscriberController(
-        JMS_HOST, JMS_PORT, JMS_USERNAME, JMS_PASSWORD, JMS_TOPIC, str(uuid.uuid4())
-    )
+def jms_controller(_app) -> JMSSubscriberController:
+    with _app.app_context():
+        controller = JMSSubscriberController(
+            host=current_app.config["RS_DATABUS_HOST"],
+            port=current_app.config["RS_DATABUS_PORT"],
+            username=current_app.config["RS_DATABUS_USERNAME"],
+            password=current_app.config["RS_DATABUS_PASSWORD"],
+            topic=current_app.config["RS_DATABUS_SUBSCRIPTION_TOPIC"],
+            subscriber_id=str(uuid.uuid4()),
+        )
+
     controller.start()
     yield controller
     controller.terminate()
