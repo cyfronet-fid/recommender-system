@@ -69,8 +69,8 @@ def test_get_default_recommendation_alg(get_engines):
     assert get_default_recommendation_alg(get_engines.keys()) == "RL"
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = "NCF"
     assert get_default_recommendation_alg(get_engines.keys()) == "NCF"
-    os.environ["DEFAULT_RECOMMENDATION_ALG"] = "random"
-    assert get_default_recommendation_alg(get_engines.keys()) == "random"
+    os.environ["DEFAULT_RECOMMENDATION_ALG"] = "Random"
+    assert get_default_recommendation_alg(get_engines.keys()) == "Random"
 
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = "NFC"
     assert get_default_recommendation_alg(get_engines.keys()) == "RL"
@@ -81,8 +81,8 @@ def test_get_default_recommendation_alg(get_engines):
     assert get_default_recommendation_alg(get_engines.keys()) == "RL"
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = "ncf"
     assert get_default_recommendation_alg(get_engines.keys()) == "NCF"
-    os.environ["DEFAULT_RECOMMENDATION_ALG"] = "Random"
-    assert get_default_recommendation_alg(get_engines.keys()) == "random"
+    os.environ["DEFAULT_RECOMMENDATION_ALG"] = "random"
+    assert get_default_recommendation_alg(get_engines.keys()) == "Random"
 
 
 def test_get_engine_names(get_engines):
@@ -94,8 +94,8 @@ def test_get_engine_names(get_engines):
     3) Any engine name that exists.
     """
 
-    engine_from_req = ["RL", "NCF", "random"]
-    default_engine = ["RL", "NCF", "random"]
+    engine_from_req = ["RL", "NCF", "Random"]
+    default_engine = ["RL", "NCF", "Random"]
     engines_keys = list(get_engines.keys())
 
     # 1. case - engine_from_req is specified, and engines_keys are the same as the range of engine_from_req
@@ -128,8 +128,8 @@ def test_get_engine_names(get_engines):
     assert engine_names == expected_eg_names
 
     # 4. case - engines_keys includes engines than engine_from_req nad default_engine
-    engine_from_req = ("RL", "NCF", "random")
-    default_engine = ("RL", "NCF", "random")
+    engine_from_req = ("RL", "NCF", "Random")
+    default_engine = ("RL", "NCF", "Random")
     # Last index of engines_keys, so it is expected to be the last element of returned names
     engines_keys.append("New Engine")
 
@@ -170,10 +170,10 @@ def test_engine_loader(
     assert type(engine) == NCFInferenceComponent
     assert engine_name == "NCF"
 
-    engine_names = ["random", "NCF", "RL"]
+    engine_names = ["Random", "NCF", "RL"]
     engine, engine_name = engine_loader(engine_names, engines, K)
     assert type(engine) == RandomInferenceComponent
-    assert engine_name == "random"
+    assert engine_name == "Random"
 
     # 2. case no ML engine is saved and random engine is not passed
     engine_names = ["NCF", "RL"]
@@ -186,10 +186,10 @@ def test_engine_loader(
         engine_loader(engine_names, engines, K)
 
     # 3. case no ML engine is but random engine is also passed
-    engine_names = ["NCF", "RL", "random"]
+    engine_names = ["NCF", "RL", "Random"]
     engine, engine_name = engine_loader(engine_names, engines, K)
     assert type(engine) == RandomInferenceComponent
-    assert engine_name == "random"
+    assert engine_name == "Random"
 
 
 def test_engine_loader2(
@@ -245,11 +245,11 @@ def test_load_engine(
     # 2. user is random
     del recommendation_data["user_id"]
 
-    for engine_version in {"RL", "NCF", "random", "placeholder"}:
+    for engine_version in {"RL", "NCF", "Random", "random", "placeholder"}:
         recommendation_data["engine_version"] = engine_version
         engine, engine_name = load_engine(recommendation_data)
         assert type(engine) == RandomInferenceComponent
-        assert engine_name == "random"
+        assert engine_name == "Random"
 
 
 def test_load_engine_with_aai_uid(
@@ -277,8 +277,8 @@ def test_load_engine_with_aai_uid(
     # 2. user is random
     del recommendation_data_with_aai_uid["aai_uid"]
 
-    for engine_version in {"RL", "NCF", "random", "placeholder"}:
+    for engine_version in {"RL", "NCF", "random", "Random", "placeholder"}:
         recommendation_data_with_aai_uid["engine_version"] = engine_version
         engine, engine_name = load_engine(recommendation_data_with_aai_uid)
         assert type(engine) == RandomInferenceComponent
-        assert engine_name == "random"
+        assert engine_name == "Random"
