@@ -119,6 +119,12 @@ pipenv run pytest ./tests
 ```bash
 docker-compose -f docker-compose.testing.yml up && docker-compose -f docker-compose.testing.yml down
 ```
+### Deep health check
+You can curl `/health` server endpoint to check the application's health. It checks for 
+- Database connection
+- User and Service tables row count (has to be at least 10 each)
+- Celery workers connection
+- JMS connection
 
 ### Recommendation Engines
 Recommendation engines ensure that both logged in and non-logged in users receive relevant recommendations.

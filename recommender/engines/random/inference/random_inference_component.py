@@ -18,7 +18,7 @@ class RandomInferenceComponent(BaseInferenceComponent):
         - all users if necessary (for example during ML training).
     """
 
-    engine_name = "random"
+    engine_name = "Random"
     default_explanation = Explanation(
         long="This service has been selected at random however taking into"
         " account the search criteria",

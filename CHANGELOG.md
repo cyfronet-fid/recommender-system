@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- /health endpoint [@wujuu]
 ### Changed
 - **BREAKING CHANGE**: Adjust user actions handling to the new user action schema [@JanKapala]
 ### Fixed

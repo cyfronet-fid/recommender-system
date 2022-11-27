@@ -84,3 +84,9 @@ def send_recommendation_to_databus(context: dict, recommendation_response: dict)
     )
 
     conn.disconnect()
+
+
+@celery.task
+def ping() -> bool:
+    """This task checks the connection to the celery workers"""
+    return True
