@@ -91,7 +91,7 @@ def test_user_action_deserialization(mongo, user_action_json_dict):
     ).get("panel_id")
     assert ua.source.root.service.id == user_action_json_dict.get("source").get(
         "root"
-    ).get("service_id")
+    ).get("resource_id")
     assert str(ua.target.visit_id) == user_action_json_dict.get("target").get(
         "visit_id"
     )

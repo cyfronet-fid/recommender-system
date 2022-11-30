@@ -24,12 +24,19 @@ root = api.model(
             "The unique identifier of a recommender panel on the page",
             example="v1",
         ),
-        "service_id": fields.Integer(
+        "resource_type": fields.String(
             required=False,
-            title="Service ID",
-            description="Field used only if the root type is recommendation_panel. "
-            "The unique identifier of a recommended service clicked by "
-            "the user",
+            title="Resource type",
+            description="The type of the resource clicked by the user. Currently"
+            " only supported type is a `service`",
+            example="service",
+        ),
+        "resource_id": fields.Integer(
+            required=False,
+            title="Resource ID",
+            description="The unique identifier of a recommended resource clicked"
+            " by the user. Currently it can be only"
+            " id of the service.",
             example=1,
         ),
     },

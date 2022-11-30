@@ -52,7 +52,12 @@ def user_action_json_dict():
         "source": {
             "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
             "page_id": "services_catalogue_list",
-            "root": {"type": "recommendation_panel", "panel_id": "v1", "service_id": 1},
+            "root": {
+                "type": "recommendation_panel",
+                "panel_id": "v1",
+                "resource_type": "service",
+                "resource_id": 1,
+            },
         },
         "target": {
             "visit_id": "9f543b80-dd5b-409b-a619-6312a0b04f4f",
@@ -72,7 +77,12 @@ def user_action_json_dict_with_aai_uid():
         "source": {
             "visit_id": "202090a4-de4c-4230-acba-6e2931d9e37c",
             "page_id": "services_catalogue_list",
-            "root": {"type": "recommendation_panel", "panel_id": "v1", "service_id": 1},
+            "root": {
+                "type": "recommendation_panel",
+                "panel_id": "v1",
+                "resource_type": "service",
+                "resource_id": 1,
+            },
         },
         "target": {
             "visit_id": "9f543b80-dd5b-409b-a619-6312a0b04f4f",

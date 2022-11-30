@@ -12,7 +12,12 @@ def load_mp_dump(data):
 
     for model in MP_DUMP_MODEL_CLASSES:
         json_key = pluralize(underscore(model.__name__))
+        model_fields = list(model._fields.keys())
         for json_dict in data[json_key]:
+            # Only include fields defined in the mongonengine model
+            json_dict = {
+                key: value for key, value in json_dict.items() if key in model_fields
+            }
             model(**json_dict).save()
 
 

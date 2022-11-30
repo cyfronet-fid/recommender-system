@@ -4,6 +4,7 @@ from factory import DictFactory
 
 class UserActionFactory(DictFactory):
     user_id = 1234
+    client_id = "marketplace"
     unique_id = "5642c351-80fe-44cf-b606-304f2f338122"
     timestamp = "2021-03-18T19:33:21.620Z"
     source = {
@@ -12,7 +13,8 @@ class UserActionFactory(DictFactory):
         "root": {
             "type": "recommendation_panel",
             "panel_id": "v1",
-            "service_id": 1234,
+            "resource_type": "service",
+            "resource_id": 1234,
         },
     }
 
