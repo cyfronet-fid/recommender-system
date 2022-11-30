@@ -71,7 +71,7 @@ class Deserializer:
             root = Root(
                 type=root_data.get("type"),
                 panel_id=root_data.get("panel_id"),
-                service=root_data.get("service_id"),
+                service=root_data.get("resource_id"),
             )
         source1.root = root
 

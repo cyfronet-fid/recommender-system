@@ -23,15 +23,20 @@ class UserJourneyRoot(BaseModel):
         "The unique identifier of a recommender panel on the page",
         example="v1",
     )
-    service_id: Optional[int] = (
-        Field(
-            default=None,
-            title="Service ID",
-            description="Field used only if the root type is recommendation_panel. "
-            "The unique identifier of a recommended service clicked by "
-            "the user",
-            example=1,
-        ),
+    resource_type: Optional[str] = Field(
+        default=None,
+        title="Resource type",
+        description="The type of the resource clicked by the user. Currently"
+        " only supported type is a `service`",
+        example="service",
+    )
+    resource_id: Optional[int] = Field(
+        default=None,
+        title="Resource ID",
+        description="The unique identifier of a recommended resource clicked"
+        " by the user. Currently it can be only"
+        " id of the service.",
+        example=1,
     )
 
 
