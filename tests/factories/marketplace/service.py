@@ -78,3 +78,4 @@ class ServiceFactory(MarketplaceDocument):
     related_services = []
     required_services = []
     status = "published"
+    pid = "pid"
