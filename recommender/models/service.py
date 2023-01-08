@@ -44,6 +44,7 @@ class Service(MarketplaceDocument):
     one_hot_tensor = ListField(IntField(), blank=True)
     dense_tensor = ListField(FloatField(), blank=True)
     status = StringField()
+    pid = StringField()
 
     meta = {
         "indexes": [
