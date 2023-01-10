@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - YYYY-MM-DD
 ### Added
 - /health endpoint [@wujuu]
+- pid for services [@wujuu]
 ### Changed
 - **BREAKING CHANGE**: Adjust user actions handling to the new user action schema [@JanKapala]
 ### Fixed
 - engine_version in the recommendations response [@Michal-Kolomanski]
+- better exception handling for finding user in the DB [@Michal-Kolomanski]
 ### Removed
 
 ## [4.0.0] - 2022-10-26

@@ -121,15 +121,16 @@ class MLEngineInferenceComponent(BaseInferenceComponent):
         """
 
         user_id, aai_uid = context.get("user_id"), context.get("aai_uid")
-
-        if not (user_id or aai_uid):
-            raise UserCannotBeIdentified()
-
-        return (
+        user = (
             User.objects(id=user_id).first()
             if user_id
             else User.objects(aai_uid=aai_uid).first()
         )
+
+        if user is None:
+            raise UserCannotBeIdentified()
+
+        return user
 
     @abstractmethod
     def _generate_recommendations(

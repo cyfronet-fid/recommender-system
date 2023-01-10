@@ -166,6 +166,13 @@ To specify from which engine the recommendations are requested, provide an `engi
 It is possible to define which algorithm should be used by default in the absence of the `engine_version` parameter by modifying the `DEFAULT_RECOMMENDATION_ALG` parameter from .env file
 (look into [ENV variables](#env-variables) section).
 
+### Engines
+List of available engines (after training):
+- `NCF` - returns `K` recommendations from the given context.
+- `RL` - returns `K` recommendations from the given context.
+- `Random` - returns `K` random recommendations from the given context.
+- `NCFRanking` - used for sort by relevance.
+
 ### Seeding database
 Note: Only available in development and testing environment.
 
