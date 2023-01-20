@@ -175,11 +175,6 @@ class SizeOfUsersAndElasticServicesError(Exception):
         return "Length of users and candidates is not equal"
 
 
-class ServicesContextNotProvidedError(Exception):
-    def message(self):
-        return "Candidates not provided outside the context of the User Dashboard"
-
-
 class UserCannotBeIdentified(Exception):
     def message(self):
         return "Recommendation context did not provide user_id or aai_uid"

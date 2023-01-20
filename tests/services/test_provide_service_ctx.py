@@ -5,7 +5,6 @@ from tests.conftest import users_services_args
 from recommender.services.provide_service_ctx import get_all_collection_ids, service_ctx
 from recommender.models import Service, User
 from tests.endpoints.conftest import recommendation_data
-from recommender.errors import ServicesContextNotProvidedError
 
 
 def test_get_all_collection_ids(mongo, generate_users_and_services):
@@ -31,26 +30,47 @@ def test_get_all_collection_ids(mongo, generate_users_and_services):
 def test_service_ctx(mongo, generate_users_and_services, recommendation_data):
     """
     Check:
-    1) candidates provided, page_id different from /dashboard
-    2) candidates NOT provided, page_id different from /dashboard
-    3) candidates NOT provided, page_id == /dashboard
+    K recommendations returned:
+    1) candidates provided,
+    2) candidates NOT provided, empty list
+    3) candidates NOT provided, the key does not exist
+
+    Sort by relevance:
+    4) candidates NOT provided,
+    5) candidates provided,
+
     """
+    # All services from db
+    args = users_services_args()
+    all_services = args["common_services_num"] + args["unordered_services_num"]
+
     # 1)
     returned_dict = service_ctx(recommendation_data)
     assert returned_dict == recommendation_data
 
     # 2)
-    del recommendation_data["candidates"]
-    with pytest.raises(ServicesContextNotProvidedError):
-        service_ctx(recommendation_data)
+    recommendation_data["candidates"] = []
+    candidates = service_ctx(recommendation_data)["candidates"]
+    assert len(candidates) == all_services
+    assert all([type(service_id) == int for service_id in candidates])
 
     # 3)
-    recommendation_data.update({"page_id": "/dashboard"})
-    returned_dict = service_ctx(recommendation_data)
+    del recommendation_data["candidates"]
+    candidates = service_ctx(recommendation_data)["candidates"]
+    assert len(candidates) == all_services
+    assert all([type(service_id) == int for service_id in candidates])
 
-    args = users_services_args()
-    services_num = args["common_services_num"] + args["unordered_services_num"]
+    # 4)
+    recommendation_data["engine_version"] = "NCFRanking"
 
-    assert returned_dict.get("candidates")
-    assert len(returned_dict["candidates"]) == services_num
-    assert all([type(service_id) == int for service_id in returned_dict["candidates"]])
+    candidates = service_ctx(recommendation_data)["candidates"]
+    assert len(candidates) == all_services
+    assert all([type(service_id) == int for service_id in candidates])
+
+    # 5)
+    l = [1, 2, 3]
+    recommendation_data["candidates"] = l
+
+    candidates = service_ctx(recommendation_data)["candidates"]
+    assert len(candidates) == len(l)
+    assert all([type(service_id) == int for service_id in candidates])
