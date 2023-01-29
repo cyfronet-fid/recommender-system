@@ -6,12 +6,14 @@ from recommender.api.schemas.common import api
 from .access_mode import access_mode
 from .access_type import access_type
 from .category import category
+from .catalogue import catalogue
 from .life_cycle_status import life_cycle_status
 from .platform import platform
 from .project import project
 from .provider import provider
 from .scientific_domain import scientific_domain
 from .service import service
+from .datasource import datasource
 from .target_user import target_user
 from .trl import trl
 from .user import user
@@ -29,6 +31,15 @@ database_dump = api.model(
             required=True,
             title="Scientific Services",
             description="List of scientific services",
+        ),
+        "datasources": fields.List(
+            fields.Nested(
+                datasource,
+                required=False,
+                title="Datasource",
+            ),
+            required=False,
+            title="Datasources",
         ),
         "users": fields.List(
             fields.Nested(
@@ -62,6 +73,17 @@ database_dump = api.model(
             required=True,
             title="Categories",
             description="List of categories",
+        ),
+        "catalogues": fields.List(
+            fields.Nested(
+                catalogue,
+                required=True,
+                title="Catalogue",
+                description="Catalogue",
+            ),
+            required=True,
+            title="Catalogues",
+            description="List of catalogues",
         ),
         "providers": fields.List(
             fields.Nested(

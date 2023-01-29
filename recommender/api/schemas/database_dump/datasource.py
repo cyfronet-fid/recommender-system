@@ -1,16 +1,15 @@
-"""Service model"""
+"""Datasource model"""
 
 from flask_restx import fields
 
 from recommender.api.schemas.common import api
 
-service = api.model(
-    "Service",
+datasource = api.model(
+    "Datasource",
     {
         "id": fields.Integer(
             required=True,
-            title="Service ID",
-            description="The unique identifier of a the service",
+            title="Datasource ID",
             example=1234,
         ),
         "pid": fields.String(
@@ -22,19 +21,16 @@ service = api.model(
         "name": fields.String(
             required=True,
             title="Name",
-            description="Name of the service",
             example="Cloud GPU",
         ),
         "description": fields.String(
             required=True,
             title="Description",
-            description="description of the service",
             example="Service providing GPU cluster on demand",
         ),
         "tagline": fields.String(
             required=True,
             title="Tagline",
-            description="Tag of the service",
             example="State-of-the-art service",
         ),
         "countries": fields.List(
@@ -53,11 +49,14 @@ service = api.model(
             description="Order type",
             example="Order required",
         ),
-        "rating": fields.String(
-            required=True,
-            title="Rating",
-            description="Rating",
-            example="5.0",
+        "horizontal": fields.Boolean(required=False, title="Horizontal"),
+        "standards": fields.List(
+            fields.String(title="Standard"), required=False, title="Standards"
+        ),
+        "open_source_technologies": fields.List(
+            fields.String(title="Open source technology"),
+            title="Open source technologies",
+            required=False,
         ),
         "categories": fields.List(
             fields.Integer(
@@ -68,6 +67,16 @@ service = api.model(
             required=True,
             title="Categories IDs",
             description="List of categories IDs",
+        ),
+        "catalogues": fields.List(
+            fields.Integer(
+                title="Catalogue ID",
+                description="ID of the catalogue",
+                example=1234,
+            ),
+            required=False,
+            title="Catalogue IDs",
+            description="List of catalogue IDs",
         ),
         "providers": fields.List(
             fields.Integer(
@@ -98,72 +107,58 @@ service = api.model(
         "platforms": fields.List(
             fields.Integer(
                 title="Platform ID",
-                description="ID of the service's platform",
                 example=1234,
             ),
             required=True,
             title="Platforms IDs",
-            description="List of service's platforms IDs",
         ),
         "target_users": fields.List(
             fields.Integer(
                 title="Target user ID",
-                description="ID of the service's target user",
                 example=1234,
             ),
             required=True,
             title="Target users IDs",
-            description="List of service's target users IDs",
         ),
         "related_services": fields.List(
             fields.Integer(
                 title="Related service ID",
-                description="ID of the service's related service",
                 example=1234,
             ),
             required=True,
             title="Related services IDs",
-            description="List of service's related services IDs",
         ),
         "access_modes": fields.List(
             fields.Integer(
                 title="Access mode ID",
-                description="ID of the service's access mode",
                 example=1234,
             ),
             required=True,
             title="Access modes IDs",
-            description="List of service's access modes IDs",
         ),
         "access_types": fields.List(
             fields.Integer(
                 title="Access type ID",
-                description="ID of the service's access type",
                 example=1234,
             ),
             required=True,
             title="Access types IDs",
-            description="List of service's access types IDs",
         ),
         "trls": fields.List(
             fields.Integer(
                 title="TRL ID",
-                description="ID of the service's Technology readiness level",
                 example=1234,
             ),
             required=True,
             title="TRLs IDs",
-            description="List of service's TRLs IDs",
         ),
         "life_cycle_statuses": fields.List(
             fields.Integer(
                 title="Life cycle status ID",
-                description="ID of the service's life cycle status",
                 example=1234,
             ),
             required=True,
             title="Life cycle statuses IDs",
-            description="List of service's life cycle statuses IDs",
         ),
     },
 )
