@@ -136,7 +136,6 @@ Recommendation engines ensure that both logged in and non-logged in users receiv
 These engines use artificial intelligence algorithms to make recommendations based on a user's interests, the context of the search, and all of that user's and other users' behaviours on the portal.
 
 #### Engines for anonymous users (no training required):
-- Anonymous (in development) - integrated with Google Analytics
 - Random
 
 These engines employ statistical methods to provide an anonymous user with the best possible recommendations. The anonymous engine provides information, for example, which services are most commonly visited or purchased by other users in a specific search context. In that case, even if a user is anonymous, our recommender system can provide the user with valuable recommendations.

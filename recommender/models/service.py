@@ -7,6 +7,7 @@ from mongoengine import (
     BinaryField,
     FloatField,
     IntField,
+    BooleanField,
 )
 
 from .access_mode import AccessMode
@@ -19,15 +20,18 @@ from .provider import Provider
 from .scientific_domain import ScientificDomain
 from .target_user import TargetUser
 from .trl import Trl
+from .research_step import ResearchStep
 
 
 class Service(MarketplaceDocument):
+    pid = StringField()
     name = StringField()
     description = StringField()
     tagline = StringField()
     countries = ListField(StringField())
     order_type = StringField()
     rating = StringField()
+    horizontal = BooleanField()
     categories = ListField(ReferenceField(Category))
     providers = ListField(ReferenceField(Provider))
     resource_organisation = ReferenceField(Provider)
@@ -38,13 +42,13 @@ class Service(MarketplaceDocument):
     access_types = ListField(ReferenceField(AccessType))
     trls = ListField(ReferenceField(Trl))
     life_cycle_statuses = ListField(ReferenceField(LifeCycleStatus))
+    research_steps = ListField(ReferenceField(ResearchStep))
     related_services = ListField(ReferenceField("Service"))
     required_services = ListField(ReferenceField("Service"))
     dataframe = BinaryField(blank=True)
     one_hot_tensor = ListField(IntField(), blank=True)
     dense_tensor = ListField(FloatField(), blank=True)
     status = StringField()
-    pid = StringField()
 
     meta = {
         "indexes": [

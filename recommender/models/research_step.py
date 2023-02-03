@@ -5,6 +5,6 @@ from mongoengine import StringField
 from .marketplace_document import MarketplaceDocument
 
 
-class Provider(MarketplaceDocument):
-    pid = StringField()
+class ResearchStep(MarketplaceDocument):
     name = StringField()
+    description = StringField()

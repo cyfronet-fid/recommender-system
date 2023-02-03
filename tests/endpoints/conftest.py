@@ -16,6 +16,7 @@ def mp_dump_data():
                 "countries": ["PL", "US"],
                 "rating": "2",
                 "order_type": "open_access",
+                "horizontal": False,
                 "categories": [1, 2],
                 "providers": [1, 2],
                 "resource_organisation": 1,
@@ -28,6 +29,7 @@ def mp_dump_data():
                 "access_modes": [1, 2],
                 "trls": [1, 2],
                 "life_cycle_statuses": [1, 2],
+                "research_steps": [1, 2],
             },
             {
                 "id": 2,
@@ -37,6 +39,7 @@ def mp_dump_data():
                 "countries": ["PL"],
                 "rating": "2",
                 "order_type": "open_access",
+                "horizontal": True,
                 "categories": [2],
                 "providers": [2],
                 "resource_organisation": 2,
@@ -49,6 +52,7 @@ def mp_dump_data():
                 "access_modes": [2],
                 "trls": [2],
                 "life_cycle_statuses": [2],
+                "research_steps": [2],
             },
         ],
         "users": [
@@ -68,7 +72,10 @@ def mp_dump_data():
             }
         ],
         "categories": [{"id": 1, "name": "c1"}, {"id": 2, "name": "c2"}],
-        "providers": [{"id": 1, "name": "p1"}, {"id": 2, "name": "p2"}],
+        "providers": [
+            {"id": 1, "pid": "pid1", "name": "p1"},
+            {"id": 2, "pid": "pid2", "name": "p2"},
+        ],
         "scientific_domains": [{"id": 1, "name": "sd1"}, {"id": 2, "name": "sd2"}],
         "platforms": [{"id": 1, "name": "pl1"}, {"id": 2, "name": "pl2"}],
         "target_users": [
@@ -90,6 +97,10 @@ def mp_dump_data():
         "life_cycle_statuses": [
             {"id": 1, "name": "lcs1", "description": "desc"},
             {"id": 2, "name": "lcs2", "description": "desc"},
+        ],
+        "research_steps": [
+            {"id": 1, "name": "rs1", "description": "desc"},
+            {"id": 2, "name": "rs2", "description": "desc"},
         ],
     }
 

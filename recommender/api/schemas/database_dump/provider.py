@@ -2,7 +2,7 @@
 
 from flask_restx import fields
 
-from recommender.api.schemas.common import api
+from recommender.api.schemas.common import api, NullableString
 
 provider = api.model(
     "Provider",
@@ -10,8 +10,14 @@ provider = api.model(
         "id": fields.Integer(
             required=True,
             title="Provider ID",
-            description="The unique identifier of a the provider",
+            description="The MP's unique ID of a provider",
             example=1234,
+        ),
+        "pid": NullableString(
+            required=True,
+            title="PID",
+            description="The unique, global ID of a provider",
+            example="string",
         ),
         "name": fields.String(
             required=True,

@@ -22,6 +22,7 @@ from .search_data import SearchData
 from .ml_component import MLComponent
 from .marketplace_document import MarketplaceDocument
 from .project import Project
+from .research_step import ResearchStep
 
 MP_DUMP_MODEL_CLASSES = [
     Category,
@@ -36,6 +37,7 @@ MP_DUMP_MODEL_CLASSES = [
     User,
     Service,
     Project,
+    ResearchStep,
 ]
 
 ML_MODELS = [
