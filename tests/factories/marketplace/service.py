@@ -14,6 +14,7 @@ from .provider import ProviderFactory
 from .scientific_domain import ScientificDomainFactory
 from .target_user import TargetUserFactory
 from .trl import TrlFactory
+from .research_step import ResearchStepFactory
 
 from faker.providers import BaseProvider
 from factory.random import reseed_random, random
@@ -47,6 +48,7 @@ class ServiceFactory(MarketplaceDocument):
     class Meta:
         model = Service
 
+    pid = "pid"
     name = LazyFunction(lambda: fake.service_name())
     description = LazyAttribute(lambda o: fake.service_description(o.name))
     tagline = LazyFunction(lambda: fake.service_tagline())
@@ -75,7 +77,10 @@ class ServiceFactory(MarketplaceDocument):
     scientific_domains = LazyFunction(
         lambda: ScientificDomainFactory.create_batch(random.randint(2, 5))
     )
+    research_steps = LazyFunction(
+        lambda: ResearchStepFactory.create_batch(random.randint(2, 5))
+    )
     related_services = []
     required_services = []
     status = "published"
-    pid = "pid"
+    horizontal = random.choice([True, False])

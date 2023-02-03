@@ -121,9 +121,9 @@ def users_services_args(valid=True):
     """Provide values for users and services generation"""
     seed(10)
     args = {
-        "common_services_num": randint(10, 20),
-        "unordered_services_num": randint(10, 20),
-        "users_num": randint(1, 12),
+        "common_services_num": randint(40, 50),
+        "unordered_services_num": randint(40, 50),
+        "users_num": randint(1, 50),
         "k_common_services_min": randint(1, 3),
         "k_common_services_max": randint(4, 6),
         "verbose": False,

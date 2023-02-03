@@ -29,7 +29,7 @@ def populate_users_and_services(
         k_common_services_min:  the minimum common services for a user
         k_common_services_max:  the maximum common services for a user
         verbose:                be verbose?
-        valid:                  should created users and services be valid (have categories and scientific domains)?
+        valid:                  should create users and services be valid (have categories and scientific domains)?
     """
     if k_common_services_min > k_common_services_max:
         raise RangeOfCommonServicesError()

@@ -13,6 +13,12 @@ service = api.model(
             description="The unique identifier of a the service",
             example=1234,
         ),
+        "pid": fields.String(
+            required=False,
+            title="Pid",
+            description="Pid",
+            example="pid",
+        ),
         "name": fields.String(
             required=True,
             title="Name",
@@ -158,6 +164,22 @@ service = api.model(
             required=True,
             title="Life cycle statuses IDs",
             description="List of service's life cycle statuses IDs",
+        ),
+        "research_steps": fields.List(
+            fields.Integer(
+                title="Research step ID",
+                description="ID of the service's research step",
+                example=1234,
+            ),
+            required=True,
+            title="Research step IDs",
+            description="List of service's research steps IDs",
+        ),
+        "horizontal": fields.Boolean(
+            required=True,
+            title="Horizontal",
+            description="A flag, whether a service is considered as horizontal",
+            example=True,
         ),
     },
 )

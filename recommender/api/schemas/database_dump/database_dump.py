@@ -15,6 +15,7 @@ from .service import service
 from .target_user import target_user
 from .trl import trl
 from .user import user
+from .research_step import research_step
 
 database_dump = api.model(
     "Database dump",
@@ -144,12 +145,23 @@ database_dump = api.model(
             fields.Nested(
                 life_cycle_status,
                 required=True,
-                title="TRL",
-                description="TRL",
+                title="Life cycle status",
+                description="Life cycle status",
             ),
             required=True,
-            title="TRLs",
-            description="List of TRLs",
+            title="Life cycle statuses",
+            description="Life cycle statuses",
+        ),
+        "research_steps": fields.List(
+            fields.Nested(
+                research_step,
+                required=True,
+                title="Research step",
+                description="Research step",
+            ),
+            required=True,
+            title="Research steps",
+            description="Research steps",
         ),
     },
 )

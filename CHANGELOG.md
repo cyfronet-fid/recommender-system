@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- **BREAKING CHANGE**: research_steps and horizontal [@Michal-Kolomanski]
+- **BREAKING CHANGE**: providers PID [@Michal-Kolomanski]
+### Changed
+### Fixed
+### Removed
+
+## [5.0.1] - 2023-01-19
+### Added
 - /health endpoint [@wujuu]
 - pid for services [@wujuu]
 ### Changed
