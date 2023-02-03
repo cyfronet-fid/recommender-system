@@ -89,13 +89,13 @@ recommendation_context = api.model(
             example="some_page_identifier",
         ),
         "panel_id": fields.String(
-            required=True,
+            required=False,
             title="Root type",
             description="The unique identifier of the recommender panel on the page",
             example="v1",
         ),
         "engine_version": fields.String(
-            required=True,
+            required=False,
             title="Engine version",
             description="Version of the recommendation engine",
             example="NCF",
