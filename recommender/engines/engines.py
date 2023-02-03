@@ -12,8 +12,8 @@ from recommender.engines.random.inference.random_inference_component import (
 
 # Order of engines may have an impact depending on the given context
 ENGINES = {
-    RLInferenceComponent.engine_name: RLInferenceComponent,
     NCFInferenceComponent.engine_name: NCFInferenceComponent,
+    RLInferenceComponent.engine_name: RLInferenceComponent,
     RandomInferenceComponent.engine_name: RandomInferenceComponent,
     NCFRankingInferenceComponent.engine_name: NCFRankingInferenceComponent,
 }

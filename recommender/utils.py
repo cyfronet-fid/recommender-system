@@ -138,7 +138,7 @@ def gen_json_dict(panel_id: str, anonymous_user: bool = False) -> Dict[str, Any]
      and provided panel_id.
 
     Args:
-        panel_id: Version of the panel, could be `"v1"` or `"v1"`
+        panel_id: Version of the panel
 
     Returns:
         json_dict: dictionary compatible with body of the /recommendations

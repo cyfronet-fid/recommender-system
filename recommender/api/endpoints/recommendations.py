@@ -10,7 +10,7 @@ from recommender.api.schemas.recommendation import (
     recommendation,
     recommendation_context,
 )
-from recommender.services.provide_service_ctx import service_ctx
+from recommender.services.provide_ctx import provide_ctx
 from recommender.services.deserializer import deserialize_recommendation
 from recommender.services.engine_selector import load_engine
 from recommender.tasks import send_recommendation_to_databus
@@ -28,31 +28,37 @@ class Recommendation(Resource):
     @api.response(200, "Recommendations fetched successfully", recommendation)
     def post(self):
         """Returns list of ids of recommended scientific services"""
-
-        json_dict = service_ctx(request.get_json())
-        engine, engine_name = load_engine(json_dict)
-        panel_id = json_dict.get("panel_id")
+        req_body = provide_ctx(request.get_json())
         try:
-            services_ids, scores, explanations = engine(json_dict)
-            explanations_long, explanations_short = [
-                list(t) for t in list(zip(*[(e.long, e.short) for e in explanations]))
-            ]
-            deserialize_recommendation(json_dict, services_ids, engine_name)
+            response = self.process_request(req_body)
 
-            response = {
-                "panel_id": panel_id,
-                "recommendations": services_ids,
-                "explanations": explanations_long,
-                "explanations_short": explanations_short,
-                "scores": scores,
-                "engine_version": engine_name,
-            }
-
-            if json_dict.get("client_id") == "marketplace":
-                send_recommendation_to_databus.delay(json_dict, response)
+            if req_body.get("client_id") == "marketplace":
+                send_recommendation_to_databus.delay(req_body, response)
 
         except InsufficientRecommendationSpaceError:
             logger.error(InsufficientRecommendationSpaceError().message())
             response = {"recommendations": []}
+
+        return response
+
+    @staticmethod
+    def process_request(req_body: dict) -> dict:
+        """Process the request and get recommendations"""
+        engine, engine_name = load_engine(req_body)
+        services_ids, scores, explanations = engine(req_body)
+
+        explanations_long, explanations_short = [
+            list(t) for t in list(zip(*[(e.long, e.short) for e in explanations]))
+        ]
+        deserialize_recommendation(req_body, services_ids, engine_name)
+
+        response = {
+            "panel_id": req_body.get("panel_id"),
+            "recommendations": services_ids,
+            "explanations": explanations_long,
+            "explanations_short": explanations_short,
+            "scores": scores,
+            "engine_version": engine_name,
+        }
 
         return response

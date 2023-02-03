@@ -63,7 +63,7 @@ def test_get_default_recommendation_alg(get_engines):
     DEFAULT_RECOMMENDATION_ALG in (RL, rl, Rl, rL) - return RL
     DEFAULT_RECOMMENDATION_ALG in (NCF, ncf, Ncf...) - return NCF
     DEFAULT_RECOMMENDATION_ALG in (random, Random, ...) - return random
-    Not set or something else - return RL
+    Not set or something else - return NCF
     """
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = "RL"
     assert get_default_recommendation_alg(get_engines.keys()) == "RL"
@@ -73,9 +73,9 @@ def test_get_default_recommendation_alg(get_engines):
     assert get_default_recommendation_alg(get_engines.keys()) == "Random"
 
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = "NFC"
-    assert get_default_recommendation_alg(get_engines.keys()) == "RL"
+    assert get_default_recommendation_alg(get_engines.keys()) == "NCF"
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = ""
-    assert get_default_recommendation_alg(get_engines.keys()) == "RL"
+    assert get_default_recommendation_alg(get_engines.keys()) == "NCF"
 
     os.environ["DEFAULT_RECOMMENDATION_ALG"] = "rl"
     assert get_default_recommendation_alg(get_engines.keys()) == "RL"

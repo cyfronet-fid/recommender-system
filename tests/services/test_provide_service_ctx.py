@@ -2,7 +2,7 @@
 
 import pytest
 from tests.conftest import users_services_args
-from recommender.services.provide_service_ctx import get_all_collection_ids, service_ctx
+from recommender.services.provide_ctx import get_all_collection_ids, service_ctx
 from recommender.models import Service, User
 from tests.endpoints.conftest import recommendation_data
 

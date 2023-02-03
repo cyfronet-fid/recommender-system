@@ -45,12 +45,12 @@ def get_default_recommendation_alg(
     Returns:
         rec_alg: default recommendation algorithm
     """
-    rec_alg = os.environ.get(default_engine, "RL")
+    rec_alg = os.environ.get(default_engine, "NCF")
     try:
         index = [e.lower() for e in list(engine_names)].index(rec_alg.lower())
         return list(engine_names)[index]
     except ValueError:
-        return "RL"
+        return "NCF"
 
 
 def get_engine_names(
