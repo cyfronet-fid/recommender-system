@@ -2,7 +2,7 @@
 
 from flask_restx import fields
 
-from recommender.api.schemas.common import api
+from recommender.api.schemas.common import api, NullableString
 
 service = api.model(
     "Service",
@@ -13,7 +13,7 @@ service = api.model(
             description="The unique identifier of a the service",
             example=1234,
         ),
-        "pid": fields.String(
+        "pid": NullableString(
             required=False,
             title="Pid",
             description="Pid",
