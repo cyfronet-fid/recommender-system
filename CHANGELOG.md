@@ -6,9 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
-- **BREAKING CHANGE**: research_steps and horizontal [@Michal-Kolomanski]
-- **BREAKING CHANGE**: providers PID [@Michal-Kolomanski]
 ### Changed
+### Fixed
+- Handling nullable string as service pid [@Michal-Kolomanski]
+### Removed
+
+## [6.0.0] - 2023-02-13
+### Added
+- BREAKING CHANGE: `research_steps` and `horizontal` [@Michal-Kolomanski]
+- BREAKING CHANGE: providers `PID` [@Michal-Kolomanski]
+### Changed
+- `engine_version` optional [@Michal-Kolomanski]
+- `panel_id` optional [@Michal-Kolomanski]
+- default recommendation engine is NCF [@Michal-Kolomanski]
+- `panel_id=service` handled [@Michal-Kolomanski]
 ### Fixed
 ### Removed
 
