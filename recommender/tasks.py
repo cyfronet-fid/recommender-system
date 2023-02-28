@@ -12,12 +12,10 @@ from recommender.engines.autoencoders.inference.embedding_component import (
 )
 from recommender.engines.autoencoders.training.pipeline import AEPipeline
 from recommender.engines.ncf.training.pipeline import NCFPipeline
-from recommender.engines.rl.training.pipeline import RLPipeline
 from recommender.extensions import celery
 from recommender.pipeline_configs import (
     AUTOENCODERS_PIPELINE_CONFIG,
     NCF_PIPELINE_CONFIG,
-    RL_PIPELINE_CONFIG,
 )
 from recommender.services.deserializer import Deserializer
 from recommender.services.drop_ml_models import drop_ml_models
@@ -39,7 +37,7 @@ def update(data):
         # TODO: parallel computing algebra here to make it faster
         # TODO: Commented unused pipelines to speed up the training
         NCFPipeline(NCF_PIPELINE_CONFIG)()
-        RLPipeline(RL_PIPELINE_CONFIG)()
+        # RLPipeline(RL_PIPELINE_CONFIG)() # TODO fix RL training
 
     except Exception:
         logger.exception(
