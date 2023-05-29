@@ -171,6 +171,7 @@ List of available engines (after training):
 - `RL` - returns `K` recommendations from the given context.
 - `Random` - returns `K` random recommendations from the given context.
 - `NCFRanking` - used for sort by relevance.
+- `RandomRanking` - sort resources randomly.
 
 ### Seeding database
 Note: Only available in development and testing environment.

@@ -13,6 +13,13 @@ from recommender.errors import (
     InvalidRecommendationPanelIDError,
     NoSavedMLComponentError,
 )
+from recommender.engines.random.inference.random_ranking_inference_component import (
+    RandomRankingInferenceComponent,
+)
+from recommender.engines.ncf.inference.ncf_ranking_inference_component import (
+    NCFRankingInferenceComponent,
+)
+from recommender.models import User
 
 
 def get_K(context: Dict[str, Any]) -> int:
@@ -122,6 +129,20 @@ def engine_loader(
     return engine, eg_name
 
 
+def check_user(context: dict[str, Any]) -> bool:
+    """Check whether ID of a user was passed and whether such user exists"""
+    user_id, aai_uid = context.get("user_id"), context.get("aai_uid")
+
+    if user_id or aai_uid:
+        user = (
+            User.objects(id=user_id).first()
+            if user_id
+            else User.objects(aai_uid=aai_uid).first()
+        )
+        return bool(user)
+    return False
+
+
 def load_engine(json_dict: dict) -> Tuple[Any, str]:
     """
     Load the engine based on whether a user is logged in
@@ -135,14 +156,23 @@ def load_engine(json_dict: dict) -> Tuple[Any, str]:
         engine_name: engine name
     """
     K = get_K(json_dict)
+    engine_from_req = json_dict.get("engine_version")
 
-    if not (json_dict.get("user_id") or json_dict.get("aai_uid")):  # user is anonymous
+    if not check_user(json_dict):  # User is anonymous
+        # Sort by relevance
+        if engine_from_req in (
+            NCFRankingInferenceComponent.engine_name,
+            RandomRankingInferenceComponent.engine_name,
+        ):
+            return (
+                RandomRankingInferenceComponent(K),
+                RandomRankingInferenceComponent.engine_name,
+            )
         return (
             RandomInferenceComponent(K),
             RandomInferenceComponent.engine_name,
         )
 
-    engine_from_req = json_dict.get("engine_version")
     default_engine = get_default_recommendation_alg(tuple(ENGINES.keys()))
 
     engine_names = get_engine_names(

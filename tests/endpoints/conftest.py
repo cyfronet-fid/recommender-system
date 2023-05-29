@@ -58,7 +58,7 @@ def mp_dump_data():
         "users": [
             {
                 "id": 1,
-                "aai_uid": "abc",
+                "aai_uid": "abc@egi.eu",
                 "scientific_domains": [1, 2],
                 "categories": [1, 2],
                 "accessed_services": [1, 2],

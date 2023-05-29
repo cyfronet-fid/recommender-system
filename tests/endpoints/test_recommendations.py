@@ -6,13 +6,21 @@ from copy import deepcopy
 import pytest
 
 from recommender.engines.explanations import Explanation
+from tests.conftest import (
+    generate_users_and_services,
+)
+from recommender.models import User
 
 
 @pytest.mark.parametrize(
     "recc_data_fixture", ["recommendation_data", "recommendation_data_with_aai_uid"]
 )
-def test_recommendations(client, mocker, recc_data_fixture, request):
+def test_recommendations(
+    client, mocker, generate_users_and_services, recc_data_fixture, request
+):
     recc_data = request.getfixturevalue(recc_data_fixture)
+    recc_data["user_id"] = User.objects.first().id
+    recc_data["aai_uid"] = User.objects.first().aai_uid
 
     _inference_component_init_mock = mocker.patch(
         "recommender.engines.base.base_inference_component.MLEngineInferenceComponent.__init__"
