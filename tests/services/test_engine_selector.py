@@ -16,8 +16,14 @@ from recommender.engines.rl.inference.rl_inference_component import (
 from recommender.engines.ncf.inference.ncf_inference_component import (
     NCFInferenceComponent,
 )
+from recommender.engines.ncf.inference.ncf_ranking_inference_component import (
+    NCFRankingInferenceComponent,
+)
 from recommender.engines.random.inference.random_inference_component import (
     RandomInferenceComponent,
+)
+from recommender.engines.random.inference.random_ranking_inference_component import (
+    RandomRankingInferenceComponent,
 )
 from recommender.models.ml_component import MLComponent
 from tests.endpoints.conftest import (
@@ -33,6 +39,7 @@ from recommender.errors import (
     InvalidRecommendationPanelIDError,
     NoSavedMLComponentError,
 )
+from recommender.models import User
 
 
 def test_get_K(recommendation_data):
@@ -232,6 +239,8 @@ def test_load_engine(
     and whether user is logged-in or not
     """
     # 1. case user is logged-in
+    recommendation_data["user_id"] = User.objects.first().id
+
     recommendation_data["engine_version"] = "NCF"
     engine, engine_name = load_engine(recommendation_data)
     assert type(engine) == NCFInferenceComponent
@@ -242,6 +251,17 @@ def test_load_engine(
     assert type(engine) == RLInferenceComponent
     assert engine_name == "RL"
 
+    # Sort by relevance
+    recommendation_data["engine_version"] = "NCFRanking"
+    engine, engine_name = load_engine(recommendation_data)
+    assert type(engine) == NCFRankingInferenceComponent
+    assert engine_name == "NCFRanking"
+
+    recommendation_data["engine_version"] = "RandomRanking"
+    engine, engine_name = load_engine(recommendation_data)
+    assert type(engine) == RandomRankingInferenceComponent
+    assert engine_name == "RandomRanking"
+
     # 2. user is random
     del recommendation_data["user_id"]
 
@@ -250,6 +270,17 @@ def test_load_engine(
         engine, engine_name = load_engine(recommendation_data)
         assert type(engine) == RandomInferenceComponent
         assert engine_name == "Random"
+
+    # Sort by relevance
+    recommendation_data["engine_version"] = "NCFRanking"
+    engine, engine_name = load_engine(recommendation_data)
+    assert type(engine) == RandomRankingInferenceComponent
+    assert engine_name == "RandomRanking"
+
+    recommendation_data["engine_version"] = "RandomRanking"
+    engine, engine_name = load_engine(recommendation_data)
+    assert type(engine) == RandomRankingInferenceComponent
+    assert engine_name == "RandomRanking"
 
 
 def test_load_engine_with_aai_uid(
@@ -264,6 +295,8 @@ def test_load_engine_with_aai_uid(
     and whether user is logged-in or not
     """
     # 1. case user is logged-in
+    recommendation_data_with_aai_uid["aai_uid"] = User.objects.first().aai_uid
+
     recommendation_data_with_aai_uid["engine_version"] = "NCF"
     engine, engine_name = load_engine(recommendation_data_with_aai_uid)
     assert type(engine) == NCFInferenceComponent
@@ -274,7 +307,18 @@ def test_load_engine_with_aai_uid(
     assert type(engine) == RLInferenceComponent
     assert engine_name == "RL"
 
-    # 2. user is random
+    # Sort by relevance
+    recommendation_data_with_aai_uid["engine_version"] = "NCFRanking"
+    engine, engine_name = load_engine(recommendation_data_with_aai_uid)
+    assert type(engine) == NCFRankingInferenceComponent
+    assert engine_name == "NCFRanking"
+
+    recommendation_data_with_aai_uid["engine_version"] = "RandomRanking"
+    engine, engine_name = load_engine(recommendation_data_with_aai_uid)
+    assert type(engine) == RandomRankingInferenceComponent
+    assert engine_name == "RandomRanking"
+
+    # 2. user is anonymous
     del recommendation_data_with_aai_uid["aai_uid"]
 
     for engine_version in {"RL", "NCF", "random", "Random", "placeholder"}:
@@ -282,3 +326,14 @@ def test_load_engine_with_aai_uid(
         engine, engine_name = load_engine(recommendation_data_with_aai_uid)
         assert type(engine) == RandomInferenceComponent
         assert engine_name == "Random"
+
+    # Sort by relevance
+    recommendation_data_with_aai_uid["engine_version"] = "NCFRanking"
+    engine, engine_name = load_engine(recommendation_data_with_aai_uid)
+    assert type(engine) == RandomRankingInferenceComponent
+    assert engine_name == "RandomRanking"
+
+    recommendation_data_with_aai_uid["engine_version"] = "RandomRanking"
+    engine, engine_name = load_engine(recommendation_data_with_aai_uid)
+    assert type(engine) == RandomRankingInferenceComponent
+    assert engine_name == "RandomRanking"

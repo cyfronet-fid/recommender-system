@@ -1,5 +1,5 @@
 # pylint: disable=invalid-name, too-few-public-methods, line-too-long
-"""Recommender engine that provides users with random recommendations in a given context"""
+"""Recommender engine that provides users with random recommendations from a given context"""
 
 import random
 from typing import List, Tuple, Dict, Any
@@ -10,26 +10,19 @@ from recommender.services.fts import retrieve_services_for_recommendation
 
 
 class RandomInferenceComponent(BaseInferenceComponent):
-    """
-    Recommender engine that provides all users with random recommendations in a given context.
-
-    Used for:
-        - random users,
-        - all users if necessary (for example during ML training).
-    """
+    """Recommender engine that provides all users with random recommendations from a given context"""
 
     engine_name = "Random"
     default_explanation = Explanation(
-        long="This service has been selected at random however taking into"
-        " account the search criteria",
-        short="This service has been selected randomly.",
+        long="This service has been sorted randomly.",
+        short="Random service.",
     )
 
     def __call__(
         self, context: Dict[str, Any]
     ) -> Tuple[List[int], List[float], List[Explanation]]:
         """
-        Get random recommendations in a given context.
+        Get random recommendations from a given context.
 
         Args:
             context: json dict from the /recommendations endpoint request.

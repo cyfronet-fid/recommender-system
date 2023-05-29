@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - YYYY-MM-DD
 ### Added
+- RandomRanking engine [@Michal-Kolomanski]
+### Changed
+### Fixed
+### Removed
+
+## [6.0.2] - 2023-02-28
+### Added
 ### Changed
 - RL training is omitted during training [@Michal-Kolomanski]
 ### Fixed
