@@ -1,4 +1,4 @@
-# pylint: disable=missing-function-docstring, broad-except, fixme
+# pylint: disable=missing-function-docstring, broad-except, logging-fstring-interpolation, fixme
 
 """This module contains celery tasks"""
 import json
@@ -48,12 +48,22 @@ def update(data):
 
 
 @celery.task
-def add_user_action(user_action_raw: dict):
+def add_user_action(user_action_raw: str):
     """
     Receive dict with user action, validate / parses it and saves it to DB
     """
-    user_action = UserAction.parse_obj(user_action_raw)
-    Deserializer.deserialize_user_action(user_action).save()
+    try:
+        user_action = UserAction.parse_obj(json.loads(user_action_raw))
+    except ValueError:
+        logger.error(f"Could not parse user action: {user_action_raw}")
+        return
+
+    # UA from mp are saved directly
+    if user_action.client_id != "marketplace":
+        try:
+            Deserializer.deserialize_user_action(user_action.to_dict()).save()
+        except Exception:
+            logger.error(f"Could not save user action: {user_action.to_dict()}")
 
 
 @celery.task

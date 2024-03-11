@@ -1,4 +1,4 @@
-# pylint: disable=no-member, line-too-long, too-few-public-methods, invalid-name, fixme
+# pylint: disable=no-member, line-too-long, too-few-public-methods, invalid-name, not-callable, fixme
 
 """
 This module contains logic for composing marketplace DB dump,
