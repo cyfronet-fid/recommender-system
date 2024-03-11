@@ -7,7 +7,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-# pylint: disable=too-few-public-methods, missing-class-docstring
+# pylint: disable=too-few-public-methods, missing-class-docstring, line-too-long
 class UserJourneyRoot(BaseModel):
     type: str = Field(
         title="Root type",
@@ -30,7 +30,7 @@ class UserJourneyRoot(BaseModel):
         " only supported type is a `service`",
         example="service",
     )
-    resource_id: Optional[int] = Field(
+    resource_id: Optional[int | str] = Field(
         default=None,
         title="Resource ID",
         description="The unique identifier of a recommended resource clicked"
@@ -104,9 +104,14 @@ class Action(BaseModel):
 
 # pylint: disable=too-few-public-methods, missing-class-docstring
 class UserAction(BaseModel):
+    aai_uid: Optional[str] = Field(
+        title="User UID",
+        description="The unique identifier of the logged user provided by AAI",
+        example="d17380a3d98a019a44ffa6fe9be9f7237359a4300c076a1ee85ff78b5b6b9231@egi.eu",
+    )
     user_id: Optional[int] = Field(
         title="User ID",
-        description="The unique identifier of the logged user.",
+        description="The unique identifier of the logged user provided by Marketplace",
         example=1234,
     )
     unique_id: uuid.UUID = Field(
@@ -118,6 +123,19 @@ class UserAction(BaseModel):
         title="Timestamp",
         description="The exact time of taking this action by the user",
     )
+    client_id: str = Field(
+        title="Client ID",
+        description="Name of client who made the request",
+        example="marketplace",
+    )
     source: UserActionSource
     target: UserActionTarget
     action: Action
+
+    def to_dict(self):
+        """Convert recursively to dict"""
+        result = self.dict()
+        for key, value in result.items():
+            if isinstance(value, BaseModel):
+                result[key] = value.to_dict()
+        return result

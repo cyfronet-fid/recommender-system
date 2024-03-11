@@ -1,8 +1,9 @@
-# pylint: disable=no-member, line-too-long
+# pylint: disable=no-member, line-too-long, logging-fstring-interpolation
 
 """Implementation of the user activity stub - for development purpose"""
 import copy
 from typing import List
+from logger_config import get_logger
 
 from recommender.models import (
     Recommendation,
@@ -14,6 +15,8 @@ from recommender.models import (
     SearchData,
     User,
 )
+
+logger = get_logger(__name__)
 
 
 class Deserializer:
@@ -83,7 +86,11 @@ class Deserializer:
 
         user_id, aai_uid = json_dict.get("user_id"), json_dict.get("aai_uid")
         if aai_uid and not user_id:
-            user_id = User.objects(aai_uid=aai_uid).first().id
+            try:
+                user_id = User.objects(aai_uid=aai_uid).first().id
+            except AttributeError:
+                user_id = None
+                logger.warning(f"Could not find user with aai_uid: {aai_uid}")
 
         user_action = UserAction(
             user=user_id,

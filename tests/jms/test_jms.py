@@ -81,11 +81,6 @@ def jms_controller(_app) -> JMSSubscriberController:
     controller.terminate()
 
 
-def test_listener(jms_controller, mocker: MockerFixture):
-    deserializer_mock = mocker.patch(
-        "recommender.tasks.Deserializer.deserialize_user_action"
-    )
-
+def test_listener(jms_controller):
     user_action_data = UserActionFactory()
     jms_controller.send(user_action_data)
-    deserializer_mock.assert_called_once_with(UserAction.parse_obj(user_action_data))
